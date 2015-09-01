@@ -14,6 +14,6 @@ public:
 	
 	void addModifier(Node*);
 	void addModifies(Node*, Node*);
-}
+};
 
 #endif

@@ -9,9 +9,9 @@ class StatementTable {
 	
 public:
 	StatementTable();
-	Node* getStatements(std::string);
+	Node* getStatement(std::string);
 	
 	void addStatement(int, Node*);
-}
+};
 
 #endif

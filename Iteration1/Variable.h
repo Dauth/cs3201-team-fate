@@ -17,6 +17,6 @@ public:
 
 	void addUsedBy(Node*);
 	void addModifiedBy(Node*);
-}
+};
 
 #endif

@@ -10,6 +10,7 @@
 #include "ModifiesTable.h"
 #include "ExpressionTable.h"
 #include "ProcedureTable.h"
+#include "StatementTable.h"
 
 class PKB {
 
@@ -19,6 +20,7 @@ class PKB {
 	ParentsTable parentsTable;
 	ExpressionTable expressionTable;
 	ProcedureTable procedureTable;
+	StatementTable statementTable;
 
 public:
 	PKB();
