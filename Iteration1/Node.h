@@ -13,7 +13,6 @@ class Node {
 	Node* rightChild;
 	std::vector<Node*> stmtLst;
 	Variable* var;
-	Expression* expr;
 	
 public:
 	Node (synt_type, std::string);
@@ -23,15 +22,13 @@ public:
 	Node* getRightChild();
 	Node* getstmtLst();
 	std::vector<Node*> getStmtLst();
-	Variable getVar();
-	Expression getExpr();
+	Variable* getVar();
 	
 	void setParent(Node*);
 	void setLeftChild(Node*);
 	void setRightChild(Node*);
 	void addStmt(Node*);
 	void setVar(Variable*);
-	void setExpr(Expression*);
 };
 
 #endif

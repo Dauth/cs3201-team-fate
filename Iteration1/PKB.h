@@ -26,10 +26,7 @@ public:
 	PKB();
 
 	Node* createProcedure(std::string);
-	Node* createNode(synt_type);
-	Node* createVariable(std::string);
-	Node* createExpression(std::string);
-	Node* createConstant(std::string);
+	Node* createNode(synt_type, std::string); //2nd parameter is varname/expr/const or statement number
 
 	void setLeftChild(Node*, Node*);
 	void setRightChild(Node*, Node*);

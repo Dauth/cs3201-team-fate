@@ -9,7 +9,7 @@ class StatementTable {
 	
 public:
 	StatementTable();
-	Node* getStatement(std::string);
+	Node* getStatement(int);
 	
 	void addStatement(int, Node*);
 };

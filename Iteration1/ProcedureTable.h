@@ -5,13 +5,13 @@
 #include "AST.h"
 
 class ProcedureTable {
-	std::map<std::string, AST> procedureTable;
+	std::map<std::string, AST> table;
 	
 public:
 	ProcedureTable();
 	AST getProcedure(std::string);
 
 	void addProcedure(std::string, AST);
-}
+};
 
 #endif

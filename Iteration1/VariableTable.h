@@ -9,14 +9,14 @@ class VariableTable {
 	std::map<std::string, Variable*> table;
 	
 public:
-	Variable();
+	VariableTable();
 	Variable* getVariable(std::string);
-	Node* getModifiedBy(std::string);
-	Node* getUsedBy(std::string);
+	std::vector<Node*> getModifiedBy(std::string);
+	std::vector<Node*> getUsedBy(std::string);
 
 	void addVariable(std::string, Node*);
 	void addModifiedBy(std::string, Node*);
 	void addUsedBy(std::string, Node*);
-}
+};
 
 #endif
