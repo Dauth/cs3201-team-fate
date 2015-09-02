@@ -2,17 +2,18 @@
 #define QUERYTREE_H
 
 #include "stdafx.h"
-#include "querynode.h"
+#include "QueryNode.h"
+#include "PatternNode.h"
 
 class QueryTree {
 
 public:
 	QueryTree ();
-	QueryNode* getQueryPart();
-	QueryNode* getPattern();
+	QueryNode* getQuery();
+	PatternNode* getPattern();
 
-	void setQueryPart();
-	void setPattern();
+	void addQuery(QueryNode*);
+	void addPattern(PatternNode*);
 };
 
 #endif

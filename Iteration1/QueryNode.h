@@ -2,12 +2,13 @@
 #define QUERYNODE_H
 
 #include "stdafx.h"
-#include "paramnode.h"
+#include "query_type.h"
+#include "ParamNode.h"
 
 class QueryNode {
 
 public:
-	QueryNode (query_type, ParamNode, ParamNode);
+	QueryNode (query_type, ParamNode*, ParamNode*);
 	query_type getType();
 	QueryNode* getNext();
 	ParamNode* getLeftParam();
