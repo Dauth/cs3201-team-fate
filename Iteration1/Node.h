@@ -18,6 +18,7 @@ class Node {
 public:
 	Node (synt_type, std::string);
 	std::string getId();
+	Node* getRoot();
 	Node* getParent();
 	Node* getLeftChild();
 	Node* getRightChild();
@@ -25,6 +26,7 @@ public:
 	std::vector<Node*> getStmtLst();
 	Variable* getVar();
 	
+	void setRoot(Node*);
 	void setParent(Node*);
 	void setLeftChild(Node*);
 	void setRightChild(Node*);

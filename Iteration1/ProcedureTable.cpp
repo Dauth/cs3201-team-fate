@@ -4,10 +4,11 @@ ProcedureTable::ProcedureTable () {
 
 }
 
-AST ProcedureTable::getProcedure(std::string procedureName) {
-	return table[procedureName];
-}
-
-void ProcedureTable::addProcedure(std::string procedureName, AST procedureAST) {
-	table[procedureName] = procedureAST;
+AST* ProcedureTable::getOrCreateProcedure(std::string procedureName) {
+	if ( table.find(procedureName) == table.end() ) {
+		Node node(procedure, procedureName) ;
+		AST ast(node);
+		table[procedureName] = ast;
+	}
+	return &table[procedureName];
 }

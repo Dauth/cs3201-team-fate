@@ -12,7 +12,6 @@ public:
 	std::vector<Node*> getModifiers();
 	std::vector<Node*> getModified(Node*);
 	
-	void addModifier(Node*);
 	void addModifies(Node*, Node*);
 };
 

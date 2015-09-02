@@ -12,8 +12,7 @@ public:
 	std::vector<Node*> getUsers();
 	std::vector<Node*> getUsed(Node*);
 	
-	void addUsers(Node*);
 	void addUsed(Node*, Node*);
-}
+};
 
 #endif

@@ -16,13 +16,10 @@ std::vector<Node*> ModifiesTable::getModified(Node* pnode) {
 	return modified;
 }
 
-void ModifiesTable::addModifier(Node* pnode) {
-	if ( table.find(pnode) == table.end() ) {
-		std::vector<Node*> pnodes;
-		table[pnode] = pnodes;
-	}
-}
-
 void ModifiesTable::addModifies(Node* pnodeLeft, Node* pnodeRight) {
+	if ( table.find(pnodeLeft) == table.end() ) {
+		std::vector<Node*> pnodes;
+		table[pnodeLeft] = pnodes;
+	}
 	table[pnodeLeft].push_back(pnodeRight);
 }

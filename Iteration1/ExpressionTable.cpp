@@ -9,7 +9,7 @@ std::vector<Node*> ExpressionTable::getExpressions(std::string exprstr) {
 }
 
 void ExpressionTable::addExpression(Node* pnode) {
-	Node node = *pnode;
+	Node &node = *pnode;
 	if ( table.find(node.getId()) == table.end() ) {
 		std::vector<Node*> pnodes;
 		table[node.getId()] = pnodes;

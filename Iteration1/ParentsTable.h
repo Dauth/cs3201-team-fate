@@ -12,8 +12,7 @@ public:
 	std::vector<Node*> getParents();
 	std::vector<Node*> getChildren(Node*);
 	
-	void addParent(Node*);
 	void addChild(Node*, Node*);
-}
+};
 
 #endif
