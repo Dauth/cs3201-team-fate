@@ -1,13 +1,33 @@
-#include<iostream>
+#include "QueryNode.h"
 
-class QueryNode{
-	//Node Type
-	/*E.g modifies,Parent, parent*,follows, follows*/
-	//using enum
-	//http://en.cppreference.com/w/cpp/language/enum
-	/*TO DO : nodeName
-			  pointer for attribute
-			  pointer for pattern tree
-			  pointer for nextNode
-	*/
+query_type QUERY_TYPE;
+ParamNode* leftParam;
+ParamNode* rightParam;
+QueryNode* nextQuery;
+
+QueryNode::QueryNode (query_type queryType, ParamNode* leftParam, ParamNode* rightParam) {
+	QUERY_TYPE = queryType;
+	leftParam = leftParam;
+	rightParam = rightParam;
+	nextQuery = NULL;
+}
+
+query_type QueryNode::getType() {
+	return QUERY_TYPE;
+}
+
+QueryNode* QueryNode::getNext() {
+	return nextQuery;
+}
+
+ParamNode* QueryNode::getLeftParam() {
+	return leftParam;
+}
+
+ParamNode* QueryNode::getRightParam() {
+	return rightParam;
+}
+
+void QueryNode::setNext(QueryNode* queryNode) {
+	nextQuery = queryNode;
 }

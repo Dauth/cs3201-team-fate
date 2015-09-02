@@ -7,7 +7,7 @@
 class PatternNode {
 
 public:
-	QueryNode (ParamNode*, ParamNode*, ParamNode*);
+	PatternNode (ParamNode*, ParamNode*, ParamNode*);
 	PatternNode* getNext();
 	ParamNode* getLeftParam();
 	ParamNode* getMiddleParam();
