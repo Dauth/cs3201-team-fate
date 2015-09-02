@@ -2,7 +2,8 @@
 #define VARIABLE_H
 
 #include "stdafx.h"
-#include "Node.h"
+
+class Node;
 
 class Variable {
 	std::string name;

@@ -1,4 +1,5 @@
 #include "Variable.h"
+#include "Node.h"
 
 Variable::Variable(std::string _name) {
 	name = _name;

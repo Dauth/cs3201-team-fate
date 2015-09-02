@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "Variable.h"
 
 Node::Node (synt_type st, std::string id) {
 		SYNT_TYPE = st;

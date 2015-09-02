@@ -2,7 +2,8 @@
 #define NODE_H
 
 #include "stdafx.h"
-#include "Variable.h"
+
+class Variable;
 
 class Node {
 	synt_type SYNT_TYPE;
