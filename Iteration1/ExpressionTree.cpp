@@ -24,6 +24,11 @@ std::vector <char> expressionConverter(string inflixString){
 		inflixOperandProcess(tStack, resultVector, cChar);
 		inflixOperatorProcess(tStack, resultVector, cChar);
 	}
+
+	while(!tStack.empty()){
+		resultVector.push_back(tStack.pop());
+	}
+
 	return resultVector;
 }
 
