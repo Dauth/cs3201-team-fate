@@ -6,25 +6,29 @@
 class Variable;
 
 class Node {
-	synt_type SYNT_TYPE;
-	std::string identifier;
-	Node* root;
-	Node* parent;
-	Node* leftChild;
+	synt_type SYNT_TYPE; // type of node
+	int line; // prog/statement line
+	std::string value; // constant value, procedure name, call target, expr
+	Node* root; // pointer to procedure node
+	Node* parent; // parent as in tree parent, not parent(s1,s2) function
+	Node* leftChild; 
 	Node* rightChild;
-	std::vector<Node*> stmtLst;
+	std::map<int, Node*> stmtLst;
+	std::map<Node*, int> indexLst;
 	Variable* var;
 	
 public:
-	Node (synt_type, std::string);
-	std::string getId();
+	Node (synt_type, int, std::string);
+	synt_type getType();
+	int getLine();
+	std::string getValue();
 	Node* getRoot();
 	Node* getParent();
 	Node* getLeftChild();
 	Node* getRightChild();
-	Node* getstmtLst();
-	std::vector<Node*> getStmtLst();
-	Variable* getVar();
+	std::map<int, Node*> getStmtLst();
+	std::map<Node*, int> getIndexLst();
+	Variable* getVariable();
 	
 	void setRoot(Node*);
 	void setParent(Node*);

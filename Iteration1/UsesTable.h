@@ -10,9 +10,10 @@ class UsesTable {
 public:
 	UsesTable();
 	std::vector<Node*> getUsers();
+	std::vector<Node*> getUsers(synt_type);
 	std::vector<Node*> getUsed(Node*);
 	
-	void addUsed(Node*, Node*);
+	void addUsedBy(Node*, Node*);
 };
 
 #endif

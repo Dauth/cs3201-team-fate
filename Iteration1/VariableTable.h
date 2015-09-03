@@ -6,7 +6,7 @@
 #include "Variable.h"
 
 class VariableTable {
-	std::map<std::string, Variable> table;
+	std::map<std::string, Variable*> table;
 	
 public:
 	VariableTable();

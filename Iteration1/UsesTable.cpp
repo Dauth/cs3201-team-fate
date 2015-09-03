@@ -9,17 +9,29 @@ std::vector<Node*> UsesTable::getUsers() {
 	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
 		users.push_back(it->first);
 	}
+	return users;
 }
 
-std::vector<Node*> UsesTable::getUsed(Node* pnode) {
-	std::vector<Node*> used = table[pnode];
+std::vector<Node*> UsesTable::getUsers(synt_type st) {
+	std::vector<Node*> users;
+	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); ++it) {
+		Node* node = it->first;
+		if (node->getType() == st) {
+			users.push_back(node);
+		}
+    }
+	return users;
+}
+
+std::vector<Node*> UsesTable::getUsed(Node* node) {
+	std::vector<Node*> used = table[node];
 	return used;
 }
 
-void UsesTable::addUsed(Node* pnodeLeft, Node* pnodeRight) {
-	if ( table.find(pnodeLeft) == table.end() ) {
-		std::vector<Node*> pnodes;
-		table[pnodeLeft] = pnodes;
+void UsesTable::addUsedBy(Node* nodeLeft, Node* nodeRight) {
+	if ( table.find(nodeLeft) == table.end() ) {
+		std::vector<Node*> nodes;
+		table[nodeLeft] = nodes;
 	}
-	table[pnodeLeft].push_back(pnodeRight);
+	table[nodeLeft].push_back(nodeRight);
 }

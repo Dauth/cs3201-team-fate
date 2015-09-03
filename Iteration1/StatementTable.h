@@ -10,7 +10,9 @@ class StatementTable {
 public:
 	StatementTable();
 	Node* getStatement(int);
-	
+	std::vector<Node*> getStatements();
+	std::vector<Node*> getStatements(synt_type);
+
 	void addStatement(int, Node*);
 };
 

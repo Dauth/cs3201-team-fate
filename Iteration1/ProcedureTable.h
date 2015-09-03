@@ -2,14 +2,14 @@
 #define PROCEDURETABLE_H
 
 #include "stdafx.h"
-#include "AST.h"
+#include "Node.h"
 
 class ProcedureTable {
-	std::map<std::string, AST> table;
+	std::map<std::string, Node*> table;
 	
 public:
 	ProcedureTable();
-	AST* getOrCreateProcedure(std::string);
+	Node* getOrCreateProcedure(std::string);
 };
 
 #endif

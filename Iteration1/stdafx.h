@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 #include "synt_type.h"
 
 

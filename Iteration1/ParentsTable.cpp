@@ -11,15 +11,15 @@ std::vector<Node*> ParentsTable::getParents() {
 	}
 }
 
-std::vector<Node*> ParentsTable::getChildren(Node* pnode) {
-	std::vector<Node*> children = table[pnode];
+std::vector<Node*> ParentsTable::getChildren(Node* node) {
+	std::vector<Node*> children = table[node];
 	return children;
 }
 
-void ParentsTable::addChild(Node* pnodeLeft, Node* pnodeRight) {
-	if ( table.find(pnodeLeft) == table.end() ) {
-		std::vector<Node*> pnodes;
-		table[pnodeLeft] = pnodes;
+void ParentsTable::addChild(Node* nodeLeft, Node* nodeRight) {
+	if ( table.find(nodeLeft) == table.end() ) {
+		std::vector<Node*> nodes;
+		table[nodeLeft] = nodes;
 	}
-	table[pnodeLeft].push_back(pnodeRight);
+	table[nodeLeft].push_back(nodeRight);
 }

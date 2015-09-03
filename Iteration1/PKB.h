@@ -22,38 +22,59 @@ class PKB {
 	ProcedureTable procedureTable;
 	StatementTable statementTable;
 
+	void handleModifiedBy(Node*, Node*, Node*);
+	void handleUsedBy(Node*, Node*, Node*);
+	void handleParent(Node*, Node*);
+
+	synt_type getStatementType(Node&);
+	Node* getFollowing(Node*);
+	Node* getFollowedBy(Node*);
+
 public:
 	PKB();
 
 	Node* createProcedure(std::string);
-	Node* createNode(synt_type, std::string); //2nd parameter is varname/expr/const or statement number
+	//type, statement/prog num, constant/procname/expr, UsedBy, ModifiedBy
+	// Parent, ProcedureNode
+	Node* createNode(synt_type, int, std::string, Node*, Node*, Node*, Node*); 
 
-	void setLeftChild(Node*, Node*);
-	void setRightChild(Node*, Node*);
 	void addStatement(Node*, Node*);
 
-	std::vector<Variable> getModifies(std::string);
-	std::vector<Variable> getModifies(int);
-	std::vector<Variable> getModifies(synt_type);
-	std::vector<Node*> getModifiedBy(std::string);
-	std::vector<Node*> getModifiedBy(synt_type);
+	//argument is the _ in modifies ( _ , v )
+	std::vector<Node*> getModifies(std::string);   // proc name, returns nodes proc modifies
+	std::vector<Node*> getModifies(int);           // statement num, return nodes modified by statement
+	std::vector<Node*> getModifies(synt_type);     // statement type, returns all nodes modified by statement type
 
-	std::vector<Variable> getUses(std::string);
-	std::vector<Variable> getUses(synt_type);
-	std::vector<Variable> getUses(int);
-	std::vector<Node*> getUsers(std::string);
-	std::vector<Variable> getUsers(synt_type);
+	//argument is the _ in modifies ( p/s , _ )
+	std::vector<Node*> getModifiedBy(std::string); // variable name, returns all nodes that modify this var
+	std::vector<Node*> getModifiedBy(synt_type);   // statement type (should always be variable), returns all statements that modify
 
+	//argument is the _ in uses ( _ , v )
+	std::vector<Node*> getUses(std::string);       // proc name, returns node proc uses
+	std::vector<Node*> getUses(int);               // statement num, returns nodes used by statement
+	std::vector<Node*> getUses(synt_type);         // statement type, returns all nodes used by statement type
+
+	//argument is the _ in uses ( p/s, _ )
+	std::vector<Node*> getUsedBy(std::string);      // variable name, returns all nodes that uses this var
+	std::vector<Node*> getUsedBy(synt_type);        // statement type (should always be variable), returns all statements that use
+
+	//argument is the _ in parent ( _ , s )
 	std::vector<Node*> getChildren(int);
 	std::vector<Node*> getChildren(synt_type);
+
+	//argument is the _ in parent ( s , _ )
 	Node* getParent(int);
 	std::vector<Node*> getParents(synt_type);
 
-	std::vector<Node*> getFollowing(int);
+	//argument is the _ in follows ( _ , s )
+	Node* getFollowing(int);
 	std::vector<Node*> getFollowing(synt_type);
-	Node* getFollower(int);
-	std::vector<Node*> getFollowers(synt_type);
 
+	//argument is the _ in follows ( s , _ )
+	Node* getFollowedBy(int);
+	std::vector<Node*> getFollowedBy(synt_type);
+	
+	std::vector<Node*> getExpressions(std::string);
 };
 
 #endif

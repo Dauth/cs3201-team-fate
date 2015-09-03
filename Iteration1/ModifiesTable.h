@@ -10,6 +10,7 @@ class ModifiesTable {
 public:
 	ModifiesTable();
 	std::vector<Node*> getModifiers();
+	std::vector<Node*> getModifiers(synt_type);
 	std::vector<Node*> getModified(Node*);
 	
 	void addModifies(Node*, Node*);
