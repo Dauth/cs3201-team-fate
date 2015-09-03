@@ -1,22 +1,79 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <ctype.h>
+#include <stdio.h>
+#include <regex>
+
 
 using namespace std;
 
+enum TOKEN { DESGENITY, SYNONYM, ERROR };
+TOKEN currentToken = TOKEN::DESGENITY;
 
-class QueryParser{
-	/*validation parser*/
-	/* handle of declarations : check for variables and put into symbol table*/
-	/*Then handle the queries*/
+class QueryTree
+{
+	int ID;
+public:
+	void setID(int);
 
-	//method to add to the querytree
-	//method to add to the symbol table
+};
+void QueryTree::setID(int id)
+{
+	ID = id;
+}
 
 void Match (char *c)
 {
-	printf( " %s\n", c );
+	TOKEN curr = currentToken;
+	switch (curr)
+	{
+	case DESGENITY : 
+		{
+			bool foundEntity = false;
+		static const char * const designEntity[] = {"procedure", "stmtLst" , "stmt", "assign", "call", "while", "if", "variable", "constant", "prog_line"};
+	for (int a = 0; a < _countof(designEntity); a ++)
+	{
+		if (strcmp(c,designEntity[a]) == 0)
+		{
+			//printf("FIRST\n");
+			//printf( "%s\n", c );
+			currentToken = TOKEN::SYNONYM;
+			foundEntity = true;
+		}
+	}
+	if (!foundEntity)
+	{
+		//error
+		currentToken = TOKEN::ERROR;
+	}
+		}
+	break;
+
+	case SYNONYM :{
+		//printf("NEXT\n");printf( "%s\n", c );
+				  string s = c;
+				  smatch m; 
+				  regex e ("([a-zA-Z])+(\d|#)*");
+
+				    while (regex_search (s,m,e)) {
+for (auto i = s.begin(); i != s.end(); ++i)
+{
+    s = m.suffix().str();
+	//printf( "CORRECT: %s\n", s );
 }
-void GetNextToken()
+    
+  }
+
+
+				  }
+		break;
+	}
+}
+
+
+
+void GetToken()
 {
 
 }
@@ -27,6 +84,7 @@ int main()
 	//char str[80] = "Select s from something";
 	const char* s = " ";
 	char* token;
+	TOKEN currentToken = DESGENITY;
 
 	string i ;
 	getline (cin, i);
@@ -45,12 +103,12 @@ int main()
    /* walk through other tokens */
    while( token != NULL ) 
    {
-      printf( " %s\n", token );
+      //printf( " %s\n", token );
 	  char c = *token;
 	  if (isdigit(c))
 	  {
 		  foundID = true;
-		  printf( " %s ii\n", token );
+		  //printf( " %s ii\n", token );
 	  }
 	  Match(token);
       token = strtok(NULL, s);
@@ -62,7 +120,25 @@ int main()
 	
 	return 0;
 }
-
+void print( vector <string> & v )
+{
+  for (size_t n = 0; n < v.size(); n++)
+    cout << "\"" << v[ n ] << "\"\n";
+  cout << endl;
 }
+vector<string> split(const char *str, char c = ' ')
+{
+    vector<string> result;
 
+    do
+    {
+        const char *begin = str;
 
+        while(*str != c && *str)
+            str++;
+
+        result.push_back(string(begin, str));
+    } while (0 != *str++);
+
+    return result;
+}
