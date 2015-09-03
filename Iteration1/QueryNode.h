@@ -6,6 +6,10 @@
 #include "ParamNode.h"
 
 class QueryNode {
+	query_type QUERY_TYPE;
+	ParamNode* leftParam;
+	ParamNode* rightParam;
+	QueryNode* nextQuery;
 
 public:
 	QueryNode (query_type, ParamNode*, ParamNode*);

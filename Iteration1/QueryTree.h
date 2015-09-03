@@ -6,6 +6,12 @@
 #include "PatternNode.h"
 
 class QueryTree {
+	QueryNode* firstQuery;
+	PatternNode* firstPattern;
+	QueryNode* currQuery;
+	PatternNode* currPattern;
+	QueryNode* lastAddedQuery;
+	PatternNode* lastAddedPattern;
 
 public:
 	QueryTree ();

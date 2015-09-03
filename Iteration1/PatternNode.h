@@ -5,6 +5,10 @@
 #include "ParamNode.h"
 
 class PatternNode {
+	ParamNode* leftParam;
+	ParamNode* middleParam;
+	ParamNode* rightParam;
+	PatternNode* nextPattern;
 
 public:
 	PatternNode (ParamNode*, ParamNode*, ParamNode*);

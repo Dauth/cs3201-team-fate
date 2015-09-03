@@ -6,9 +6,12 @@
 #include "SymbolTable.h"
 
 class QueryEvaluator {
+	QueryTree* tree;
+	SymbolTable* table;
 
 public:
-	QueryTree (SymbolTable*, QueryTree*);
+	QueryEvaluator ();
+	void evaluate(SymbolTable*, QueryTree*);
 };
 
 #endif

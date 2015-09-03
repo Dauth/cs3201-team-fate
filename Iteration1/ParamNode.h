@@ -5,6 +5,8 @@
 #include "synt_type.h"
 
 class ParamNode {
+	synt_type SYNT_TYPE;
+	std::string param;
 
 public:
 	ParamNode (synt_type, std::string);
