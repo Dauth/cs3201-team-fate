@@ -205,10 +205,10 @@ ParamNode* getOptimal(ParamNode* left, ParamNode* right) {
 	int leftTypeNum = std::numeric_limits<int>::max();
 	int rightTypeNum = std::numeric_limits<int>::max();
 	if(left->getParam() != "_") {
-		leftTypeNum = ;
+		leftTypeNum = pkb->getCount(left->getType());
 	}
 	if(right->getParam() != "_") {
-		rightTypeNum = ;
+		rightTypeNum = pkb->getCount(right->getType());
 	}
 	if(left->getType() == integer) {
 		return left;

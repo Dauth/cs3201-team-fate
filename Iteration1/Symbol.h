@@ -13,7 +13,7 @@ public:
 	~Symbol();
 	//attributes
 	void setVar(int i, std::string var, std::string varType);
-	std::vector<Data> getData(int i);
+	std::vector<Data> getData();
 	int getSize();
 };
 
