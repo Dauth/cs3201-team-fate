@@ -41,6 +41,7 @@ public:
 	void addStatement(Node*, Node*);
 
 	std::vector<Node*> getStatement(synt_type);
+	int getCount(synt_type);
 
 	//argument is the _ in modifies ( _ , v )
 	std::vector<Node*> getModifies(std::string);   // proc name, returns nodes proc modifies

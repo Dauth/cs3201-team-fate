@@ -17,6 +17,13 @@ std::vector<Node*> StatementTable::getStatements() {
 	return nodes;
 }
 
+int StatementTable::getStatementCount(synt_type st) {
+	if ( count.find(st) == count.end() ) {
+		return count[st];
+	}
+	return 0;
+}
+
 std::vector<Node*> StatementTable::getStatements(synt_type st) {
 	std::vector<Node*> nodes;
     for(std::map<int, Node*>::iterator it = table.begin(); it != table.end(); ++it) {

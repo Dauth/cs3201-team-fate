@@ -8,7 +8,14 @@ PKB::PKB () {
 std::vector<Node*> PKB::getStatement(synt_type st) {
 	return statementTable.getStatements(st);
 }
-	
+
+int PKB::getCount(synt_type st) {
+	if(st == variable) {
+		return variableTable.getVariableCount();
+	}
+	return statementTable.getStatementCount(st);
+}
+
 Node* PKB::createProcedure(std::string procName) {
 	return procedureTable.getOrCreateProcedure(procName);
 }
