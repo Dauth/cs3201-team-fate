@@ -6,15 +6,16 @@
 
 class Symbol{
  private:
-      std::multimap<int,Data> myMap;
+      std::vector<Data> SymbolTable;
 
 public:
-	Symbol(int i, std::string var, std::string varType);
-	~Symbol();
+	Symbol(std::string var, std::string varType);
 	//attributes
-	void setVar(int i, std::string var, std::string varType);
-	std::vector<Data> getData(int i);
+	void setVar(std::string var, std::string varType);
+	void setResult(int index);
+	std::vector<Data> getQuery();
 	int getSize();
+	int getIndex(std::string var);
 };
 
 #endif

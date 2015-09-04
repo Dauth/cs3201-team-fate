@@ -1,11 +1,9 @@
 #include "stdafx.h"
 #include "Data.h"
+#include"Node.h"
 
 //TODO add the PKB object
 //leave this empty
-Data::~Data()
-{
-}
 Data::Data(std::string var, std::string varType, bool res=false) //, PKB out = nullptr
 {
 	variable=var;
@@ -28,6 +26,10 @@ void Data::setResult(bool res1)
 {
 	result=res1;
 }
+void Data::setPKBoutput(std::vector<Node*> PKBres)
+{
+	pkbresult=PKBres;
+}
 //GETTERS
 std::string Data::getVar()
 {
@@ -40,4 +42,8 @@ std::string Data::getVarType()
 bool Data::getResult()
 {
 	return result;
+}
+std::vector<Node*> Data::getPKBoutput()
+{
+	return pkbresult;
 }

@@ -14,7 +14,7 @@ private:
 
 public:
 	Data(std::string x, std::string y, bool res);
-	~Data();
+	void setPKBoutput(std::vector<Node*> PKBres);
 	//Attributes
 	void setVar(std::string x);
 	void setVarType(std::string y);

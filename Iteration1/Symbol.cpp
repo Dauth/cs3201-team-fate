@@ -1,32 +1,34 @@
 #include "stdafx.h"
 #include "Symbol.h"
+#include<string>
 
-Symbol::~Symbol()
+Symbol::Symbol(std::string var, std::string varType )
 {
+	SymbolTable.push_back(Data(var,varType,false));
 }
-Symbol::Symbol(int i, std::string var, std::string varType )
+void Symbol:: setVar(std::string var, std::string varType)
 {
-	myMap.insert(std::make_pair(i, Data(var,varType,false)));
+	SymbolTable.push_back(Data(var,varType,false));
 }
-void Symbol:: setVar(int i,std::string var, std::string varType)
+void Symbol:: setResult(int index)
 {
-	myMap.insert(std::make_pair(i, Data(var,varType,false)));
+	SymbolTable[index].setResult(true);
 }
-std::vector<Data> Symbol::getData(int i)
-{
-	std::vector<Data> vec; 
-	//multimap<int, Data>::iterator iter=myMap.find(i);
-	//give by batch
-	std::multimap<int, Data>::const_iterator it =myMap.lower_bound(i);
-	std::multimap<int, Data>::const_iterator it2 =myMap.upper_bound(i);
-	while(it!=it2)
-	{
-		vec.push_back(it->second);
-		++it;
-	}
-	return vec;
+std::vector<Data> Symbol::getQuery()
+{	
+	return SymbolTable;
 }
 int Symbol::getSize()
 {
-	return myMap.max_size();
+	return SymbolTable.max_size();
 }
+int Symbol::getIndex(std::string var)
+{
+	for(int i=0; i<SymbolTable.max_size();i++)
+	{
+		if(SymbolTable[i].getVar()==var)
+			return i;
+	}
+}
+
+
