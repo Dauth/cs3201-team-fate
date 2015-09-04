@@ -1,14 +1,16 @@
 #ifndef PARENTFUNCTIONS_H
 #define PARENTFUNCTIONS_H
 
+
 #include "stdafx.h"
 #include "Node.h"
-
+class ParentFunctions{
 public:
-	std::vector<Node*> getParentsFor(Node* parent);
-	Node* getParentsOf(Node* child);
-	std::vector<Node*> getParentsStarFor(Node* parent);
-	std::vector<Node*> getParentsStarOf(Node* child);
+	ParentFunctions();
+	std::vector<Node*> getChildrenStar(int statementLine);
+	std::vector<Node*> getChildrenStar(synt_type type);
+	std::vector<Node*> getParentsStar(int statementLine);
+	std::vector<Node*> getParentsStar(synt_type type);
 };
 
 #endif
