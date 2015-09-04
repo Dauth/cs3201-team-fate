@@ -1,5 +1,5 @@
-#include "StatementTable.h"
 #include "stdafx.h"
+#include "StatementTable.h"
 
 StatementTable::StatementTable () {
 
@@ -31,4 +31,10 @@ std::vector<Node*> StatementTable::getStatements(synt_type st) {
 
 void StatementTable::addStatement(int statementNum, Node* statementNode) {
 	table[statementNum] = statementNode;
+	if ( count.find(statementNode->getType()) == count.end() ) {
+		count[statementNode->getType()] = 1; // magic number!!
+	} else {
+		int current = count[statementNode->getType()];
+		count[statementNode->getType()] = current += 1; // magic number!!
+	}
 }

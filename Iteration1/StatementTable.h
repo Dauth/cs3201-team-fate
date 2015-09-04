@@ -6,6 +6,7 @@
 
 class StatementTable {
 	std::map<int, Node*> table;
+	std::map<synt_type, int> count;
 	
 public:
 	StatementTable();

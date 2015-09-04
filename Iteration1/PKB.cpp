@@ -1,9 +1,14 @@
+#include "stdafx.h"
 #include "PKB.h"
 
 PKB::PKB () {
 
 }
 
+std::vector<Node*> PKB::getStatement(synt_type st) {
+	return statementTable.getStatements(st);
+}
+	
 Node* PKB::createProcedure(std::string procName) {
 	return procedureTable.getOrCreateProcedure(procName);
 }
@@ -50,7 +55,6 @@ void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure) {
 void PKB::handleParent(Node* child, Node* parent) {
 	parentsTable.addChild(parent, child);
 }
-
 
 std::vector<Node*> PKB::getModifies(std::string procName) {
 	Node* procedure = procedureTable.getOrCreateProcedure(procName);
@@ -139,9 +143,9 @@ std::vector<Node*> PKB::getChildren(synt_type st) {
 	return std::vector<Node*> (children.begin(), children.end());
 }
 
-Node* PKB::getParent(int statementLine) {
+std::vector<Node*> PKB::getParent(int statementLine) {
 	Node* child = statementTable.getStatement(statementLine);
-	return child->getParent()->getParent();
+	return std::vector<Node*>(1, child->getParent()->getParent());
 }
 
 std::vector<Node*> PKB::getParents(synt_type st) {
@@ -153,9 +157,13 @@ std::vector<Node*> PKB::getParents(synt_type st) {
 	return std::vector<Node*> (children.begin(), children.end());
 }
 
-Node* PKB::getFollowing(int statementLine) {
+std::vector<Node*> PKB::getFollowing(int statementLine) {
 	Node* statement = statementTable.getStatement(statementLine);
-	return getFollowing(statement);
+	Node* node = getFollowing(statement);
+	if(node != nullptr) {
+		return std::vector<Node*>(0, node);
+	}
+	return std::vector<Node*>();
 }
 
 //private
@@ -180,9 +188,13 @@ std::vector<Node*> PKB::getFollowing(synt_type st) {
 	return following;
 }
 
-Node* PKB::getFollowedBy(int statementLine) {
+std::vector<Node*> PKB::getFollowedBy(int statementLine) {
 	Node* statement = statementTable.getStatement(statementLine);
-	return getFollowedBy(statement);
+	Node* node = getFollowedBy(statement);
+	if(node != nullptr) {
+		return std::vector<Node*>(0, node);
+	}
+	return std::vector<Node*>();
 }
 
 //private

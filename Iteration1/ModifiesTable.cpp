@@ -1,5 +1,6 @@
-#include "ModifiesTable.h"
 #include "stdafx.h"
+#include "ModifiesTable.h"
+
 
 ModifiesTable::ModifiesTable () {
 
@@ -25,8 +26,10 @@ std::vector<Node*> ModifiesTable::getModifiers(synt_type st) {
 }
 
 std::vector<Node*> ModifiesTable::getModified(Node* node) {
-	std::vector<Node*> modified = table[node];
-	return modified;
+	if ( table.find(node) == table.end() ) {
+		return std::vector<Node*>();
+	}
+	return table[node];
 }
 
 void ModifiesTable::addModifies(Node* nodeLeft, Node* nodeRight) {

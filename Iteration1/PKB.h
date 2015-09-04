@@ -40,6 +40,8 @@ public:
 
 	void addStatement(Node*, Node*);
 
+	std::vector<Node*> getStatement(synt_type);
+
 	//argument is the _ in modifies ( _ , v )
 	std::vector<Node*> getModifies(std::string);   // proc name, returns nodes proc modifies
 	std::vector<Node*> getModifies(int);           // statement num, return nodes modified by statement
@@ -63,15 +65,15 @@ public:
 	std::vector<Node*> getChildren(synt_type);
 
 	//argument is the _ in parent ( s , _ )
-	Node* getParent(int);
+	std::vector<Node*> getParent(int);
 	std::vector<Node*> getParents(synt_type);
 
 	//argument is the _ in follows ( _ , s )
-	Node* getFollowing(int);
+	std::vector<Node*> getFollowing(int);
 	std::vector<Node*> getFollowing(synt_type);
 
 	//argument is the _ in follows ( s , _ )
-	Node* getFollowedBy(int);
+	std::vector<Node*> getFollowedBy(int);
 	std::vector<Node*> getFollowedBy(synt_type);
 	
 	std::vector<Node*> getExpressions(std::string);

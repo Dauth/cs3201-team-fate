@@ -1,5 +1,5 @@
-#include "ExpressionTable.h"
 #include "stdafx.h"
+#include "ExpressionTable.h"
 
 ExpressionTable::ExpressionTable () {
 

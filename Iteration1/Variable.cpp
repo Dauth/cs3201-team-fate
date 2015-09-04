@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "Variable.h"
 #include "Node.h"
-#include "stdafx.h"
 
 Variable::Variable(std::string _name) {
 	name = _name;
