@@ -1,4 +1,4 @@
-#ifndef PKG_H
+#ifndef PKB_H
 #define PKB_H
 
 #include "stdafx.h"
