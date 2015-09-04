@@ -7,5 +7,6 @@ enum synt_type {
 	procedure,
 	variable,
 	expression,
-	constant
-}
+	constant,
+	integer
+};

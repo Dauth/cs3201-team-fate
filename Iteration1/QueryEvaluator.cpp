@@ -1,16 +1,61 @@
-#include <string>
+#include "stdafx.h"
+#include "QueryEvaluator.h"
+#include "PKB.h"
 
-using namespace std;
+QueryEvaluator::QueryEvaluator() {
+	hasResult = true;
+}
 
+void QueryEvaluator::evaluate(SymbolTable* st, QueryTree* qt) {
+	table = st;
+	tree = qt;
+	evaluatePattern();
+}
 
-class QueryEvaluator{
-	/*constructor a query tree and symbol table*/
-	
-	/*Evaluate pattern tree (Methods) : get from PKB then
-	fills symbol table*/
-	/*evaluate query parts (methods) : get from PKB then
-	fills up symbol table*/
+void QueryEvaluator::evaluatePattern() {
+	//tree->getPattern()...
+}
 
-	/*pass the PKBoutput object to Query Result Projector*/
+void QueryEvaluator::evaluateQuery() {
+	QueryNode* query = tree->getQuery();
+	while(query) {
+		ParamNode* left = query->getLeftParam();
+		ParamNode* right = query->getRightParam();
+		std::vector<Node*> result;
+		ParamNode* arg = getOptimal(left, right);
+		if(left == arg) {
+			evaluateLeft(query->getType(), arg);
+		} else {
+			evaluateRight(query->getType(), arg);
+		}
+		query = tree->getQuery();
+	}
+}
 
+void QueryEvaluator::evaluateLeft(query_type type, ParamNode* pnode) {
+	if(pnode->getType() == integer) {
+		evaluateLeftByType(type, std::stoi(pnode->getParam()));
+	} else if(pnode->getType() == expression) {
+		evaluateLeftByType(type, pnode->getParam());
+	} else {
+		evaluateLeftByType(type, pnode->getType());
+	}
+}
+
+void QueryEvaluator::evaluateLeftByType(query_type type, int lineNum) {
+	switch(type) {
+		case modifies		:
+
+		case uses			:
+		case follows		:
+		case followsStar	:
+		case parent			:
+		case parentStar		:
+		/*case calls			:
+		case callsStar		:
+		case next			:
+		case nextStar		:
+		case affects		:
+		case affectsStar	:*/
+	}
 }

@@ -1,11 +1,5 @@
+#include "stdafx.h"
 #include "QueryTree.h"
-
-QueryNode* firstQuery;
-PatternNode* firstPattern;
-QueryNode* currQuery;
-PatternNode* currPattern;
-QueryNode* lastAddedQuery;
-PatternNode* lastAddedPattern;
 
 QueryTree::QueryTree () {
 	firstQuery = NULL;

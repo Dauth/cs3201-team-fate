@@ -8,6 +8,11 @@
 class QueryEvaluator {
 	QueryTree* tree;
 	SymbolTable* table;
+	bool hasResult;
+
+	void evaluatePattern();
+	void evaluateQuery();
+	void evaluateResult();
 
 public:
 	QueryEvaluator ();

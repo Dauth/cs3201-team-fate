@@ -11,4 +11,4 @@ enum query_type {
 	nextStar,
 	affects,
 	affectsStar
-}
+};

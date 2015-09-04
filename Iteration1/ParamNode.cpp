@@ -1,11 +1,9 @@
+#include "stdafx.h"
 #include "ParamNode.h"
 
-synt_type SYNT_TYPE;
-std::string param;
-
-ParamNode::ParamNode (synt_type type, std::string param) {
+ParamNode::ParamNode (synt_type type, std::string p) {
 	SYNT_TYPE = type;
-	param = param;
+	param = p;
 }
 
 synt_type ParamNode::getType() {
