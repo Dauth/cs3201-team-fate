@@ -1,9 +1,7 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
-#include<iostream>
-#include<string>
-#include<map>
-#include<vector>
+
+#include "stdafx.h"
 #include "Data.h"
 
 using namespace std;

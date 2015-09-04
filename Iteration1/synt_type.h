@@ -3,6 +3,7 @@ enum synt_type {
 	ifelse,
 	assignment,
 	call,
+	statement,
 	statementList,
 	procedure,
 	variable,

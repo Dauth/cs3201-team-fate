@@ -3,20 +3,32 @@
 
 #include "stdafx.h"
 #include "QueryTree.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
+#include "PKB.h"
 
 class QueryEvaluator {
+	Symbol* symbol;
 	QueryTree* tree;
-	SymbolTable* table;
 	bool hasResult;
+	PKB* pkb;
 
 	void evaluatePattern();
 	void evaluateQuery();
+	std::vector<Node*> evaluateLeft(query_type, ParamNode*);
+	std::vector<Node*> evaluateRight(query_type, ParamNode*);
+	std::vector<Node*> evaluateLeftByType(query_type, int);
+	std::vector<Node*> evaluateLeftByType(query_type, std::string);
+	std::vector<Node*> evaluateLeftByType(query_type, synt_type);
+	std::vector<Node*> evaluateRightByType(query_type, int);
+	std::vector<Node*> evaluateRightByType(query_type, std::string);
+	std::vector<Node*> evaluateRightByType(query_type, synt_type);
 	void evaluateResult();
+	ParamNode* getOptimal(ParamNode*, ParamNode*);
+	bool resultNotEmpty(ParamNode*, std::vector<Node*>);
 
 public:
-	QueryEvaluator ();
-	void evaluate(SymbolTable*, QueryTree*);
+	QueryEvaluator (PKB*);
+	void evaluate(Symbol*, QueryTree*);
 };
 
 #endif
