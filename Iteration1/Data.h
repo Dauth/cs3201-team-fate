@@ -14,7 +14,6 @@ private:
 
 public:
 	Data(std::string x, std::string y, bool res);
-	void setPKBoutput(std::vector<Node*> PKBres);
 	//Attributes
 	void setVar(std::string x);
 	void setVarType(std::string y);
@@ -23,6 +22,7 @@ public:
 	std::string getVar();
 	std::string getVarType();
 	bool getResult();
+	std::vector<Node*> getPKBoutput();
 
 };
 
