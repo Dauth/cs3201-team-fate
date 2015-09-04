@@ -19,6 +19,7 @@ public:
 	void setVar(std::string x);
 	void setVarType(std::string y);
 	void setResult(bool r);
+	void setPKBoutput(std::vector<Node*> PKBres);
 	std::string getVar();
 	std::string getVarType();
 	bool getResult();
