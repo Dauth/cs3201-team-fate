@@ -4,12 +4,11 @@
 
 //TODO add the PKB object
 //leave this empty
-Data::Data(std::string var, std::string varType, bool res=false) //, PKB out = nullptr
+Data::Data(std::string var, synt_type varType, bool res=false) //, PKB out = nullptr
 {
 	variable=var;
 	variableType=varType;
 	result=res;
-	//, output(out)
 }
 
 
@@ -18,7 +17,7 @@ void Data::setVar(std::string var1)
 {
 	variable=var1;
 }
-void Data::setVarType(std::string varType)
+void Data::setVarType(synt_type varType)
 {
 	variableType=varType;
 }
@@ -26,7 +25,7 @@ void Data::setResult(bool res1)
 {
 	result=res1;
 }
-void Data::setPKBoutput(std::vector<Node*> PKBres)
+void Data::setPKBOutput(std::vector<Node*> PKBres)
 {
 	pkbresult=PKBres;
 }
@@ -35,7 +34,7 @@ std::string Data::getVar()
 {
 	return variable;
 }
-std::string Data::getVarType()
+synt_type Data::getVarType()
 {
 	return variableType;
 }
@@ -43,7 +42,7 @@ bool Data::getResult()
 {
 	return result;
 }
-std::vector<Node*> Data::getPKBoutput()
+std::vector<Node*> Data::getPKBOutput()
 {
 	return pkbresult;
 }

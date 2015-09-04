@@ -8,21 +8,21 @@ class Data{
 
 private:
 	std::string variable;
-	std::string variableType;
+	synt_type variableType;
 	bool result;
 	std::vector<Node*> pkbresult;
 
 public:
-	Data(std::string x, std::string y, bool res);
+	Data(std::string x, synt_type y, bool res);
 	//Attributes
 	void setVar(std::string x);
-	void setVarType(std::string y);
+	void setVarType(synt_type y);
 	void setResult(bool r);
-	void setPKBoutput(std::vector<Node*> PKBres);
+	void setPKBOutput(std::vector<Node*> PKBres);
 	std::string getVar();
-	std::string getVarType();
+	synt_type getVarType();
 	bool getResult();
-	std::vector<Node*> getPKBoutput();
+	std::vector<Node*> getPKBOutput();
 
 };
 

@@ -2,32 +2,32 @@
 #include "Symbol.h"
 #include<string>
 
-Symbol::Symbol(std::string var, std::string varType )
+Symbol::Symbol(std::string var, synt_type varType )
 {
-	SymbolTable.push_back(Data(var,varType,false));
+	symbolTable.push_back(new Data(var,varType,false));
 }
-void Symbol:: setVar(std::string var, std::string varType)
+void Symbol::setVar(std::string var, synt_type varType)
 {
-	SymbolTable.push_back(Data(var,varType,false));
+	symbolTable.push_back(new Data(var,varType,false));
 }
-void Symbol:: setResult(int index)
+void Symbol::setResult(int index)
 {
-	SymbolTable[index].setResult(true);
+	symbolTable.at(index)->setResult(true);
 }
-std::vector<Data> Symbol::getQuery()
+std::vector<Data*> Symbol::getQuery()
 {	
-	return SymbolTable;
+	return symbolTable;
 }
 int Symbol::getSize()
 {
-	return SymbolTable.max_size();
+	return symbolTable.max_size();
 }
 int Symbol::getIndex(std::string var)
 {
-	for(int i=0; i<SymbolTable.max_size();i++)
+	for(std::vector<Data*>::iterator i = symbolTable.begin(); i != symbolTable.end(); i++)
 	{
-		if(SymbolTable[i].getVar()==var)
-			return i;
+		if((**i).getVar()==var)
+			return std::distance(symbolTable.begin(), i);
 	}
 }
 
