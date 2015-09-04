@@ -1,5 +1,6 @@
 #include "Node.h"
 #include "Variable.h"
+#include "stdafx.h"
 
 Node::Node (synt_type st, int l, std::string v) {
 	SYNT_TYPE = st;

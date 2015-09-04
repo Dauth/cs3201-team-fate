@@ -1,4 +1,5 @@
 #include "ParentsTable.h"
+#include "stdafx.h"
 
 ParentsTable::ParentsTable () {
 

@@ -1,4 +1,5 @@
 #include "UsesTable.h"
+#include "stdafx.h"
 
 UsesTable::UsesTable () {
 

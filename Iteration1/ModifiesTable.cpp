@@ -1,4 +1,5 @@
 #include "ModifiesTable.h"
+#include "stdafx.h"
 
 ModifiesTable::ModifiesTable () {
 

@@ -1,4 +1,5 @@
 #include "StatementTable.h"
+#include "stdafx.h"
 
 StatementTable::StatementTable () {
 

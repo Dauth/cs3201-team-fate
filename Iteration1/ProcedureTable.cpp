@@ -1,4 +1,5 @@
 #include "ProcedureTable.h"
+#include "stdafx.h"
 
 ProcedureTable::ProcedureTable () {
 

@@ -1,4 +1,5 @@
 #include "VariableTable.h"
+#include "stdafx.h"
 
 VariableTable::VariableTable () {
 
