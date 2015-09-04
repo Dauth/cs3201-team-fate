@@ -12,6 +12,7 @@ public:
 	std::vector<Node*> getExpressions(std::string);
 	
 	void addExpression(Node*);
+	void debug();
 };
 
 #endif

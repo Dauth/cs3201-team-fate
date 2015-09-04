@@ -79,6 +79,7 @@ public:
 	std::vector<Node*> getFollowedBy(synt_type);
 	
 	std::vector<Node*> getExpressions(std::string);
+	void debug();
 };
 
 #endif

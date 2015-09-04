@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PKB.h"
-
+#include <iostream>
 PKB::PKB () {
 
 }
@@ -20,8 +20,8 @@ Node* PKB::createProcedure(std::string procName) {
 	return procedureTable.getOrCreateProcedure(procName);
 }
 
-Node* PKB::createNode(synt_type st, int line, std::string value="", 
-	Node* usedBy=nullptr, Node* modifiedBy=nullptr, Node* parent=nullptr, Node* procedure=nullptr) {
+Node* PKB::createNode(synt_type st, int line, std::string value, 
+	Node* usedBy, Node* modifiedBy, Node* parent, Node* procedure) {
 	Node* node = new Node(st, line, value);
 	if(st == variable) {
 		Variable* var = variableTable.getOrCreateVariable(value);
@@ -32,14 +32,15 @@ Node* PKB::createNode(synt_type st, int line, std::string value="",
 		statementTable.addStatement(line, node);
 	} else if (st == expression ) {
 		expressionTable.addExpression(node);
+		node->setVar(usedBy->getVariable());
 	}
-	if (modifiedBy != nullptr) {
+	if (modifiedBy != nullptr && st == variable) {
 		handleModifiedBy(node, modifiedBy, procedure);
 	}
-	if (usedBy != nullptr) {
+	if (usedBy != nullptr && st == variable) {
 		handleUsedBy(node, usedBy, procedure);
 	}
-	if (parent != nullptr) {
+	if (parent != nullptr && st == variable) {
 		handleParent(node, usedBy);
 	}
 	return node;
@@ -76,10 +77,11 @@ std::vector<Node*> PKB::getModifies(int statementLine) {
 std::vector<Node*> PKB::getModifies(synt_type st) {
 	std::vector<Node*> modifiers = modifiesTable.getModifiers(st);
 	std::set<Node*> modifies;
-	for(std::vector<Node*>::iterator it = modifiers.begin(); it != modifiers.end(); ++it) {
-		std::vector<Node*> temp = modifiesTable.getModified(*it);
-		for(std::vector<Node*>::iterator it2 = temp.begin(); it2 != temp.end(); ++it) {
-			modifies.insert(*it2);
+	for(int i=0; i<modifiers.size(); i++) {
+		std::vector<Node*> temp = modifiesTable.getModified(modifiers[i]);
+		//std::cout << temp[0]->getValue() << "\n";
+		for(int j=0; j<temp.size(); j++) {
+			modifies.insert(temp[j]);
 		}
 	}
 	return std::vector<Node*> (modifies.begin(), modifies.end());
@@ -228,4 +230,8 @@ std::vector<Node*> PKB::getFollowedBy(synt_type st) {
 
 std::vector<Node*> PKB::getExpressions(std::string expr) {
 	return expressionTable.getExpressions(expr);
+}
+
+void PKB::debug() {
+
 }

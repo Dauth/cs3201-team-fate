@@ -12,7 +12,7 @@ This function converts an inflix expression to postflix.
 Parameters: String - a string that consists of operand and operator
 Return:		array
 */
-std::vector <char> expressionConverter(string inflixString){
+std::vector <char> ExpressionTree::expressionConverter(string inflixString){
 	stack <char> tStack;
 	std::vector <char> resultVector;
 	char cChar;
@@ -32,7 +32,7 @@ std::vector <char> expressionConverter(string inflixString){
 	return resultVector;
 }
 
-void inflixBracketProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
+void ExpressionTree::inflixBracketProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
 	char wChar;
 	if(cChar == "("){
 		tStack.push(cChar);
@@ -43,13 +43,13 @@ void inflixBracketProcess(stack <char>& tStack, std::vector <char>& resultVector
 	}
 }
 
-void inflixOperandProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
+void ExpressionTree::inflixOperandProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
 	if (isOperand(cChar)){
 			resultVector.push_back(cChar);
 	}
 }
 
-void inflixOperatorProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
+void ExpressionTree::inflixOperatorProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
 	if(isOperator(cChar){
 		if(tStack.empty()){
 			tStack.push(cChar);
@@ -69,7 +69,7 @@ This function checks if the given character is alphanumeric - A-z0-9.
 Parameters: char
 Return:		bool
 */
-bool isOperand(char cChar){
+bool ExpressionTree::isOperand(char cChar){
 	return isalnum(cChar);
 }
 
@@ -78,7 +78,7 @@ This function checks if the given character is an operator  + - *.
 Parameters: char
 Return:		bool
 */
-bool isOperator(char cChar){
+bool ExpressionTree::isOperator(char cChar){
 	bool result = false;
 	if(cChar == '*' || cChar == '+' || cChar == '-' ||){
 		result = true;
@@ -86,12 +86,14 @@ bool isOperator(char cChar){
 	return result;
 }
 
+
+
 /*
 This function gets the rank order of the operator.
 Parameters: char
 Return:		int
 */
-int getPrecedence(char operator){
+int ExpressionTree::getPrecedence(char operator){
 	int result = -1;
 	if(operator == "*"){
 		result = 2;
@@ -108,7 +110,7 @@ This function checks if the given inflix expression is balanced a.k.a correct nu
 Parameters: string
 Return:		bool
 */
-bool isInflixBalanced(string inflixString){
+bool ExpressionTree::isInflixBalanced(string inflixString){
 	bool result = false;
 	stack <char> tStack;
 	char cChar;
@@ -133,15 +135,53 @@ bool isInflixBalanced(string inflixString){
 	return result
 }
 
-/*
-This function checks if the given inflix expression well defined
-Parameters: string
-Return:		bool
-*/
-bool isInflixBalanced(string inflixString){
-	bool result = false;
-	stack <char> tStack;
-	char cChar;
+
+Node* ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo){
+	Node* operatorRoot = Node(expression, lineNo, postflixExp[postflixExp.length() - 1]);
+
+	for(int i = postflixExp.length() - 2; i >= 0; i++){
+		char expressionChar = postflixExp[i];
+		Node* tNode;
+		if(isOperator(expressionChar) || expressionChar == "(" || expressionchar == ")"){
+			tNode = Node(expression, lineNo, expressionChar);
+		}else if (isOperand(expressionChar)){
+			tNode = Node(constant, lineNo, expressionChar);
+		}
+
+		operatorRoot = insert(operatorRoot, tNode);
+	}
+	return operatorRoot;
 }
 
-#endif
+/*
+This function builds the expression tree
+Parameters: 
+Return:		Node*
+*/
+
+Node* ExpressionTree::insert(root, node){
+	if(root == null){
+		root = node
+	}
+	else{
+		if(root.getRightChild() == null){
+			root.setRightChild() = node
+			node.setParent() = root
+			insert(root.getRightChild(), node)
+		}else if(isOperator(root.getRightChild().getValue())){
+			insert(root.getRightChild(), node)
+		}else if(root.getLeftChild() == null){
+			root.setLeftChild() = node
+			node.setParent() = root
+			insert(root.getLeftChild(), node)
+		}else if (isOperator(root.getLeftChild().getValue())){
+			insert(root.getLeftChild(), node)
+		}
+	}
+	return root;
+}
+
+
+
+
+#endif	
