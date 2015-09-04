@@ -110,7 +110,7 @@ This function checks if the given inflix expression is balanced a.k.a correct nu
 Parameters: string
 Return:		bool
 */
-bool ExpressionTree::isInflixBalanced(string inflixString){
+bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	bool result = false;
 	stack <char> tStack;
 	char cChar;

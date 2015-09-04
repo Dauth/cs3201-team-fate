@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DesignExtractor.h"
+#include "ExpressionTree.h"
 #include "PKB.h"
 #include <vector>
 
@@ -130,4 +131,70 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 	}
 
 	return followedBy;
+}
+
+//Functions for pattern matching
+
+std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string left,std::string right){
+	//code to extract expression if needed
+
+	std::vector<Node*> result;
+
+	if (type == whileLoop){
+		std::vector<Node*> whileList = pkb->getStatement(whileLoop);
+		if (left == "_"){
+			result = whileList;
+		}
+		else{
+			for (unsigned int i = 0; i < whileList.size(); i++){
+				if (whileList.at(i)->getLeftChild()->getVariable()->getName() == left){
+					result.push_back(whileList.at(i));
+				}
+			}
+		}
+	}
+
+	//elseif type = "ifstat"
+
+	else{
+		std::vector<Node*> assignList;
+		Node* tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right),0);
+		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
+		for (unsigned int i = 0; i < exprList.size(); i++){
+			Node* tNode2 = exprList.at(i);
+			int compareResult = compare(tNode2,tNode);
+			if(compareResult != 0){
+				if (left == "_"){
+					result.push_back(tNode2);	
+				}
+				else{
+					Node* parentNode = tNode2 ->getParent();
+					while(parentNode->getType()!= assignment){
+						parentNode = parentNode ->getParent();
+					}
+					if(parentNode->getLeftChild()->getVariable()->getName() == left){
+						result.push_back(tNode2);
+					}
+				}
+			}
+		}
+	}
+	
+	return result;
+}
+
+int compare(Node* p,Node* q){
+   if(p==NULL&&q==NULL){
+	   return 1;
+   }
+   else if(p==NULL||q==NULL){
+	   return 0;
+   }
+   else if(p->getValue()==q->getValue())   {
+	   int s1=compare(p->getLeftChild(),q->getLeftChild());
+	   int s2=compare(p->getRightChild(),q->getRightChild());
+	   return s1*s2;
+   }
+   else
+		return 0;
 }

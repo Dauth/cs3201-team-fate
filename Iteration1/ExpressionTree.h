@@ -1,5 +1,5 @@
-#ifndef Express
-#define PROCEDURETABLE_H
+#ifndef EXPRESSIONTREE_H
+#define EXPRESSIONTREE_H
 
 #include "stdafx.h"
 #include "Node.h"
@@ -13,8 +13,8 @@ class ExpressionTree{
 
 
 public:
-	std::vector <char> ExpressionTree::expressionConverter(string inflixString);
-	Node* ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo);
+	static std::vector <String> ExpressionTree::expressionConverter(std::string inflixString);
+	static Node* ExpressionTree::exptreeSetup(std::vector<String> postflixExp, int lineNo);
 
 
 
