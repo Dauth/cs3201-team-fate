@@ -36,7 +36,8 @@ public:
 	Node* createProcedure(std::string);
 	//type, statement/prog num, constant/procname/expr, UsedBy, ModifiedBy
 	// Parent, ProcedureNode
-	Node* createNode(synt_type, int, std::string, Node*, Node*, Node*, Node*); 
+	Node* createNode(synt_type, int, std::string="",
+		Node* usedBy=nullptr, Node* modifiedBy=nullptr, Node* parent=nullptr, Node* procedure=nullptr); 
 
 	void addStatement(Node*, Node*);
 

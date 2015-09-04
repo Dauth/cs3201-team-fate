@@ -27,14 +27,14 @@ Node* PKB::createNode(synt_type st, int line, std::string value="",
 		Variable* var = variableTable.getOrCreateVariable(value);
 		node->setVar(var);
 	}
+
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {
 		statementTable.addStatement(line, node);
 	} else if (st == expression ) {
 		expressionTable.addExpression(node);
 	}
-
 	if (modifiedBy != nullptr) {
-		handleModifiedBy(node, usedBy, procedure);
+		handleModifiedBy(node, modifiedBy, procedure);
 	}
 	if (usedBy != nullptr) {
 		handleUsedBy(node, usedBy, procedure);
@@ -49,14 +49,14 @@ void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure) {
 	modifiesTable.addModifies(modifiedBy, node);
 	modifiesTable.addModifies(procedure, node);
 	variableTable.addModifiedBy(node->getVariable()->getName(), modifiedBy);
-	variableTable.addModifiedBy(procedure->getValue(), modifiedBy);
+	variableTable.addModifiedBy(node->getVariable()->getName(), procedure);
 }
 
 void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure) {
 	usesTable.addUsedBy(usedBy, node);
 	usesTable.addUsedBy(procedure, node);
 	variableTable.addUsedBy(node->getVariable()->getName(), usedBy);
-	variableTable.addUsedBy(procedure->getValue(), usedBy);
+	variableTable.addUsedBy(node->getVariable()->getName(), procedure);
 }
 
 void PKB::handleParent(Node* child, Node* parent) {
