@@ -1,27 +1,26 @@
 #ifndef DATA_H
 #define DATA_H
-#include<iostream>
-#include<string>
 
+#include "stdafx.h"
+#include "Node.h"
 
-using namespace std;
 class Data{
 
 private:
 	std::string variable;
 	std::string variableType;
-	bool        result;
-	//PKB         output;    // I suppose PKB is an already defined type
+	bool result;
+	std::vector<Node*> pkbresult;
 
 public:
+	Data(std::string x, std::string y, bool res);
 	~Data();
-	Data(string x,string y,bool res);
 	//Attributes
-	void setVar(string x);
-	void setVarType(string y);
+	void setVar(std::string x);
+	void setVarType(std::string y);
 	void setResult(bool r);
-	string getVar();
-	string getVarType();
+	std::string getVar();
+	std::string getVarType();
 	bool getResult();
 
 };

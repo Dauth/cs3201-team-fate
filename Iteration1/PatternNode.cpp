@@ -1,9 +1,5 @@
+#include "stdafx.h"
 #include "PatternNode.h"
-
-ParamNode* leftParam;
-ParamNode* middleParam;
-ParamNode* rightParam;
-PatternNode* nextPattern;
 
 PatternNode::PatternNode (ParamNode* left, ParamNode* middle, ParamNode* right) {
 	leftParam = left;

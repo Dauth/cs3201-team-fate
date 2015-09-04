@@ -1,4 +1,4 @@
-#ifndef PKG_H
+#ifndef PKB_H
 #define PKB_H
 
 #include "stdafx.h"
@@ -36,9 +36,13 @@ public:
 	Node* createProcedure(std::string);
 	//type, statement/prog num, constant/procname/expr, UsedBy, ModifiedBy
 	// Parent, ProcedureNode
-	Node* createNode(synt_type, int, std::string, Node*, Node*, Node*, Node*); 
+	Node* createNode(synt_type, int, std::string="",
+		Node* usedBy=nullptr, Node* modifiedBy=nullptr, Node* parent=nullptr, Node* procedure=nullptr); 
 
 	void addStatement(Node*, Node*);
+
+	std::vector<Node*> getStatement(synt_type);
+	int getCount(synt_type);
 
 	//argument is the _ in modifies ( _ , v )
 	std::vector<Node*> getModifies(std::string);   // proc name, returns nodes proc modifies
@@ -63,15 +67,15 @@ public:
 	std::vector<Node*> getChildren(synt_type);
 
 	//argument is the _ in parent ( s , _ )
-	Node* getParent(int);
+	std::vector<Node*> getParent(int);
 	std::vector<Node*> getParents(synt_type);
 
 	//argument is the _ in follows ( _ , s )
-	Node* getFollowing(int);
+	std::vector<Node*> getFollowing(int);
 	std::vector<Node*> getFollowing(synt_type);
 
 	//argument is the _ in follows ( s , _ )
-	Node* getFollowedBy(int);
+	std::vector<Node*> getFollowedBy(int);
 	std::vector<Node*> getFollowedBy(synt_type);
 	
 	std::vector<Node*> getExpressions(std::string);

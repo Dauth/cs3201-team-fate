@@ -11,6 +11,7 @@ class VariableTable {
 public:
 	VariableTable();
 	Variable* getOrCreateVariable(std::string);
+	int getVariableCount();
 	std::vector<Node*> getModifiedBy(std::string);
 	std::vector<Node*> getUsedBy(std::string);
 

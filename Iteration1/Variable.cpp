@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Variable.h"
 #include "Node.h"
 

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "UsesTable.h"
 
 UsesTable::UsesTable () {
@@ -24,8 +25,10 @@ std::vector<Node*> UsesTable::getUsers(synt_type st) {
 }
 
 std::vector<Node*> UsesTable::getUsed(Node* node) {
-	std::vector<Node*> used = table[node];
-	return used;
+	if ( table.find(node) == table.end() ) {
+		return std::vector<Node*>();
+	}
+	return table[node];
 }
 
 void UsesTable::addUsedBy(Node* nodeLeft, Node* nodeRight) {

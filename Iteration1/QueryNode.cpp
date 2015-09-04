@@ -1,14 +1,10 @@
+#include "stdafx.h"
 #include "QueryNode.h"
 
-query_type QUERY_TYPE;
-ParamNode* leftParam;
-ParamNode* rightParam;
-QueryNode* nextQuery;
-
-QueryNode::QueryNode (query_type queryType, ParamNode* leftParam, ParamNode* rightParam) {
-	QUERY_TYPE = queryType;
-	leftParam = leftParam;
-	rightParam = rightParam;
+QueryNode::QueryNode (query_type type, ParamNode* left, ParamNode* right) {
+	QUERY_TYPE = type;
+	leftParam = left;
+	rightParam = right;
 	nextQuery = NULL;
 }
 
@@ -28,6 +24,6 @@ ParamNode* QueryNode::getRightParam() {
 	return rightParam;
 }
 
-void QueryNode::setNext(QueryNode* queryNode) {
-	nextQuery = queryNode;
+void QueryNode::setNext(QueryNode* query) {
+	nextQuery = query;
 }
