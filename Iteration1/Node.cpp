@@ -5,7 +5,7 @@
 Node::Node (synt_type st, int l, std::string v) {
 	SYNT_TYPE = st;
 	value = v;
-	l = l;
+	line = l;
 }
 
 synt_type Node::getType() {

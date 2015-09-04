@@ -17,3 +17,7 @@ void ExpressionTable::addExpression(Node* node) {
 		table[node->getValue()].push_back(node);
 	}
 }
+
+void debug() {
+	//std::cout << "ExpressionTable: " << table.size() << "\n";
+}
