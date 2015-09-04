@@ -10,6 +10,8 @@ using namespace std;
 enum TOKEN { SELECT, RESULT_CL, WITH_CL, SUCHTHAT_CL, PATTERN_CL };
 
 TOKEN currToken = TOKEN::SELECT;
+bool expectingThat = false;
+string concatSuchThatStmt = "";
 
 void removeCharsFromString( string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
@@ -40,11 +42,25 @@ void GetToken(char *currentToken)
 	{
 		currToken = TOKEN::RESULT_CL;
 	}
+	else if (expectingThat && strcmp(currentToken, "that") == 0)
+	{
+		currToken = TOKEN::SUCHTHAT_CL;
+	}
+	else if (strcmp(currentToken,"with") == 0)
+	{
+		currToken = TOKEN::WITH_CL;
+	}
+	else if (strcmp(currentToken,"pattern") == 0)
+	{
+		currToken = TOKEN::PATTERN_CL;
+	}
+	else if (strcmp(currentToken,"such") == 0)
+	{
+		expectingThat = true;
+	}
+
 	else{
-		if (strcmp(currentToken,"with") == 0)
-		{
-			currToken = TOKEN::WITH_CL;
-		}
+
 		switch(currToken)
 		{
 		case RESULT_CL: 
@@ -60,7 +76,7 @@ void GetToken(char *currentToken)
 					writable.push_back('\0');
 					vector<string> variablesTuple = split(&writable[0],',');
 
-					// do for loop for each variable to see if it exists;
+					// do for loop for each variable to see if it exists in the symbol table;
 					// code over here
 
 
@@ -74,28 +90,41 @@ void GetToken(char *currentToken)
 
 				}
 			}break;
-		}
+
+		case SUCHTHAT_CL: 
+			{ // 
+				regex stmtRef("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
+				regex entRef();
+				regex varRef();
+				concatSuchThatStmt.append(currentToken);
+				if (regex_match(concatSuchThatStmt,stmtRef))
+				{
+					// means Modifies(..,...)
+				}
+				printf("%s \n", currentToken);
+			}break;
+
+		} // end of switch
 	}
 
 }
 
 void Match (char *c)
 {
-	regex re(" *(while|assign) +([a-zA-Z])+(\\d|#)*( *, *[a-zA-Z]+(\\d|#)*)*");
-	regex sel(" *select *.*");
+	regex re(" *(procedure|stmtLst|stmt|assign|call|while|if|variable|constant|prog_line) +([a-zA-Z])+(\\d|#)*( *, *[a-zA-Z]+(\\d|#)*)*");
+	regex sel(" *Select *.*");
 
 	if (regex_match(c,re))
 	{
 		int count =0;
 		char *pch;
 		char *end_token;
-		printf ("Splitting string \"%s\" into tokens:\n",c);
 		pch = strtok_s (c," ,",&end_token);
 		bool entityTypeFound = false;
 
 		while (pch != NULL)
 		{
-			printf ("%s\n",pch);
+			printf ("Split design entity ',' : %s\n",pch);
 			pch = strtok_s (NULL, " ,",&end_token);
 			if (!entityTypeFound)
 			{
@@ -103,8 +132,8 @@ void Match (char *c)
 			}
 			else
 			{
-			++count;
-			// store each variable in the symbol table
+				++count;
+				// store each variable in the symbol table
 			}
 		}
 		--count;
@@ -115,12 +144,11 @@ void Match (char *c)
 		printf ("Select st");
 		char *pch;
 		char *end_token;
-		printf ("Splitting string \"%s\" into tokens:\n",c);
 		pch = strtok_s (c," ",&end_token);
 
 		while (pch != NULL)
 		{
-			printf ("%s\n",pch);
+			printf ("For each word in select statement : %s\n",pch);
 			GetToken(pch);
 			pch = strtok_s (NULL, " ",&end_token);
 		}
@@ -149,7 +177,7 @@ int main()
 
 	while( token != NULL ) 
 	{
-		printf( "TOKEN: %s\n", token );
+		printf( "First split by ';' : %s\n", token );
 		Match(token);
 		token = strtok_s(NULL, s,&end_str);
 
