@@ -1,16 +1,12 @@
-#include<iostream>
-#include <map>
-#include <string>
+#include "stdafx.h"
 #include "Data.h"
-
-using namespace std;
 
 //TODO add the PKB object
 //leave this empty
 Data::~Data()
 {
 }
-Data::Data(string var, string varType, bool res=false) //, PKB out = nullptr
+Data::Data(std::string var, std::string varType, bool res=false) //, PKB out = nullptr
 {
 	variable=var;
 	variableType=varType;
@@ -20,11 +16,11 @@ Data::Data(string var, string varType, bool res=false) //, PKB out = nullptr
 
 
 //SETTERS
-void Data::setVar(string var1)
+void Data::setVar(std::string var1)
 {
 	variable=var1;
 }
-void Data::setVarType(string varType)
+void Data::setVarType(std::string varType)
 {
 	variableType=varType;
 }
@@ -33,11 +29,11 @@ void Data::setResult(bool res1)
 	result=res1;
 }
 //GETTERS
-string Data::getVar()
+std::string Data::getVar()
 {
 	return variable;
 }
-string Data::getVarType()
+std::string Data::getVarType()
 {
 	return variableType;
 }

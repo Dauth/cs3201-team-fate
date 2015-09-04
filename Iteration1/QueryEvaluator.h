@@ -5,12 +5,14 @@
 #include "QueryTree.h"
 #include "Symbol.h"
 #include "PKB.h"
+#include "DesignExtractor.h"
 
 class QueryEvaluator {
 	Symbol* symbol;
 	QueryTree* tree;
 	bool hasResult;
 	PKB* pkb;
+	DesignExtractor* dEx;
 
 	void evaluatePattern();
 	void evaluateQuery();
@@ -27,7 +29,7 @@ class QueryEvaluator {
 	bool resultNotEmpty(ParamNode*, std::vector<Node*>);
 
 public:
-	QueryEvaluator (PKB*);
+	QueryEvaluator (PKB*, DesignExtractor*);
 	void evaluate(Symbol*, QueryTree*);
 };
 

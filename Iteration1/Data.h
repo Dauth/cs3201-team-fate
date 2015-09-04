@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include "stdafx.h"
+#include "Node.h"
 
 class Data{
 
@@ -12,11 +13,11 @@ private:
 	std::vector<Node*> pkbresult;
 
 public:
-	Data(string x,string y,bool res);
+	Data(std::string x, std::string y, bool res);
 	~Data();
 	//Attributes
-	void setVar(string x);
-	void setVarType(string y);
+	void setVar(std::string x);
+	void setVarType(std::string y);
 	void setResult(bool r);
 	std::string getVar();
 	std::string getVarType();

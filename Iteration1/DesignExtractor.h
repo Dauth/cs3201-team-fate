@@ -19,7 +19,8 @@ public:
 	std::vector<Node*> getParentsStar(int);
 	std::vector<Node*> getParentsStar(synt_type);
 
-	std::vector<Node*> searchWithPattern(synt_type,synt_type,std::string,std::string);
+	std::vector<Node*> searchWithPattern(synt_type,std::string,std::string);
+	std::vector<Node*> searchWithPattern(synt_type,synt_type,std::string);
 };
 	
 

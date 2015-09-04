@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "QueryEvaluator.h"
 
-QueryEvaluator::QueryEvaluator(PKB* p) {
+QueryEvaluator::QueryEvaluator(PKB* p, DesignExtractor* de) {
 	pkb = p;
+	dEx = de;
 }
 
 void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
@@ -15,7 +16,16 @@ void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
 }
 
 void QueryEvaluator::evaluatePattern() {
-	//tree->getPattern()...
+	PatternNode* pattern = tree->getPattern();
+	std::vector<Node*> result;
+	while(pattern) {
+		if(pattern->getMiddleParam()->getType() == expression) {
+			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), pattern->getMiddleParam()->getParam(), pattern->getRightParam()->getParam());
+		} else {
+			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), pattern->getMiddleParam()->getType(), pattern->getRightParam()->getParam());
+		}
+		hasResult = resultNotEmpty(pattern->getLeftParam(), result);
+	}
 }
 
 void QueryEvaluator::evaluateQuery() {
@@ -195,10 +205,10 @@ ParamNode* getOptimal(ParamNode* left, ParamNode* right) {
 	int leftTypeNum = std::numeric_limits<int>::max();
 	int rightTypeNum = std::numeric_limits<int>::max();
 	if(left->getParam() != "_") {
-		leftTypeNum = 
+		leftTypeNum = ;
 	}
 	if(right->getParam() != "_") {
-		rightTypeNum = 
+		rightTypeNum = ;
 	}
 	if(left->getType() == integer) {
 		return left;
