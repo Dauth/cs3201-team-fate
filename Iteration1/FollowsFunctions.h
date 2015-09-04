@@ -1,11 +1,16 @@
 #ifndef FollowsFunctions_H
 #define FollowsFunctions_H
 
+#include "stdafx.h"
+#include "Node.h"
+
+class FollowsFunctions{
 
 public:
-	Node* getFollows(Node* node);
-	Node* getFollowsBy(Node* node);
-	std::vector<Node*> getFollowsStar(Node* node);
-	std::vector<Node*> getFollowsStarBy(Node* node);
-
+	FollowsFunctions();
+	std::vector<Node*> getFollowingStar(int statementLine);
+	std::vector<Node*> getFollowingStar(synt_type type);
+	std::vector<Node*> getFollowedByStar(int statementLine);
+	std::vector<Node*> getFollowedByStar(synt_type type);
+};
 #endif

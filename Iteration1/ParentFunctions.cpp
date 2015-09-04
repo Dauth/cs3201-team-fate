@@ -1,14 +1,15 @@
-#include "ParentFunctions.h";
-#include "ParentsTable.h"
+#include "ParentFunctions.h"
 #include "PKB.h"
-#include <vector>;
+#include <vector>
 
-ParentsTable pt;
-ParentFunctions::ParentFunctions(){
-};
+ParentFunctions::ParentFunctions(PKB* i){pkb = i;}
 
 std::vector<Node*> ParentFunctions::getChildrenStar(int statementLine){
-	std::vector<Node*> childList = PKB::getChildren(statementLine);
+	std::vector<Node*> childList;
+	if (pkb->getChildren(statementLine).empty()){
+		return childList;
+	}
+	childList = pkb->getChildren(statementLine);
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0; i<tempList.size(); i++){
 		if(tempList.at(i)->getType() == whileLoop){
@@ -21,7 +22,11 @@ std::vector<Node*> ParentFunctions::getChildrenStar(int statementLine){
 }
 
 std::vector<Node*> ParentFunctions::getChildrenStar(synt_type type){
-	std::vector<Node*> childList = PKB::getChildren(type);
+	std::vector<Node*> childList;
+	if (pkb->getChildren(type).empty()){
+		return childList;
+	}
+	childList = pkb->getChildren(type);
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0; i<tempList.size(); i++){
 		if(tempList.at(i) -> getType() == whileLoop){
@@ -35,7 +40,10 @@ std::vector<Node*> ParentFunctions::getChildrenStar(synt_type type){
 
 std::vector<Node*> ParentFunctions::getParentsStar(int statementLine){
 	std::vector<Node*> parentList;
-	parentList.push_back(PKB::getParent(statementLine));
+	if (pkb->getParent(statementLine).empty()){
+		return parentList;
+	}
+	parentList = pkb->getParent(statementLine);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0; i<tempList.size(); i++){
 		std::vector<Node*> tempList2 = ParentFunctions::getParentsStar(tempList.at(i)->getLine());
@@ -45,7 +53,11 @@ std::vector<Node*> ParentFunctions::getParentsStar(int statementLine){
 }
 
 std::vector<Node*> ParentFunctions::getParentsStar(synt_type type){
-	std::vector<Node*> parentList = PKB::getParent(type);
+	std::vector<Node*> parentList;
+	if (pkb->getParent(type).empty()){
+		return parentList;
+	}
+	parentList = pkb->getParent(type);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0; i<tempList.size(); i++){
 		std::vector<Node*> tempList2 = ParentFunctions::getParentsStar(tempList.at(i)->getType());
