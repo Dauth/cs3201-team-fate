@@ -6,7 +6,7 @@
 #include "PKB.h"
 
 class ExpressionTree{
-	PKB pkb;
+	PKB* pkb;
 
 private:
 	bool ExpressionTree::isOperand(char);
@@ -19,6 +19,7 @@ private:
 	Node* ExpressionTree::insertSON(Node, Node);
 
 public:
+	ExpressionTree(PKB*);
 	std::vector <char> ExpressionTree::expressionConverter(std::string);
 	Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
 	Node* ExpressionTree::exptreeSetupSON(std::vector<char>);

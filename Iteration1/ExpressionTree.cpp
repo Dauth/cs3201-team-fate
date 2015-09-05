@@ -15,7 +15,7 @@ const char* CLOSEDBRACKETS = ")";
 const char* OPENBRACES = "{";
 const char* CLOSEDBRACES = "}";
 
-ExpressionTree::ExpressionTree(){PKB pkb;};
+ExpressionTree::ExpressionTree(PKB* p){pkb = p;};
 
 using namespace std;
 
@@ -171,7 +171,7 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 
 Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	Node* operatorRoot = pkb.createNode(expression, lineNo, str);
+	Node* operatorRoot = pkb->createNode(expression, lineNo, str);
 	
 	for(int i = postflixExp.size() - 2; i >= 0; i++){
 		char expressionChar = postflixExp[i];
@@ -202,11 +202,11 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 		
 		std::string str(1, expressionChar);
 		if(leftOrRight == LEFT){
-			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
+			root = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
 			dupRoot->setLeftChild(root);
 
 		}else if (leftOrRight == RIGHT){
-			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
+			root = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
 			dupRoot->setRightChild(root);
 		}
 	}
