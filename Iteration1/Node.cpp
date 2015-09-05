@@ -8,6 +8,11 @@ Node::Node (synt_type st, int l, std::string v) {
 	line = l;
 }
 
+Node::Node (synt_type st, std::string v) {
+	SYNT_TYPE = st;
+	value = v;
+}
+
 synt_type Node::getType() {
 	return SYNT_TYPE;
 }
