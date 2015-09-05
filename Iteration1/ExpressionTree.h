@@ -16,11 +16,13 @@ private:
 	int ExpressionTree::getPrecedence(char);
 	bool ExpressionTree::isInflixBalanced(std::string);
 	Node* ExpressionTree::insert(Node*, Node*, int, char, int, Node*, Node*, Node*);
+	Node* ExpressionTree::insertSON(Node, Node);
 
 public:
 	std::vector <char> ExpressionTree::expressionConverter(std::string);
 	Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
-
+	Node* ExpressionTree::exptreeSetupSON(std::vector<char>);
+	
 };
 
 #endif

@@ -191,27 +191,22 @@ Return:		Node*
 
 Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	synt_type expressionCharType;
-	if(root == NULL ){
+	if(root == nullptr){
 		if(isAlpha(expressionChar)){
 			expressionCharType = variable;
 		}else if(isDigit(expressionChar)){
 			expressionCharType = constant;
 		}
 
-		if(parentNode != NULL){//to prevent proc from being set as parent
-			root->setParent(parentNode);
-		}
-
-		root->setExpParent(dupRoot);
 		root->setRoot(procNode);
 		
 		std::string str(1, expressionChar);
 		if(leftOrRight == LEFT){
-			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, nullptr, procNode);
+			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
 			dupRoot->setLeftChild(root);
 
 		}else if (leftOrRight == RIGHT){
-			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, nullptr, procNode);
+			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
 			dupRoot->setRightChild(root);
 		}
 	}
@@ -226,5 +221,48 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 }
 
 
+Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
+	std::string str(1, postflixExp[postflixExp.size() - 1]);
+	Node* operatorRoot = new Node(expression, str);
 
+	for(int i = postflixExp.size() - 2; i >= 0; i++){
+		std::string expressionChar(1, postflixExp[i]);
+		if(isOperator(postflixExp[i])){
+			Node* tNode = new Node(expression, expressionChar);
+			operatorRoot = insertSON(operatorRoot, tNode);
+		}else if (isOperand(postflixExp[i])){
+			Node* tNode = new Node(constant, expressionChar);
+			operatorRoot = insertSON(operatorRoot, tNode);
+		}
+	}
+	return operatorRoot;
+}
+
+/*
+This function builds the expression tree
+Parameters: 
+Return:		Node*
+*/
+
+Node* ExpressionTree::insertSON(Node* root, Node* node){
+	if(root == nullptr ){
+		root = node;
+	}
+	else{
+		if(root->getRightChild() == nullptr){
+			root->setRightChild(node);
+			node->setParent(root);
+			insertSON(root->getRightChild(), node);
+		}else if(isOperator(root->getRightChild()->getValue()[0])){
+			insertSON(root->getRightChild(), node);
+		}else if(root->getLeftChild() == nullptr){
+			root->setLeftChild(node);
+			node->setParent(root);
+			insertSON(root->getLeftChild(), node);
+		}else if (isOperator(root->getLeftChild()->getValue()[0])){
+			insertSON(root->getLeftChild(), node);
+		}
+	}
+	return root;
+}
 
