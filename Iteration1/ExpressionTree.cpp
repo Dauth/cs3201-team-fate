@@ -3,9 +3,10 @@
 #include <string>
 #include <vector>
 
+
+ExpressionTree::ExpressionTree(){};
+
 using namespace std;
-
-
 
 /*
 This function converts an inflix expression to postflix.
@@ -34,11 +35,11 @@ std::vector <char> ExpressionTree::expressionConverter(string inflixString){
 
 void ExpressionTree::inflixBracketProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
 	char wChar;
-	if(cChar == "("){
+	if(cChar.compare("(") == 0){
 		tStack.push(cChar);
-	}else if (cChar == ")"){
+	}else if (cChar.compare(")") == 0){
 		while(!tStack.empty() && wChar = tStack.pop() != "("){
-				resultVector.push_back(wChar)	//push all operators which reside within the brackets
+				resultVector.push_back(wChar);	//push all operators which reside within the brackets
 		}
 	}
 }
@@ -62,6 +63,8 @@ void ExpressionTree::inflixOperatorProcess(stack <char>& tStack, std::vector <ch
 		}
 	}
 }
+
+
 
 
 /*
@@ -93,13 +96,13 @@ This function gets the rank order of the operator.
 Parameters: char
 Return:		int
 */
-int ExpressionTree::getPrecedence(char operator){
+int ExpressionTree::getPrecedence(char oOperator){
 	int result = -1;
-	if(operator == "*"){
+	if(oOperator.compare("*") == 0){
 		result = 2;
-	}else if(operator == "+"){
+	}else if(oOperator.compare("+") == 0){
 		result = 1;
-	}else if(operator == "-"){
+	}else if(oOperator.compare("-") == 0){
 		result = 1;
 	}
 	return result;
@@ -110,16 +113,16 @@ This function checks if the given inflix expression is balanced a.k.a correct nu
 Parameters: string
 Return:		bool
 */
-bool ExpressionTree::isInflixBalanced(string inflixString){
+bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	bool result = false;
 	stack <char> tStack;
 	char cChar;
 
 	for(int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
-		if(cChar == "("){
+		if(cChar.compare("(") == 0){
 			tStack.push(cChar);
-		}else if(cChar == ")"){
+		}else if (cChar.compare(")") == 0){
 			if(!tStack.empty()){
 				tStack.pop();
 			}else{	//e.g  5+)6+7
@@ -132,23 +135,22 @@ bool ExpressionTree::isInflixBalanced(string inflixString){
 		result = true;
 	}
 
-	return result
+	return result;
 }
 
 
-Node* ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo){
-	Node* operatorRoot = Node(expression, lineNo, postflixExp[postflixExp.length() - 1]);
+Node ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo){
+	Node operatorRoot = Node(expression, lineNo, postflixExp[postflixExp.size() - 1]);
 
-	for(int i = postflixExp.length() - 2; i >= 0; i++){
-		char expressionChar = postflixExp[i];
-		Node* tNode;
+	for(int i = postflixExp.size() - 2; i >= 0; i++){
+		const char* expressionChar = postflixExp[i].c_str();
 		if(isOperator(expressionChar) || expressionChar == "(" || expressionchar == ")"){
-			tNode = Node(expression, lineNo, expressionChar);
+			Node tNode = Node(expression, lineNo, expressionChar);
+			operatorRoot = insert(operatorRoot, tNode);
 		}else if (isOperand(expressionChar)){
-			tNode = Node(constant, lineNo, expressionChar);
+			Node tNode = Node(constant, lineNo, expressionChar);
+			operatorRoot = insert(operatorRoot, tNode);
 		}
-
-		operatorRoot = insert(operatorRoot, tNode);
 	}
 	return operatorRoot;
 }
@@ -159,23 +161,23 @@ Parameters:
 Return:		Node*
 */
 
-Node* ExpressionTree::insert(root, node){
-	if(root == null){
-		root = node
+Node* ExpressionTree::insert(Node root, Node node){
+	if(root == NULL ){
+		root = node;
 	}
 	else{
 		if(root.getRightChild() == null){
-			root.setRightChild() = node
-			node.setParent() = root
-			insert(root.getRightChild(), node)
+			root.setRightChild(node);
+			node.setParent(root);
+			insert(root.getRightChild(), node);
 		}else if(isOperator(root.getRightChild().getValue())){
-			insert(root.getRightChild(), node)
+			insert(root.getRightChild(), node);
 		}else if(root.getLeftChild() == null){
-			root.setLeftChild() = node
-			node.setParent() = root
-			insert(root.getLeftChild(), node)
+			root.setLeftChild(node);
+			node.setParent(root);
+			insert(root.getLeftChild(), node);
 		}else if (isOperator(root.getLeftChild().getValue())){
-			insert(root.getLeftChild(), node)
+			insert(root.getLeftChild(), node);
 		}
 	}
 	return root;
@@ -184,4 +186,3 @@ Node* ExpressionTree::insert(root, node){
 
 
 
-#endif	
