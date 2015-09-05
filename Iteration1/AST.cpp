@@ -4,7 +4,7 @@
 #include <stack>
 #include "PKB.h"
 #include "synt_type.h"
-#include "node.h"
+#include "Node.h"
 #include "ExpressionTree.h"
 #include "AST.h"
 #include <regex>
@@ -31,8 +31,9 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 	std::string line;
 	std::string currentProcName;
 	std:vector<Node*> mainProg;
-	std::stack<string> bracesStack;
-	std::vector<Node*> familyVector;
+	std::stack<string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
+	std::vector<Node*> familyVector;	//this is to store node* in the order  0=procedure 1-...=while,if,else
+	std::vector<Node*> stmLstParentVector;	//this is to store current statementlists of the procedure, while and ifelse
 	int bracesNo = -1;
 	
 	for(int i = 0; i < sourceVector.size(); i++){
@@ -41,24 +42,35 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
 				Node* procStm = pkb.createProcedure(currentProcName);
+				Node* stmLst = pkb.createNode(statementList, i + 1);
+				procStm->setLeftChild(stmLst);
 				mainProg.push_back(procStm);
 
 				bracesStack.push("{");
 				familyVector.push_back(procStm);
+				stmLstParentVector.push_back(stmLst);
 
 			}else if(statementType == PROCEDURESTM && !bracesStack.empty()){
 				cout<<"----PROCEDURE WITHIN A PROCEDURE----";
 			}else{
 				if(statementType == WHILESTM){
 					string varName = extractStatementPart(WHILESTM, line);
-					Node* whileStm = Node(whileLoop, i + 1, ":while");
-					Node* tNodeLeft = Node(variable, i + 1, varName);
-					Node* tNodeRight = Node(statementList, i + 1, "stmLst");
 
-					whileStm.setLeftChild(tNodeLeft);
-					whileStm.setRightChild(tNodeRight);
+					Node* whileStm = pkb.createNode(whileLoop, i + 1);
+					familyVector.push_back(whileStm);	//immediately add the while root node to the hiearchy
 
-					familyVector.push_back(whileStm);
+					Node* whileVar = pkb.createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
+					whileStm->setLeftChild(whileVar);
+					whileVar->setRoot(familyVector.front());
+					whileVar->setParent(familyVector[familyVector.size() - 1]);
+
+					Node* whileStmLst = pkb.createNode(whileStmLst, i + 1);	//rightnode
+					whileStm->setRightChild(whileStmLst);
+					whileStmLst->setRoot(familyVector.front());
+					whileStmLst->setParent(familyVector[familyVector.size() - 1]);
+
+					
+					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(whileStmLst);
 
 				}else if(getStatementType(line) == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
@@ -67,26 +79,32 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 						cout<<"----RECURSIVE CALL NOT ALLOWED----";
 					}
 
-					Node* tCall = Node(call, i + 1, callProcName + ":call");
+					Node* tCall = pkb.createNode(call, i + 1, callProcName);
 
-					tCall.setParent(familyVector[familyVector.size() - 1]);
-					tCall.setRoot(familyVector.front());
+					tCall->setParent(familyVector[familyVector.size() - 1]);
+					tCall->setRoot(familyVector.front());
+
+					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(tCall);
 
 				}else if(statementType == ASSIGNSTM){
-						Node* assignStm = Node(assignment, i + 1, ":assign");
-						Node* leftNode = Node(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line));
+						Node* assignStm = pkb.createNode(assignment, i + 1);
 
-						assignStm.setLeftChild(leftNode);
-						leftNode.setParent(familyVector[familyVector.size() - 1]);
-						leftNode.setRoot(familyVector.front());//No proc within a proc, therefore base is always a proc
+						Node* assignVar = pkb.createNode(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line), 
+							nullptr, assignStm, nullptr, familyVector.front());
+						assignStm->setLeftChild(assignVar);
+						assignVar->setRoot(familyVector.front());
+						assignVar->setParent(familyVector[familyVector.size() - 1]);
+
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						std::vector<string> postflix = expressionConverter(inflix);
 						
-						Node* rightNode = exptreeSetup(postflix, i + 1);
-						assignStm.setRightChild(rightNode);
-						rightNode.setParent(familyVector[familyVector.size() - 1]);
-						rightNode.setRoot(familyVector.front());
+						Node* assignExp = exptreeSetup(postflix, i + 1);
+
+						assignStm->setRightChild(assignExp);
+						assignExp->setRoot(familyVector.front());
+						assignExp->setParent(familyVector[familyVector.size() - 1]);
+						
 						
 				}
 				
@@ -99,6 +117,7 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 				while(bracesNo > 0){
 					bracesStack.pop();
 					familyVector.erase(familyVector.end() - 1);
+					stmLstParentVector.erase(stmLstParentVector.end() - 1);
 				}
 			}
 	}
@@ -149,6 +168,7 @@ std::string AST::extractStatementPart(int inputType, string input){
 
 	return match[0];
 }
+
 
 int AST::getNumOfClosingbraces(string input){
 	std::regex closingBraces(";}*$");
