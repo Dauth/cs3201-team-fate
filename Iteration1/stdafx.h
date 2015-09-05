@@ -10,6 +10,7 @@
 #include <tchar.h>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <map>
 #include <set>
 #include "synt_type.h"
