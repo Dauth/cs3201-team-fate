@@ -36,6 +36,8 @@ public:
 	void setRightChild(Node*);
 	void addStmt(Node*);
 	void setVar(Variable*);
+
+	void debug();
 };
 
 #endif

@@ -11,17 +11,17 @@ std::string Variable::getName() {
 }
 
 std::vector<Node*> Variable::getUsedBy() {
-	return usedBy;
+	return std::vector<Node*> (usedBy.begin(), usedBy.end());
 }
 
 std::vector<Node*> Variable::getModifiedBy() {
-	return modifiedBy;
+	return std::vector<Node*> (modifiedBy.begin(), modifiedBy.end());
 }
 
-void Variable::addUsedBy(Node* pnode) {
-	usedBy.push_back(pnode);
+void Variable::addUsedBy(Node* node) {
+	usedBy.insert(node);
 }
 
-void Variable::addModifiedBy(Node* pnode) {
-	modifiedBy.push_back(pnode);
+void Variable::addModifiedBy(Node* node) {
+	modifiedBy.insert(node);
 }

@@ -38,5 +38,9 @@ void VariableTable::addModifiedBy(std::string varName, Node* pnode) {
 }
 
 void VariableTable::addUsedBy(std::string varName, Node* pnode) {
-	table[varName]->addModifiedBy(pnode);
+	table[varName]->addUsedBy(pnode);
+}
+
+void VariableTable::debug() {
+	std::cout << table.size() << "\n";
 }

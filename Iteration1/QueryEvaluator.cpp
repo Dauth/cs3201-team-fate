@@ -294,13 +294,21 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 	} else {
 		nResult = sData->getPKBOutput();
 	}
-	std::ostringstream oss;
-	oss << nResult.at(0)->getLine();
-	sResult.append(oss.str());
-	for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
-		sResult.append(", ");
-		oss << (**i).getLine();
+	if(sData->getVarType() != variable) {
+		std::ostringstream oss;
+		oss << nResult.at(0)->getLine();
 		sResult.append(oss.str());
+		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
+			sResult.append(", ");
+			oss << (**i).getLine();
+			sResult.append(oss.str());
+		}
+	} else {
+		sResult.append(nResult.at(0)->getVariable()->getName());
+		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
+			sResult.append(", ");
+			sResult.append((**i).getVariable()->getName());
+		}
 	}
 	return sResult;
 }
