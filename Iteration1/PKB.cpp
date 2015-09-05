@@ -35,10 +35,10 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 		node->setVar(usedBy->getVariable());
 	}
 	if (modifiedBy != nullptr && st == variable) {
-		handleModifiedBy(node, modifiedBy, procedure);
+		handleModifiedBy(node, modifiedBy, procedure, parent);
 	}
 	if (usedBy != nullptr && st == variable) {
-		handleUsedBy(node, usedBy, procedure);
+		handleUsedBy(node, usedBy, procedure, parent);
 	}
 	if (parent != nullptr && st == assignment) {
 		handleParent(node, parent);
@@ -46,18 +46,38 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 	return node;
 }
 
-void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure) {
+void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
 	modifiesTable.addModifies(modifiedBy, node);
 	modifiesTable.addModifies(procedure, node);
 	variableTable.addModifiedBy(node->getVariable()->getName(), modifiedBy);
 	variableTable.addModifiedBy(node->getVariable()->getName(), procedure);
+	while (parent != nullptr) {
+		modifiesTable.addModifies(parent, node);
+		variableTable.addModifiedBy(node->getVariable()->getName(), parent);
+		Node* grandParent = parent->getParent()->getParent();
+		if(grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
+			parent = grandParent;
+		} else {
+			parent = nullptr;
+		}
+	}
 }
 
-void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure) {
+void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
 	usesTable.addUsedBy(usedBy, node);
 	usesTable.addUsedBy(procedure, node);
 	variableTable.addUsedBy(node->getVariable()->getName(), usedBy);
 	variableTable.addUsedBy(node->getVariable()->getName(), procedure);
+	while (parent != nullptr) {
+		usesTable.addUsedBy(parent, node);
+		variableTable.addUsedBy(node->getVariable()->getName(), parent);
+		Node* grandParent = parent->getParent()->getParent();
+		if(grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
+			parent = grandParent;
+		} else {
+			parent = nullptr;
+		}
+	}
 }
 
 void PKB::handleParent(Node* child, Node* parent) {
@@ -238,7 +258,7 @@ std::vector<Node*> PKB::getExpressions(std::string expr) {
 
 std::vector<Node*> PKB::getExpressions(std::string expr, std::string varName) {
 	Variable* var = variableTable.getOrCreateVariable(varName);
-	return expressionTable.getExpressions(expr);
+	return expressionTable.getExpressions(expr, var);
 }
 
 void PKB::debug() {

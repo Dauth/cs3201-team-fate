@@ -22,8 +22,8 @@ class PKB {
 	ProcedureTable procedureTable;
 	StatementTable statementTable;
 
-	void handleModifiedBy(Node*, Node*, Node*);
-	void handleUsedBy(Node*, Node*, Node*);
+	void handleModifiedBy(Node*, Node*, Node*, Node*);
+	void handleUsedBy(Node*, Node*, Node*, Node*);
 	void handleParent(Node*, Node*);
 
 	synt_type getStatementType(Node&);
