@@ -4,6 +4,10 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <regex>
+#include "QueryTree.h"
+#include "QueryNode.h"
+#include "Symbol.h"
+#include "ParamNode.h"
 
 using namespace std;
 
@@ -11,7 +15,15 @@ enum TOKEN { SELECT, RESULT_CL, WITH_CL, SUCHTHAT_CL, PATTERN_CL };
 
 TOKEN currToken = TOKEN::SELECT;
 bool expectingThat = false;
-string concatSuchThatStmt = "";
+string concatStmt = "";
+bool resultBool = false;
+QueryTree rootTree;
+Symbol newSymbol;
+regex stmtRef("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
+regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+
+
 
 void removeCharsFromString( string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
@@ -38,7 +50,7 @@ vector<string> split(const char *str, char c = ' ')
 
 void GetToken(char *currentToken)
 {
-	if (strcmp(currentToken,"select") == 0)
+	if (strcmp(currentToken,"Select") == 0)
 	{
 		currToken = TOKEN::RESULT_CL;
 	}
@@ -63,8 +75,59 @@ void GetToken(char *currentToken)
 
 		switch(currToken)
 		{
+
+		case PATTERN_CL: 
+			{  // assign a;
+				// Select a pattern a(_, _"x + 1"_)
+				smatch m;
+				string stringToken = currentToken;
+				string result = "";
+				regex patternCond("([^\\(]+\\()");
+				regex fullPattern("(\\([^\\)]+\\))");
+				/*
+				if(!concatStmt.empty())
+				{
+				concatStmt = "";
+				}
+				*/
+				concatStmt.append(currentToken);
+				// now verify with symbol table
+				if (regex_search(concatStmt,m,patternCond))
+				{
+					result = m.str(1);
+					removeCharsFromString( result, "(" );
+
+					// verify with symbol table
+					if (newSymbol.exists(result))
+					{
+						char *toBeRemoved = &result[0];
+						removeCharsFromString( concatStmt, toBeRemoved ); // now get the parameters
+					}
+					else 
+					{
+						//TODO THROW ERROR because variable doesn't exist in symbol table
+					}
+				}
+				if (regex_match(concatStmt,fullPattern))
+				{
+					removeCharsFromString( concatStmt, "()" );
+					std::vector<char> writable(concatStmt.begin(), concatStmt.end());
+					writable.push_back('\0');
+					vector<string> patternParam = split(&writable[0],',');
+					for(std::vector<string>::iterator i = patternParam.begin(); i != patternParam.end(); i++)
+					{
+						cout << *i;
+					}
+				}
+			}
+			break;
 		case RESULT_CL: 
 			{
+				if(!concatStmt.empty())
+				{
+					concatStmt == "";
+				}
+
 				regex tuple("<.+>");
 				regex boolean("BOOLEAN");
 				// 
@@ -78,28 +141,34 @@ void GetToken(char *currentToken)
 
 					// do for loop for each variable to see if it exists in the symbol table;
 					// code over here
-
+					for(std::vector<string>::iterator i = variablesTuple.begin(); i != variablesTuple.end(); i++)
+					{
+						if (!newSymbol.exists(*i)) { break;} // TODO THROW ERROR because variable doesn't exist
+					}
 
 				}
 				else if (regex_match(currentToken, boolean))
 				{
-
+					resultBool = true;
 				}
 				else
 				{
-
+					if (!newSymbol.exists(currentToken)) { } //TODO THROW ERROR because variable doesn't exist
 				}
 			}break;
 
 		case SUCHTHAT_CL: 
 			{ // 
-				regex stmtRef("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
-				regex entRef();
-				regex varRef();
-				concatSuchThatStmt.append(currentToken);
-				if (regex_match(concatSuchThatStmt,stmtRef))
+				if(!concatStmt.empty())
+				{
+					concatStmt == "";
+				}
+
+				concatStmt.append(currentToken);
+				if (regex_match(concatStmt,entRef))
 				{
 					// means Modifies(..,...)
+					printf("%s \n", currentToken);
 				}
 				printf("%s \n", currentToken);
 			}break;
@@ -121,20 +190,35 @@ void Match (char *c)
 		char *end_token;
 		pch = strtok_s (c," ,",&end_token);
 		bool entityTypeFound = false;
+		synt_type newSyntType = synt_type::variable;
 
 		while (pch != NULL)
 		{
 			printf ("Split design entity ',' : %s\n",pch);
-			pch = strtok_s (NULL, " ,",&end_token);
+
 			if (!entityTypeFound)
 			{
+				if (strcmp(pch,"while") == 0)
+				{
+					newSyntType= synt_type::whileLoop;
+				}
+				else if (strcmp(pch,"assign") == 0)
+				{
+					newSyntType = synt_type::assignment;
+				}
+				else if (strcmp(pch,"procedure") == 0)
+				{
+					newSyntType = synt_type::procedure;
+				}
 				entityTypeFound = true;
 			}
 			else
 			{
 				++count;
+				newSymbol.setVar(pch,newSyntType);
 				// store each variable in the symbol table
 			}
+			pch = strtok_s (NULL, " ,",&end_token);
 		}
 		--count;
 		// count number of variables
