@@ -258,7 +258,7 @@ std::vector<Node*> PKB::getExpressions(std::string expr) {
 
 std::vector<Node*> PKB::getExpressions(std::string expr, std::string varName) {
 	Variable* var = variableTable.getOrCreateVariable(varName);
-	return expressionTable.getExpressions(expr, varName);
+	return expressionTable.getExpressions(expr, var);
 }
 
 void PKB::debug() {
