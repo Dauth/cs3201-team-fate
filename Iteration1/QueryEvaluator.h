@@ -27,6 +27,7 @@ class QueryEvaluator {
 	void evaluateResult();
 	ParamNode* getOptimal(ParamNode*, ParamNode*);
 	bool resultNotEmpty(ParamNode*, std::vector<Node*>);
+	std::string getStringResult(Data*);
 
 public:
 	QueryEvaluator (PKB*, DesignExtractor*);

@@ -22,7 +22,7 @@ void QueryEvaluator::evaluatePattern() {
 		if(pattern->getMiddleParam()->getType() == expression) {
 			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), pattern->getMiddleParam()->getParam(), pattern->getRightParam()->getParam());
 		} else {
-			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), pattern->getMiddleParam()->getType(), pattern->getRightParam()->getParam());
+			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), "_", pattern->getRightParam()->getParam());
 		}
 		hasResult = resultNotEmpty(pattern->getLeftParam(), result);
 	}
@@ -72,17 +72,20 @@ std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, int lineN
 		case follows		:
 			return pkb->getFollowing(lineNum);
 		case followsStar	:
-			return ;
+			return dEx->getFollowingStar(lineNum);
 		case parent			:
 			return pkb->getChildren(lineNum);
 		case parentStar		:
-			return ;
+			return dEx->getChildrenStar(lineNum);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
@@ -95,17 +98,20 @@ std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, std::stri
 		case follows		:
 			return pkb->getFollowing(statement);
 		case followsStar	:
-			return ;
+			return dEx->getFollowingStar(statement);
 		case parent			:
 			return pkb->getChildren(statement);
 		case parentStar		:
-			return ;
+			return dEx->getChildrenStar(statement);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
@@ -118,17 +124,20 @@ std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type qType, synt_typ
 		case follows		:
 			return pkb->getFollowing(sType);
 		case followsStar	:
-			return ;
+			return dEx->getFollowingStar(sType);
 		case parent			:
 			return pkb->getChildren(sType);
 		case parentStar		:
-			return ;
+			return dEx->getChildrenStar(sType);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
@@ -141,17 +150,20 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, int line
 		case follows		:
 			return pkb->getFollowedBy(lineNum);
 		case followsStar	:
-			return ;
+			return dEx->getFollowedByStar(lineNum);
 		case parent			:
 			return pkb->getParent(lineNum);
 		case parentStar		:
-			return ;
+			return dEx->getParentsStar(lineNum);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
@@ -164,17 +176,20 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, std::str
 		case follows		:
 			return pkb->getFollowedBy(statement);
 		case followsStar	:
-			return ;
+			return dEx->getFollowedByStar(statement);
 		case parent			:
 			return pkb->getParents(statement);
 		case parentStar		:
-			return ;
+			return dEx->getParentsStar(statement);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
@@ -187,21 +202,24 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type qType, synt_ty
 		case follows		:
 			return pkb->getFollowedBy(sType);
 		case followsStar	:
-			return ;
+			return dEx->getFollowedByStar(sType);
 		case parent			:
 			return pkb->getParents(sType);
 		case parentStar		:
-			return ;
+			return dEx->getParentsStar(sType);
 		/*case calls			:
 		case callsStar		:
 		case next			:
 		case nextStar		:
 		case affects		:
 		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
 	}
 }
 
-ParamNode* getOptimal(ParamNode* left, ParamNode* right) {
+ParamNode* QueryEvaluator::getOptimal(ParamNode* left, ParamNode* right) {
 	int leftTypeNum = std::numeric_limits<int>::max();
 	int rightTypeNum = std::numeric_limits<int>::max();
 	if(left->getParam() != "_") {
@@ -225,39 +243,59 @@ ParamNode* getOptimal(ParamNode* left, ParamNode* right) {
 	}
 }
 
-bool resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
-	int symIndex = -1;
-	for(int i = 0; i < symbol->getSize(); i++) {
-		if(symbol->getData(i).getVar() == pNode->getParam()) {
-			symIndex = i;
-		}
-	}
+bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
+	int symIndex = symbol->getIndex(pNode->getParam());
 	std::vector<Node*> resultVec;
-	for(int i = 0; i < nVec.size(); i++) {
-		if(pNode->getType() == nVec.at(i)->getType()) {
-			resultVec.push_back(nVec.at(i));
+	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); i++) {
+		if(pNode->getType() == (**i).getType()) {
+			resultVec.push_back(*i);
 		}
 	}
-	std::vector<Node*> symVec = symbol->getData(symIndex).getPKBOutput();
+	std::vector<Node*> symVec = symbol->getQuery().at(symIndex)->getPKBOutput();
 	if(resultVec.size() == 0) {
 		return false;
 	} else if(symVec.size() == 0) {
-		symbol->getData(symIndex).setPKBOutput(resultVec);
+		symbol->getQuery().at(symIndex)->setPKBOutput(resultVec);
 	} else {
 		std::vector<Node*> newVec;
-		for(int i = 0; i < resultVec.size(); i++) {
-			for(int j = 0; j < symVec.size(); j++) {
-				if(resultVec.at(i) == symVec.at(j)) {
-					newVec.push_back(resultVec.at(i));
+		for(std::vector<Node*>::iterator i = resultVec.begin(); i != resultVec.end(); i++) {
+			for(std::vector<Node*>::iterator j = symVec.begin(); j != symVec.end(); j++) {
+				if(*i == *j) {
+					newVec.push_back(*i);
 					break;
 				}
 			}
 		}
-		symbol->getData(symIndex).setPKBOutput(newVec);
+		symbol->getQuery().at(symIndex)->setPKBOutput(newVec);
 	}
 	return true;
 }
 
 void QueryEvaluator::evaluateResult() {
-	for(int i = 0; i < symbol->getSize(); i++) {
-		if(symbol->getData(i).
+	std::string result;
+	if(hasResult) {
+		for(std::vector<Data*>::iterator i = symbol->getQuery().begin(); i != symbol->getQuery().end(); i++) {
+			if((**i).getResult()) {
+				result = getStringResult(*i);
+				break;
+			}
+		}
+	}
+	std::cout<<result;
+}
+
+std::string QueryEvaluator::getStringResult(Data* sData) {
+	std::string sResult;
+	std::vector<Node*> nResult;
+	if(sData->getPKBOutput().size() == 0) {
+		nResult = pkb->getStatement(sData->getVarType());
+	} else {
+		nResult = sData->getPKBOutput();
+	}
+	sResult.append(nResult.at(0)->getValue());
+	for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
+		sResult.append(", ");
+		sResult.append((**i).getValue());
+	}
+	return sResult;
+}

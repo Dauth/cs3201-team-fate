@@ -5,16 +5,17 @@
 #include "Data.h"
 
 class Symbol{
- private:
-      std::multimap<int,Data> myMap;
+private:
+	std::vector<Data*> symbolTable;
 
 public:
-	Symbol(int i, std::string var, std::string varType);
-	~Symbol();
+	Symbol(std::string var, synt_type varType);
 	//attributes
-	void setVar(int i, std::string var, std::string varType);
-	std::vector<Data> getData();
+	void setVar(std::string var, synt_type varType);
+	void setResult(int index);
+	std::vector<Data*> getQuery();
 	int getSize();
+	int getIndex(std::string var);
 };
 
 #endif

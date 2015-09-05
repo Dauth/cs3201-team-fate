@@ -2,7 +2,6 @@
 #define PARAMNODE_H
 
 #include "stdafx.h"
-#include "synt_type.h"
 
 class ParamNode {
 	synt_type SYNT_TYPE;
