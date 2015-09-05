@@ -9,17 +9,17 @@ class ExpressionTree{
 	PKB pkb;
 
 private:
-	static bool ExpressionTree::isOperand(char);
-	static bool ExpressionTree::isOperator(char);
-	static bool ExpressionTree::isAlpha(char);
-	static bool ExpressionTree::isDigit(char);
-	static int ExpressionTree::getPrecedence(char);
+	bool ExpressionTree::isOperand(char);
+	bool ExpressionTree::isOperator(char);
+	bool ExpressionTree::isAlpha(char);
+	bool ExpressionTree::isDigit(char);
+	int ExpressionTree::getPrecedence(char);
 	bool ExpressionTree::isInflixBalanced(std::string);
 	Node* ExpressionTree::insert(Node*, Node*, int, char, int, Node*, Node*, Node*);
 
 public:
-	static std::vector <char> ExpressionTree::expressionConverter(std::string);
-	static Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
+	std::vector <char> ExpressionTree::expressionConverter(std::string);
+	Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
 
 };
 

@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include "PKB.h"
-#include "synt_type.h"
 #include <cstdlib>
 
 const int LEFT = 1;
@@ -88,7 +87,11 @@ Parameters: char
 Return:		bool
 */
 bool ExpressionTree::isOperand(char cChar){
-	return isalnum(cChar);
+	bool result = false;
+	if(isalnum(cChar) != 0){
+		result = true;
+	}
+	return result;
 }
 
 bool ExpressionTree::isAlpha(char cChar){
@@ -167,7 +170,8 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 
 
 Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
-	Node* operatorRoot = pkb.createNode(expression, lineNo, postflixExp[postflixExp.size() - 1]);
+	std::string str(1, postflixExp[postflixExp.size() - 1]);
+	Node* operatorRoot = pkb.createNode(expression, lineNo, str);
 	
 	for(int i = postflixExp.size() - 2; i >= 0; i++){
 		char expressionChar = postflixExp[i];
@@ -201,12 +205,13 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 		root->setExpParent(dupRoot);
 		root->setRoot(procNode);
 		
+		std::string str(1, expressionChar);
 		if(leftOrRight == LEFT){
-			root = pkb.createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, nullptr, procNode);
+			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, nullptr, procNode);
 			dupRoot->setLeftChild(root);
 
 		}else if (leftOrRight == RIGHT){
-			root = pkb.createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, nullptr, procNode);
+			root = pkb.createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, nullptr, procNode);
 			dupRoot->setRightChild(root);
 		}
 	}

@@ -9,6 +9,7 @@
 
 class AST {
 	PKB pkb;
+	ExpressionTree expTree;
 
 	int AST::getStatementType(std::string);
 	std::string AST::extractStatementPart(int, std::string);

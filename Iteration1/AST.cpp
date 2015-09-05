@@ -18,7 +18,10 @@ const int ASSIGNSTMEXP = 5;
 using namespace std;
 
 
-AST::AST(){PKB pkb;}
+AST::AST(){
+	PKB pkb;
+	ExpressionTree expTree;
+}
 
 /*
 This function processes a vector which contains the source file
@@ -99,13 +102,13 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
-						std::vector<char> postflix = ExpressionTree::expressionConverter(inflix);
+						std::vector<char> postflix = expTree.expressionConverter(inflix);
 						
 						Node* parentNode = NULL;
 						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
 							parentNode = familyVector[familyVector.size() - 1];
 						}
-						Node* assignExp = ExpressionTree::exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
+						Node* assignExp = expTree.exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
 
 						assignStm->setRightChild(assignExp);
 						assignExp->setRoot(familyVector.front());
