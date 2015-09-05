@@ -137,7 +137,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 
 std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string left,std::string right){
 	//code to extract expression if needed
-
+	
 	std::vector<Node*> result;
 
 	if (type == whileLoop){
@@ -157,29 +157,69 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 	//elseif type = "ifstat"
 
 	else{
-		std::vector<Node*> assignList;
-		Node* tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right),0);
+		//if the expression was "_"
+		if (right == "_"){
+			if (left == "_"){
+				result = pkb->getStatement(assignment);
+				return result;
+			}
+			else{
+				std::vector<Node*> assignList  = pkb->getStatement(assignment);
+				for(unsigned int i = 0; i < assignList.size(); i++){
+					if(assignList.at(i)->getLeftChild()->getVariable()->getName() == left){
+						result.push_back(assignList.at(i));
+					}
+				}
+			}
+		}
+
+		//if the expression was not "_"
+		Node* tNode;
+		std::string firstChar = right.substr(0,0);
+
+		if (firstChar != "_"){
+			tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right,0);
+		}
+
+		else{
+			tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right.substr(1,right.length()-2),0);
+		}
+
 		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
 		for (unsigned int i = 0; i < exprList.size(); i++){
 			Node* tNode2 = exprList.at(i);
 			int compareResult = compare(tNode2,tNode);
 			if(compareResult != 0){
-				if (left == "_"){
-					result.push_back(tNode2);	
+				Node* parentNode = tNode2 ->getParent();
+				if (firstChar != "_"){
+					if(parentNode->getType() == assignment){
+						if (left == "_"){
+							result.push_back(parentNode);
+						}
+						else{
+							if(parentNode->getLeftChild()->getVariable()->getName() == left){
+								result.push_back(parentNode);
+							}
+						}
+					}
 				}
 				else{
-					Node* parentNode = tNode2 ->getParent();
-					while(parentNode->getType()!= assignment){
-						parentNode = parentNode ->getParent();
+					if (left == "_"){
+						result.push_back(parentNode);	
 					}
-					if(parentNode->getLeftChild()->getVariable()->getName() == left){
-						result.push_back(tNode2);
+					else{
+						while(parentNode->getType()!= assignment){
+							parentNode = parentNode ->getParent();
+						}
+						if(parentNode->getLeftChild()->getVariable()->getName() == left){
+							result.push_back(parentNode);
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	return result;
 }
 
