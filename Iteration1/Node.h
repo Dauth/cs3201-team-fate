@@ -20,6 +20,7 @@ class Node {
 	
 public:
 	Node (synt_type, int, std::string);
+	Node (synt_type, std::string);
 	synt_type getType();
 	int getLine();
 	std::string getValue();
