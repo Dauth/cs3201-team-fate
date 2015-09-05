@@ -10,7 +10,7 @@ class ExpressionTree{
 public:
 
 	static std::vector <string> ExpressionTree::expressionConverter(std::string);
-	static Node* ExpressionTree::exptreeSetup(std::vector<string> postflixExp, int);
+	static Node* ExpressionTree::exptreeSetup(std::vector<string> postflixExp, int, std::string);
 
 };
 

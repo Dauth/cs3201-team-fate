@@ -24,6 +24,10 @@ Node* Node::getRoot() {
 	return root;
 }
 
+Node* Node::getExpParent() {
+	return expParent;
+}
+
 Node* Node::getParent() {
 	return parent;
 }
@@ -51,6 +55,10 @@ Variable* Node::getVariable() {
 
 void Node::setRoot(Node* node) {
 	root = node;
+}
+
+void Node::setExpParent(Node* node) {
+	expParent = node;
 }
 
 void Node::setParent(Node* node) {

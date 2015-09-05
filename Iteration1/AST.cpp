@@ -103,7 +103,11 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						std::vector<string> postflix = expressionConverter(inflix);
 						
-						Node* assignExp = exptreeSetup(postflix, i + 1);
+						Node* parentNode = NULL;
+						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
+							parentNode = familyVector[familyVector.size() - 1];
+						}
+						Node* assignExp = exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
 
 						assignStm->setRightChild(assignExp);
 						assignExp->setRoot(familyVector.front());

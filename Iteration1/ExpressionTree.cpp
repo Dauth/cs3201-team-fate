@@ -2,9 +2,15 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include "PKB.h"
+#include "synt_type.h"
 
+const int LEFT = 1;
+const int RIGHT = 2;
 
-ExpressionTree::ExpressionTree(){};
+ExpressionTree::ExpressionTree(){
+	PKB pkb;
+};
 
 using namespace std;
 
@@ -76,6 +82,14 @@ bool ExpressionTree::isOperand(char cChar){
 	return isalnum(cChar);
 }
 
+bool ExpressionTree::isAlpha(char cChar){
+	return isalpha(cChar);
+}
+
+bool ExpressionTree::isDigit(char cChar){
+	return isdigit(cChar);
+}
+
 /*
 This function checks if the given character is an operator  + - *.
 Parameters: char
@@ -139,17 +153,14 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 }
 
 
-Node ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo){
-	Node operatorRoot = Node(expression, lineNo, postflixExp[postflixExp.size() - 1]);
+Node* ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+	Node operatorRoot = pkb.createNode(expression, lineNo, postflixExp[postflixExp.size() - 1]);
 
 	for(int i = postflixExp.size() - 2; i >= 0; i++){
-		const char* expressionChar = postflixExp[i].c_str();
-		if(isOperator(expressionChar) || expressionChar == "(" || expressionchar == ")"){
-			Node tNode = Node(expression, lineNo, expressionChar);
-			operatorRoot = insert(operatorRoot, tNode);
-		}else if (isOperand(expressionChar)){
-			Node tNode = Node(constant, lineNo, expressionChar);
-			operatorRoot = insert(operatorRoot, tNode);
+		std::string expressionChar = postflixExp[i];
+
+		if(isOperand(expressionChar) || isOperator(expressionChar)){//ignore brackets and other stuff
+			operatorRoot = insert(operatorRoot, operatorRoot, -1, expressionChar, lineNo, assignStmNode, procNode, parentNode);
 		}
 	}
 	return operatorRoot;
@@ -161,23 +172,36 @@ Parameters:
 Return:		Node*
 */
 
-Node* ExpressionTree::insert(Node* root, Node* node){
+Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, std::string expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+	synt_type expresionCharType;
 	if(root == NULL ){
-		root = node;
+		if(isAlpha(expressionChar)){
+			expressionCharType = variable;
+		}else if(isDigit(expressionChar)){
+			expressionCharType = constant;
+		}
+
+		if(parentNode != NULL){//to prevent proc from being set as parent
+			root->setParent(parentNode);
+		}
+
+		root->setExpParent(dupRoot);
+		root->setRoot(procNode);
+
+		if(leftOrRight == LEFT){
+			root = pkb.createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, nullptr, procNode);
+			dupRoot->setLeftChild(root);
+
+		}else if (leftOrRight == RIGHT){
+			root = pkb.createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, nullptr, procNode);
+			dupRoot->setRightChild(root);
+		}
 	}
 	else{
-		if(root->getRightChild() == null){
-			root->setRightChild(node);
-			node->setParent(root);
-			insert(root->getRightChild(), node);
-		}else if(isOperator(root->getRightChild().getValue())){
-			insert(root->getRightChild(), node);
-		}else if(root->getLeftChild() == null){
-			root->setLeftChild(node);
-			node->setParent(root);
-			insert(root->getLeftChild(), node);
-		}else if (isOperator(root->getLeftChild().getValue())){
-			insert(root->getLeftChild(), node);
+		if(root->getRightChild() == NULL || isOperator(root->getRightChild().getValue())){
+			insert(root->getRightChild(), dupRoot, RIGHT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
+		}else if(root->getLeftChild() == NULL && isOperator(root->getLeftChild().getValue())){
+			insert(root->getLeftChild(), dupRoot, LEFT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
 		}
 	}
 	return root;
