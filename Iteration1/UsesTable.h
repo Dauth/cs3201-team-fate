@@ -5,6 +5,7 @@
 #include "Node.h"
 
 class UsesTable {
+	// Statements mapped to Variables
 	std::map<Node*, std::vector<Node*>> table;
 	
 public:

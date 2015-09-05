@@ -7,8 +7,8 @@ class Node;
 
 class Variable {
 	std::string name;
-	std::vector<Node*> usedBy;
-	std::vector<Node*> modifiedBy;
+	std::set<Node*> usedBy;
+	std::set<Node*> modifiedBy;
 	
 public:
 	Variable(std::string);

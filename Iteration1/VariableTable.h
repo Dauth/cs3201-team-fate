@@ -17,6 +17,8 @@ public:
 
 	void addModifiedBy(std::string, Node*);
 	void addUsedBy(std::string, Node*);
+
+	void debug();
 };
 
 #endif

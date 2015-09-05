@@ -59,17 +59,24 @@ void Node::setParent(Node* node) {
 
 void Node::setLeftChild(Node* node) {
 	leftChild = node;
+	node->setParent(this);
 }
 
 void Node::setRightChild(Node* node) {
 	rightChild = node;
+	node->setParent(this);
 }
 
 void Node::addStmt(Node* node) {
 	indexLst[node] = stmtLst.size();
 	stmtLst[stmtLst.size()] = node;
+	node->setParent(this);
 }
 
 void Node::setVar(Variable* v) {
 	var = v;
+}
+
+void Node::debug() {
+	std::cout << "Node Type: " << SYNT_TYPE << ", line: " << line << "\n";
 }

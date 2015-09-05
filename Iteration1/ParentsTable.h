@@ -10,8 +10,8 @@ class ParentsTable {
 public:
 	ParentsTable();
 	std::vector<Node*> getParents();
-	std::vector<Node*> getChildren(Node*);
-	
+	std::vector<Node*> getChild(Node*);
+	std::vector<Node*> getChildren(synt_type);
 	void addChild(Node*, Node*);
 };
 

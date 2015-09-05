@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ModifiesTable.h"
 
-
 ModifiesTable::ModifiesTable () {
 
 }
