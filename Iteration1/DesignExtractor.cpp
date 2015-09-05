@@ -4,7 +4,10 @@
 #include "PKB.h"
 #include <vector>
 
-DesignExtractor::DesignExtractor(PKB* p){pkb = p;}
+DesignExtractor::DesignExtractor(PKB* p){
+	pkb = p;
+	ExpressionTree et;
+}
 
 //Functions for Parent*
 std::vector<Node*> DesignExtractor::getChildrenStar(int statementLine){
@@ -176,11 +179,11 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		std::string firstChar = right.substr(0,0);
 
 		if (firstChar != "_"){
-			tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right,0);
+			tNode = et.exptreeSetupSON(et.expressionConverter(right));
 		}
 
 		else{
-			tNode = ExpressionTree::exptreeSetup(ExpressionTree::expressionConverter(right.substr(1,right.length()-2),0);
+			tNode = et.exptreeSetupSON(et.expressionConverter(right.substr(1,right.length()-2)));
 		}
 
 		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());

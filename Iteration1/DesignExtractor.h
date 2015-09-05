@@ -6,6 +6,7 @@
 
 class DesignExtractor{
 	PKB* pkb;
+	ExpressionTree et;
 public:
 	DesignExtractor(PKB*);
 
