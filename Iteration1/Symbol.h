@@ -9,6 +9,7 @@ private:
 	std::vector<Data*> symbolTable;
 
 public:
+	Symbol();
 	Symbol(std::string var, synt_type varType);
 	//attributes
 	void setVar(std::string var, synt_type varType);
@@ -16,6 +17,7 @@ public:
 	std::vector<Data*>& getQuery();
 	int getSize();
 	int getIndex(std::string var);
+	bool exists(std::string var);
 };
 
 #endif
