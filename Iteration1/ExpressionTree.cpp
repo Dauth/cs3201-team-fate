@@ -4,13 +4,19 @@
 #include <vector>
 #include "PKB.h"
 #include "synt_type.h"
+#include <cstdlib>
 
 const int LEFT = 1;
 const int RIGHT = 2;
+const char* TIMES = "*";
+const char* PLUS = "+";
+const char* MINUS = "-";
+const char* OPENBRACKETS = "(";
+const char* CLOSEDBRACKETS = ")";
+const char* OPENBRACES = "{";
+const char* CLOSEDBRACES = "}";
 
-ExpressionTree::ExpressionTree(){
-	PKB pkb;
-};
+ExpressionTree::ExpressionTree(){PKB pkb;};
 
 using namespace std;
 
@@ -19,56 +25,59 @@ This function converts an inflix expression to postflix.
 Parameters: String - a string that consists of operand and operator
 Return:		array
 */
-std::vector <char> ExpressionTree::expressionConverter(string inflixString){
+std::vector <char> ExpressionTree::expressionConverter(std::string inflixString){
 	stack <char> tStack;
 	std::vector <char> resultVector;
 	char cChar;
-
+	
 	for(int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
+		const char *bChar = new char(cChar);
+		char wChar;
+		
+		if(strcmp(bChar, OPENBRACKETS) == 0){
+			tStack.push(cChar);
+		}else if (strcmp(bChar, CLOSEDBRACKETS) == 0){
+			while(!tStack.empty()){
+				 wChar = tStack.top();
+				 tStack.pop();
+				 const char *dChar = new char(wChar);
+				 if(strcmp(dChar, OPENBRACKETS) == 0){
+					resultVector.push_back(wChar);	//push all operators which reside within the brackets
+				 }else{
+					 tStack.pop();
+				 }
+			}
+		}
 
-		inflixBracketProcess(tStack, resultVector, cChar);
-		inflixOperandProcess(tStack, resultVector, cChar);
-		inflixOperatorProcess(tStack, resultVector, cChar);
+		if (isOperand(cChar)){
+			resultVector.push_back(cChar);
+		}
+		
+		if(isOperator(cChar)){
+			if(tStack.empty()){
+				tStack.push(cChar);
+			}else{
+				while(!tStack.empty() && (getPrecedence(cChar) <= getPrecedence(tStack.top()))){
+					resultVector.push_back(tStack.top());
+					tStack.pop();
+				}
+				tStack.push(cChar);
+			}
+		}
+
+		while(!tStack.empty()){
+			resultVector.push_back(tStack.top());
+			tStack.pop();
+		}
 	}
-
-	while(!tStack.empty()){
-		resultVector.push_back(tStack.pop());
-	}
-
 	return resultVector;
 }
 
-void ExpressionTree::inflixBracketProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
-	char wChar;
-	if(cChar.compare("(") == 0){
-		tStack.push(cChar);
-	}else if (cChar.compare(")") == 0){
-		while(!tStack.empty() && wChar = tStack.pop() != "("){
-				resultVector.push_back(wChar);	//push all operators which reside within the brackets
-		}
-	}
-}
 
-void ExpressionTree::inflixOperandProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
-	if (isOperand(cChar)){
-			resultVector.push_back(cChar);
-	}
-}
 
-void ExpressionTree::inflixOperatorProcess(stack <char>& tStack, std::vector <char>& resultVector, char cChar){
-	if(isOperator(cChar){
-		if(tStack.empty()){
-			tStack.push(cChar);
-		}else{
-			while(!tStack.empty() && 
-				(getPrecedence(cChar) <= getPrecedence(tStack.top()))){
-					resultVector.push_back(tStack.pop());
-			}
-			tStack.push(cChar);
-		}
-	}
-}
+
+
 
 
 
@@ -97,7 +106,9 @@ Return:		bool
 */
 bool ExpressionTree::isOperator(char cChar){
 	bool result = false;
-	if(cChar == '*' || cChar == '+' || cChar == '-' ||){
+	const char *bChar = new char(cChar);
+	
+	if(strcmp(bChar, TIMES) == 0 || strcmp(bChar, PLUS) == 0 || strcmp(bChar, MINUS) == 0){
 		result = true;
 	}
 	return result;
@@ -112,11 +123,13 @@ Return:		int
 */
 int ExpressionTree::getPrecedence(char oOperator){
 	int result = -1;
-	if(oOperator.compare("*") == 0){
+	const char *bChar = new char(oOperator);
+	
+	if(strcmp(bChar, TIMES) == 0){
 		result = 2;
-	}else if(oOperator.compare("+") == 0){
+	}else if(strcmp(bChar, PLUS) == 0){
 		result = 1;
-	}else if(oOperator.compare("-") == 0){
+	}else if(strcmp(bChar, MINUS) == 0){
 		result = 1;
 	}
 	return result;
@@ -129,8 +142,8 @@ Return:		bool
 */
 bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	bool result = false;
-	stack <char> tStack;
-	char cChar;
+	stack <std::string> tStack;
+	std::string cChar;
 
 	for(int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
@@ -153,11 +166,11 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 }
 
 
-Node* ExpressionTree::exptreeSetup(vector<string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
-	Node operatorRoot = pkb.createNode(expression, lineNo, postflixExp[postflixExp.size() - 1]);
-
+Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+	Node* operatorRoot = pkb.createNode(expression, lineNo, postflixExp[postflixExp.size() - 1]);
+	
 	for(int i = postflixExp.size() - 2; i >= 0; i++){
-		std::string expressionChar = postflixExp[i];
+		char expressionChar = postflixExp[i];
 
 		if(isOperand(expressionChar) || isOperator(expressionChar)){//ignore brackets and other stuff
 			operatorRoot = insert(operatorRoot, operatorRoot, -1, expressionChar, lineNo, assignStmNode, procNode, parentNode);
@@ -172,8 +185,8 @@ Parameters:
 Return:		Node*
 */
 
-Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, std::string expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
-	synt_type expresionCharType;
+Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+	synt_type expressionCharType;
 	if(root == NULL ){
 		if(isAlpha(expressionChar)){
 			expressionCharType = variable;
@@ -187,7 +200,7 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, std::st
 
 		root->setExpParent(dupRoot);
 		root->setRoot(procNode);
-
+		
 		if(leftOrRight == LEFT){
 			root = pkb.createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, nullptr, procNode);
 			dupRoot->setLeftChild(root);
@@ -198,10 +211,10 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, std::st
 		}
 	}
 	else{
-		if(root->getRightChild() == NULL || isOperator(root->getRightChild().getValue())){
-			insert(root->getRightChild(), dupRoot, RIGHT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
-		}else if(root->getLeftChild() == NULL && isOperator(root->getLeftChild().getValue())){
-			insert(root->getLeftChild(), dupRoot, LEFT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
+		if(root->getRightChild() == NULL || isOperator(root->getRightChild()->getValue()[0])){
+			root = insert(root->getRightChild(), root, RIGHT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
+		}else if(root->getLeftChild() == NULL && isOperator(root->getLeftChild()->getValue()[0])){
+			root = insert(root->getLeftChild(), root, LEFT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
 		}
 	}
 	return root;

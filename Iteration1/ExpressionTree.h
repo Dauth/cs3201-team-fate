@@ -3,14 +3,23 @@
 
 #include "stdafx.h"
 #include "Node.h"
-
-
+#include "PKB.h"
 
 class ExpressionTree{
-public:
+	PKB pkb;
 
-	static std::vector <string> ExpressionTree::expressionConverter(std::string);
-	static Node* ExpressionTree::exptreeSetup(std::vector<string> postflixExp, int, std::string);
+private:
+	static bool ExpressionTree::isOperand(char);
+	static bool ExpressionTree::isOperator(char);
+	static bool ExpressionTree::isAlpha(char);
+	static bool ExpressionTree::isDigit(char);
+	static int ExpressionTree::getPrecedence(char);
+	bool ExpressionTree::isInflixBalanced(std::string);
+	Node* ExpressionTree::insert(Node*, Node*, int, char, int, Node*, Node*, Node*);
+
+public:
+	static std::vector <char> ExpressionTree::expressionConverter(std::string);
+	static Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
 
 };
 

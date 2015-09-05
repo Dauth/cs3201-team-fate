@@ -3,7 +3,6 @@
 #include <string>
 #include <stack>
 #include "PKB.h"
-#include "synt_type.h"
 #include "Node.h"
 #include "ExpressionTree.h"
 #include "AST.h"
@@ -18,20 +17,19 @@ const int ASSIGNSTMEXP = 5;
 
 using namespace std;
 
-AST::AST(){
-	PKB pkb;
-}
+
+AST::AST(){PKB pkb;}
 
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
 Return:		vector<Node*>
 */
-std::vector<Node*> AST::buildAST(vector<string> sourceVector){
+std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string line;
 	std::string currentProcName;
 	std:vector<Node*> mainProg;
-	std::stack<string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
+	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
 	std::vector<Node*> familyVector;	//this is to store node* in the order  0=procedure 1-...=while,if,else
 	std::vector<Node*> stmLstParentVector;	//this is to store current statementlists of the procedure, while and ifelse
 	int bracesNo = -1;
@@ -56,7 +54,7 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 				if(statementType == WHILESTM){
 					bracesStack.push("{");
 
-					string varName = extractStatementPart(WHILESTM, line);
+					std::string varName = extractStatementPart(WHILESTM, line);
 
 					Node* whileStm = pkb.createNode(whileLoop, i + 1);
 					
@@ -66,7 +64,7 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 					whileVar->setRoot(familyVector.front());
 					whileVar->setParent(familyVector[familyVector.size() - 1]);
 
-					Node* whileStmLst = pkb.createNode(whileStmLst, i + 1);	//rightnode
+					Node* whileStmLst = pkb.createNode(statementList, i + 1);	//rightnode
 					
 
 					whileStm->setRightChild(whileStmLst);
@@ -101,13 +99,13 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
-						std::vector<string> postflix = expressionConverter(inflix);
+						std::vector<char> postflix = ExpressionTree::expressionConverter(inflix);
 						
 						Node* parentNode = NULL;
 						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
 							parentNode = familyVector[familyVector.size() - 1];
 						}
-						Node* assignExp = exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
+						Node* assignExp = ExpressionTree::exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
 
 						assignStm->setRightChild(assignExp);
 						assignExp->setRoot(familyVector.front());
@@ -118,7 +116,7 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 				
 			}
 
-			if(bracesNo = getNumOfClosingbraces()){
+			if(bracesNo = getNumOfClosingbraces(line)){
 				if(bracesNo > bracesStack.size()){
 					cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES";
 				}
@@ -137,7 +135,7 @@ This function returns an int that cross reference the const to check which state
 Parameters: string
 Return:		int
 */
-int AST::getStatementType(string input){
+int AST::getStatementType(std::string input){
 	std::regex procedure("procedure\s+\w+\s*{$");
 	std::regex callProc("call\s+(\w+);}*$");
 	std::regex whileLoop("while\s+\w*\s*{$");
@@ -163,7 +161,7 @@ control variable of the while loop, variable of assignment, expresion of assignm
 Parameters: int, string
 Return:		string
 */
-std::string AST::extractStatementPart(int inputType, string input){
+std::string AST::extractStatementPart(int inputType, std::string input){
 	std::regex procedureName("procedure\s+(\w+)\s*{$");
 	std::regex callProcName("call\s+(\w+);}*$");
 	std::regex whileLoopVar("while\s+(\w*)\s*{$");
@@ -193,7 +191,7 @@ This function returns an int which contains the details of the number of closing
 Parameters: string
 Return:		int
 */
-int AST::getNumOfClosingbraces(string input){
+int AST::getNumOfClosingbraces(std::string input){
 	std::regex closingBraces(";}*$");
 	std::smatch match;
 
