@@ -161,23 +161,23 @@ Parameters:
 Return:		Node*
 */
 
-Node* ExpressionTree::insert(Node root, Node node){
+Node* ExpressionTree::insert(Node* root, Node* node){
 	if(root == NULL ){
 		root = node;
 	}
 	else{
-		if(root.getRightChild() == null){
-			root.setRightChild(node);
-			node.setParent(root);
-			insert(root.getRightChild(), node);
-		}else if(isOperator(root.getRightChild().getValue())){
-			insert(root.getRightChild(), node);
-		}else if(root.getLeftChild() == null){
-			root.setLeftChild(node);
-			node.setParent(root);
-			insert(root.getLeftChild(), node);
-		}else if (isOperator(root.getLeftChild().getValue())){
-			insert(root.getLeftChild(), node);
+		if(root->getRightChild() == null){
+			root->setRightChild(node);
+			node->setParent(root);
+			insert(root->getRightChild(), node);
+		}else if(isOperator(root->getRightChild().getValue())){
+			insert(root->getRightChild(), node);
+		}else if(root->getLeftChild() == null){
+			root->setLeftChild(node);
+			node->setParent(root);
+			insert(root->getLeftChild(), node);
+		}else if (isOperator(root->getLeftChild().getValue())){
+			insert(root->getLeftChild(), node);
 		}
 	}
 	return root;

@@ -25,7 +25,7 @@ AST::AST(){
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
-Return:		??
+Return:		vector<Node*>
 */
 std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 	std::string line;
@@ -54,10 +54,12 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 				cout<<"----PROCEDURE WITHIN A PROCEDURE----";
 			}else{
 				if(statementType == WHILESTM){
+					bracesStack.push("{");
+
 					string varName = extractStatementPart(WHILESTM, line);
 
 					Node* whileStm = pkb.createNode(whileLoop, i + 1);
-					familyVector.push_back(whileStm);	//immediately add the while root node to the hiearchy
+					
 
 					Node* whileVar = pkb.createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
 					whileStm->setLeftChild(whileVar);
@@ -65,11 +67,13 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 					whileVar->setParent(familyVector[familyVector.size() - 1]);
 
 					Node* whileStmLst = pkb.createNode(whileStmLst, i + 1);	//rightnode
+					
+
 					whileStm->setRightChild(whileStmLst);
 					whileStmLst->setRoot(familyVector.front());
 					whileStmLst->setParent(familyVector[familyVector.size() - 1]);
 
-					
+					familyVector.push_back(whileStm);	
 					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(whileStmLst);
 
 				}else if(getStatementType(line) == CALLSTM){
@@ -124,6 +128,11 @@ std::vector<Node*> AST::buildAST(vector<string> sourceVector){
 	return mainProg;
 }
 
+/*
+This function returns an int that cross reference the const to check which statement it mataches. Example: procedure,call,while,assign
+Parameters: string
+Return:		int
+*/
 int AST::getStatementType(string input){
 	std::regex procedure("procedure\s+\w+\s*{$");
 	std::regex callProc("call\s+(\w+);}*$");
@@ -144,6 +153,12 @@ int AST::getStatementType(string input){
 	return result;
 }
 
+/*
+This function returns a string which can be one of the following:procedure's name, name of procedure to be called, 
+control variable of the while loop, variable of assignment, expresion of assignment
+Parameters: int, string
+Return:		string
+*/
 std::string AST::extractStatementPart(int inputType, string input){
 	std::regex procedureName("procedure\s+(\w+)\s*{$");
 	std::regex callProcName("call\s+(\w+);}*$");
@@ -169,7 +184,11 @@ std::string AST::extractStatementPart(int inputType, string input){
 	return match[0];
 }
 
-
+/*
+This function returns an int which contains the details of the number of closing braces in a line
+Parameters: string
+Return:		int
+*/
 int AST::getNumOfClosingbraces(string input){
 	std::regex closingBraces(";}*$");
 	std::smatch match;
