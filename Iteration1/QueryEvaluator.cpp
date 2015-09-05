@@ -36,10 +36,10 @@ void QueryEvaluator::evaluateQuery() {
 		ParamNode* right = query->getRightParam();
 		ParamNode* arg = getOptimal(left, right);
 		if(left == arg) {
-			result = evaluateLeft(query->getType(), arg);
+			result = evaluateRight(query->getType(), arg);
 			hasResult = resultNotEmpty(right, result);
 		} else {
-			result = evaluateRight(query->getType(), arg);
+			result = evaluateLeft(query->getType(), arg);
 			hasResult = resultNotEmpty(left, result);
 		}
 		query = tree->getQuery();
@@ -280,7 +280,7 @@ void QueryEvaluator::evaluateResult() {
 			}
 		}
 		if(result.empty()) {
-			result.append("true");
+			result = "true";
 		}
 	}
 	std::cout<<result;
@@ -297,17 +297,22 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 	if(sData->getVarType() != variable) {
 		std::ostringstream oss;
 		oss << nResult.at(0)->getLine();
-		sResult.append(oss.str());
 		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
-			sResult.append(", ");
+			oss << ", ";
 			oss << (**i).getLine();
-			sResult.append(oss.str());
 		}
+		sResult.append(oss.str());
 	} else {
-		sResult.append(nResult.at(0)->getVariable()->getName());
+		std::set<std::string> sortedRes;
+		sortedRes.insert(nResult.at(0)->getVariable()->getName());
 		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
+			sortedRes.insert((**i).getVariable()->getName());
+		}
+		std::set<std::string>::iterator i = sortedRes.begin();
+		sResult.append(*i);
+		for(i++; i != sortedRes.end(); i++){
 			sResult.append(", ");
-			sResult.append((**i).getVariable()->getName());
+			sResult.append(*i);
 		}
 	}
 	return sResult;
