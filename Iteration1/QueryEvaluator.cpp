@@ -34,7 +34,6 @@ void QueryEvaluator::evaluateQuery() {
 	while(query) {
 		ParamNode* left = query->getLeftParam();
 		ParamNode* right = query->getRightParam();
-		std::vector<Node*> result;
 		ParamNode* arg = getOptimal(left, right);
 		if(left == arg) {
 			result = evaluateLeft(query->getType(), arg);
@@ -280,6 +279,9 @@ void QueryEvaluator::evaluateResult() {
 				break;
 			}
 		}
+		if(result.empty()) {
+			result.append("true");
+		}
 	}
 	std::cout<<result;
 }
@@ -292,10 +294,13 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 	} else {
 		nResult = sData->getPKBOutput();
 	}
-	sResult.append(nResult.at(0)->getValue());
+	std::ostringstream oss;
+	oss << nResult.at(0)->getLine();
+	sResult.append(oss.str());
 	for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
 		sResult.append(", ");
-		sResult.append((**i).getValue());
+		oss << (**i).getLine();
+		sResult.append(oss.str());
 	}
 	return sResult;
 }
