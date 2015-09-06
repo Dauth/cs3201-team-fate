@@ -236,7 +236,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	result = pkb.getUses(whileLoop);
 	std::cout << "Obtained " << result.size() << " results\n"; // 11
 	for(int i=0; i<result.size(); i++) {
-		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
+		std::cout << "( whileLoop, " << result[i]->getVariable()->getName() << " ) ";
 	} 
 
 	// Uses (s, "y")
@@ -258,7 +258,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Parent (4, s)
 	std::cout << "\n\nQuery is Parent(4, s) \n"; 
 	result = pkb.getChildren(4);
-	std::cout << "Obtained " << result.size() << " results\n"; // 3
+	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( 4, " << result[i]->getLine() << " ) ";
 	} 
@@ -266,9 +266,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Parent (whileLoop, s)
 	std::cout << "\n\nQuery is Parent(whileLoop, s) \n"; 
 	result = pkb.getChildren(whileLoop);
-	std::cout << "Obtained " << result.size() << " results\n"; // 4
+	std::cout << "Obtained " << result.size() << " results\n"; // 5
 	for(int i=0; i<result.size(); i++) {
-		std::cout << "( 4, " << result[i]->getLine() << " ) ";
+		std::cout << "( whileLoop, " << result[i]->getLine() << " ) ";
 	} 
 
 	// Parent (s, 6)
@@ -288,7 +288,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	} 
 
 	// follows (2, s)
-	std::cout << "\n\nQuery is Follows(4, s) \n"; 
+	std::cout << "\n\nQuery is Follows(2, s) \n"; 
 	result = pkb.getFollowing(2);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
@@ -312,7 +312,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	} 
 
 	// follows (s, assignment)
-	std::cout << "\n\nQuery is Parent(s, assignment) \n"; 
+	std::cout << "\n\nQuery is follows(s, assignment) \n"; 
 	result = pkb.getFollowedBy(assignment);
 	std::cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {

@@ -40,7 +40,7 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 	if (usedBy != nullptr && st == variable) {
 		handleUsedBy(node, usedBy, procedure, parent);
 	}
-	if (parent != nullptr && st == assignment) {
+	if (parent != nullptr && ((st == assignment) || (st == whileLoop) || (st == ifelse))) {
 		handleParent(node, parent);
 	}
 	return node;
