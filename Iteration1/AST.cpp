@@ -219,13 +219,3 @@ int AST::getNumOfClosingbraces(std::string input){
 	return result;
 }
 
-std::vector<std::string> AST::printAST(std::vector<Node*> astVector){
-	for(unsigned int i = 0; i < astVector.size(); i++){
-		Node* procNode = astVector[i];
-		
-		Node* stmLst = procNode->getLeftChild();
-		stmLst->getStmtLst();
-
-	}
-}
-
