@@ -20,8 +20,13 @@ bool resultBool = false;
 QueryTree rootTree;
 Symbol newSymbol;
 bool suchThatQueryPass = false;
+const string errorMsg = "ERROR : %s";
 
-regex stmtRef("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
+//regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
+
+// INDENT | "_" | INTEGER
+regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
 
 // INDENT | "_"| "INDENT" | INTEGER
 regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
@@ -30,6 +35,175 @@ regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z
 regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
+
+
+
+bool verifyCorrectParameters(query_type queryClause,string firstParam, string secondParam)
+{
+	bool valid = false;
+	if (queryClause == query_type::modifies)
+	{
+		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::uses)
+	{
+		if (regex_match(firstParam,entRef) && regex_match(secondParam,varRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::calls)
+	{
+		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::callsStar)
+	{
+		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::parent)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::parentStar)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::follows)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::followsStar)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::next)
+	{
+		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::nextStar)
+	{
+		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::affects)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	else if (queryClause == query_type::affectsStar)
+	{
+		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		{
+			valid = true;
+		}
+	}
+	return valid;
+}
+
+synt_type getSynType (string synType)
+{
+	regex doubleQuotes ("\"[^\"]\"");
+	regex integer ("\\d+");
+	synt_type toReturn = synt_type::errorr;
+
+	if (regex_match(synType,doubleQuotes))
+	{
+		toReturn = synt_type::expression;
+	}
+	else if (regex_match(synType,integer))
+	{
+		toReturn = synt_type::integer;
+	}
+	else
+	{
+		if(newSymbol.exists(synType))
+		{
+			toReturn = newSymbol.getSyntType(synType);
+		}
+	}
+	return toReturn;
+}
+
+query_type getType (char* queryType)
+{
+	if (strcmp(queryType,"Uses") == 0)
+	{
+		return query_type::uses;
+	}
+	else if (strcmp(queryType,"Modifies") == 0)
+	{
+		return query_type::modifies;
+	}
+	else if (strcmp(queryType,"Calls") == 0)
+	{
+		return query_type::calls;
+	}
+	else if (strcmp(queryType,"Calls*") == 0)
+	{
+		return query_type::callsStar;
+	}
+	else if (strcmp(queryType,"Parent") == 0)
+	{
+		return query_type::parent;
+	}
+	else if (strcmp(queryType,"Parent*") == 0)
+	{
+		return query_type::parentStar;
+	}
+	else if (strcmp(queryType,"Follows") == 0)
+	{
+		return query_type::follows;
+	}
+	else if (strcmp(queryType, "Follows*") == 0)
+	{
+		return query_type::followsStar;
+	}
+	else if (strcmp(queryType, "Next") == 0)
+	{
+		return query_type::next;
+	}
+	else if (strcmp(queryType, "Next*") == 0)
+	{
+		return query_type::nextStar;
+	}
+	else if (strcmp(queryType, "Affects") == 0)
+	{
+		return query_type::affects;
+	}
+	else if (strcmp(queryType, "Affects*") == 0)
+	{
+		return query_type::affectsStar;
+	}
+	else return query_type::error;
+}
 
 void removeCharsFromString( string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
@@ -85,46 +259,63 @@ void GetToken(char *currentToken)
 		case PATTERN_CL: 
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
-				smatch m;
-				string stringToken = currentToken;
-				string result = "";
-				regex patternCond("([^\\(]+\\()");
-				regex fullPattern("(\\([^\\)]+\\))");
-				/*
-				if(!concatStmt.empty())
-				{
-				concatStmt = "";
-				}
-				*/
-				concatStmt.append(currentToken);
-				// now verify with symbol table
-				if (regex_search(concatStmt,m,patternCond))
-				{
-					result = m.str(1);
-					removeCharsFromString( result, "(" );
+				
+				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+),([^\\)]+|[^\,]+)\\))");
 
-					// verify with symbol table
-					if (newSymbol.exists(result))
-					{
-						char *toBeRemoved = &result[0];
-						removeCharsFromString( concatStmt, toBeRemoved ); // now get the parameters
-					}
-					else 
-					{
-						//TODO THROW ERROR because variable doesn't exist in symbol table
-					}
-				}
+				concatStmt.append(currentToken);
+
 				if (regex_match(concatStmt,fullPattern))
 				{
-					removeCharsFromString( concatStmt, "()" );
-					std::vector<char> writable(concatStmt.begin(), concatStmt.end());
-					writable.push_back('\0');
-					vector<string> patternParam = split(&writable[0],',');
-					for(std::vector<string>::iterator i = patternParam.begin(); i != patternParam.end(); i++)
-					{
-						cout << *i;
+					string supposedSynonym = "";
+					string firstParameter = "";
+					string secondParameter = "";
+
+					bool inParameters = false;
+					bool passedFirstParam = false;
+
+					for(std::string::size_type i = 0; i < concatStmt.size(); ++i) {
+						if (concatStmt[i] == '(')
+						{
+							// Begin getting the parameters
+							bool isSynonymExist = newSymbol.exists(supposedSynonym);
+
+							if (!isSynonymExist)
+							{
+								//TODO THROW ERROR because no such synonym in symbol table
+								break;
+							}
+							inParameters = true;
+						}
+						else if (concatStmt[i] == ')')
+						{
+							// Do nothing.
+						}
+						else if (inParameters && concatStmt[i] != ',')
+						{
+							if(passedFirstParam) 
+							{
+								secondParameter += concatStmt[i];
+							}
+							else {firstParameter += concatStmt[i]; }
+						}
+						else if (concatStmt[i] == ',')
+						{
+							passedFirstParam = true;
+						}
+						else if (!inParameters)
+						{
+							supposedSynonym += concatStmt[i]; 
+						}
 					}
+
+
 				}
+				else
+				{
+					// TODO THROW ERROR because pattern is in the wrong syntax
+				}
+				
+				
 			}
 			break;
 		case RESULT_CL: 
@@ -165,7 +356,7 @@ void GetToken(char *currentToken)
 
 		case SUCHTHAT_CL: 
 			{ // 
-				regex fullPattern("([^\\(]+\\([^\\)]+\\))");
+				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+),([^\\)]+|[^\,]+)\\))");
 				if(!concatStmt.empty())
 				{
 					concatStmt == "";
@@ -177,10 +368,12 @@ void GetToken(char *currentToken)
 				{
 					// means Modifies(..,...)
 					string supposedRelationEntity = "";
+					query_type queryClause;
 					string firstParameter = "";
 					string secondParameter = "";
 
 					bool inParameters = false;
+					bool passedFirstParam = false;
 
 					for(std::string::size_type i = 0; i < concatStmt.size(); ++i) {
 						if (concatStmt[i] == '(')
@@ -188,23 +381,56 @@ void GetToken(char *currentToken)
 							// Begin getting the parameters
 							std::vector<char> writable(supposedRelationEntity.begin(), supposedRelationEntity.end());
 							writable.push_back('\0');
-							getType(&writable[0]);
-							bool inParameters = true;
+							queryClause = getType(&writable[0]);
+							if (queryClause == query_type::error)
+							{
+								//TODO THROW ERROR because no such such that clause (e.g. Modifies/Calls mispelled)
+								break;
+							}
+							inParameters = true;
 						}
-						else if (inParameters)
+						else if (concatStmt[i] == ')')
 						{
-
+							// Do nothing.
+						}
+						else if (inParameters && concatStmt[i] != ',')
+						{
+							if(passedFirstParam) 
+							{
+								secondParameter += concatStmt[i];
+							}
+							else {firstParameter += concatStmt[i]; }
 						}
 						else if (concatStmt[i] == ',')
 						{
-
+							passedFirstParam = true;
 						}
 						else if (!inParameters)
 						{
 							supposedRelationEntity += concatStmt[i]; 
 						}
 					}
-					printf("%s herehere \n", supposedRelationEntity);
+					// Now check if first param and second param are valid.
+					// And create a querynode and add to the query tree
+					if (verifyCorrectParameters(queryClause,firstParameter,secondParameter))
+					{
+						synt_type firstSyn = getSynType(firstParameter);
+						synt_type secondSyn = getSynType(secondParameter);
+						if (firstSyn != synt_type::errorr && secondSyn != synt_type::errorr)
+						{
+							ParamNode* firstParamNode = new ParamNode(firstSyn,firstParameter);
+							ParamNode* secondParamNode = new ParamNode (secondSyn, secondParameter);
+							QueryNode* newQuery = new QueryNode(queryClause,firstParamNode, secondParamNode);
+							rootTree.addQuery(newQuery);
+						}			
+
+					}
+					suchThatQueryPass = true;
+				}
+				// Else the such that clause doesn't match the regex, thus THROW ERROR
+				else
+				{
+					//TODO THROW ERROR because the such that clause doesn't match the regex
 				}
 				
 			}break;
@@ -212,34 +438,6 @@ void GetToken(char *currentToken)
 		} // end of switch
 	}
 
-}
-
-query_type getType (char* queryType)
-{
-	if (strcmp(queryType,"Uses"))
-	{
-		return query_type::uses;
-	}
-	else if (strcmp(queryType,"Modifies"))
-	{
-		return query_type::modifies;
-	}
-	else if (strcmp(queryType,"Calls"))
-	{
-		return query_type::calls;
-	}
-	else if (strcmp(queryType,"Calls*"))
-	{
-		return query_type::callsStar;
-	}
-	else if (strcmp(queryType,"Parent"))
-	{
-		return query_type::parent;
-	}
-	else if (strcmp(queryType,"Parent*"))
-	{
-		return query_type::parentStar;
-	}
 }
 
 void Match (char *c)
@@ -254,7 +452,7 @@ void Match (char *c)
 		char *end_token;
 		pch = strtok_s (c," ,",&end_token);
 		bool entityTypeFound = false;
-		synt_type newSyntType = synt_type::variable;
+		synt_type newSyntType = synt_type::errorr;
 
 		while (pch != NULL)
 		{
@@ -279,8 +477,9 @@ void Match (char *c)
 			else
 			{
 				++count;
-				newSymbol.setVar(pch,newSyntType);
 				// store each variable in the symbol table
+				newSymbol.setVar(pch,newSyntType);
+				
 			}
 			pch = strtok_s (NULL, " ,",&end_token);
 		}
@@ -289,7 +488,6 @@ void Match (char *c)
 	}
 	else if (regex_match(c,sel))
 	{
-		printf ("Select st");
 		char *pch;
 		char *end_token;
 		pch = strtok_s (c," ",&end_token);
@@ -306,12 +504,9 @@ void Match (char *c)
 
 int main()
 {
-	//cout << "Hello World!";
-	//char str[80] = "Select s from something";
 	const char* s = ";";
 	char *end_str;
 	char *token;
-	//TOKEN currentToken = DESGENITY;
 
 	string i ;
 	getline (cin, i);
@@ -325,7 +520,6 @@ int main()
 
 	while( token != NULL ) 
 	{
-		printf( "First split by ';' : %s\n", token );
 		Match(token);
 		token = strtok_s(NULL, s,&end_str);
 
