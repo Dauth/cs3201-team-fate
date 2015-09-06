@@ -49,5 +49,23 @@ bool Symbol::exists(std::string var)
 	}
 	return found;
 }
+synt_type Symbol::getSyntType(std::string var)
+{
+	synt_type toReturn = synt_type::errorr;
+
+	for(std::vector<Data*>::iterator i = symbolTable.begin(); i != symbolTable.end(); i++)
+	{
+		if((**i).getVar()==var)
+		{
+			Data *newData;
+			newData = *i;
+			toReturn = newData->getVarType();
+		}
+			
+	}
+	return toReturn;
+
+
+}
 
 
