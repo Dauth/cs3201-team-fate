@@ -19,7 +19,7 @@ std::vector<Node*> DesignExtractor::getChildrenStar(int statementLine){
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		if(tempList.at(i)->getType() == whileLoop){
-			std::vector<Node*> tempList2 = DesignExtractor::getChildrenStar(tempList.at(i)->getLine());
+			std::vector<Node*> tempList2 = getChildrenStar(tempList.at(i)->getLine());
 			childList.insert(childList.end(),tempList2.begin(),tempList2.end());
 		}
 	}
@@ -36,7 +36,7 @@ std::vector<Node*> DesignExtractor::getChildrenStar(synt_type type){
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		if(tempList.at(i) -> getType() == whileLoop){
-			std::vector<Node*> tempList2 = DesignExtractor::getChildrenStar(tempList.at(i)->getType());
+			std::vector<Node*> tempList2 = getChildrenStar(tempList.at(i)->getType());
 			childList.insert(childList.end(),tempList2.begin(),tempList2.end());
 		}
 	}
@@ -52,7 +52,7 @@ std::vector<Node*> DesignExtractor::getParentsStar(int statementLine){
 	parentList = pkb->getParent(statementLine);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getParentsStar(tempList.at(i)->getLine());
+		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getLine());
 		parentList.insert(parentList.end(),tempList2.begin(),tempList2.end());
 	}
 	return parentList;
@@ -66,7 +66,7 @@ std::vector<Node*> DesignExtractor::getParentsStar(synt_type type){
 	parentList = pkb->getParent(type);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getParentsStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getType());
 		parentList.insert(parentList.end(),tempList2.begin(),tempList2.end());
 	}
 	return parentList;
@@ -82,7 +82,7 @@ std::vector<Node*> DesignExtractor::getFollowingStar(int statementLine){
 	followList = pkb->getFollowing(statementLine);
 	std::vector<Node*> tempList = followList;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getFollowingStar(tempList.at(i)->getLine());
+		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getLine());
 		followList.insert(followList.end(),tempList2.begin(),tempList2.end());
 	}
 
@@ -97,7 +97,7 @@ std::vector<Node*> DesignExtractor::getFollowingStar(synt_type type){
 	followList = pkb->getFollowing(type);
 	std::vector<Node*> tempList = followList;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getFollowingStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getType());
 		followList.insert(followList.end(),tempList2.begin(),tempList2.end());
 	}
 
@@ -112,7 +112,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(int statementLine){
 	followedBy = pkb->getFollowedBy(statementList);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getFollowedByStar(tempList.at(i)->getLine());
+		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
 		followedBy.insert(followedBy.end(),tempList2.begin(),tempList2.end());
 	}
 
@@ -127,7 +127,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 	followedBy = pkb->getFollowedBy(type);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = DesignExtractor::getFollowedByStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getType());
 		followedBy.insert(followedBy.end(),tempList2.begin(),tempList2.end());
 	}
 
@@ -189,7 +189,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
 		for (unsigned int i = 0 ; i < exprList.size() ; i++){
 			Node* tNode2 = exprList.at(i);
-			int compareResult = DesignExtractor::compare(tNode2,tNode);
+			int compareResult = compare(tNode2,tNode);
 			if(compareResult != 0){
 				Node* parentNode = tNode2 ->getParent();
 				if (firstChar != "_"){
@@ -224,7 +224,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 	return result;
 }
 
-int compare(Node* p,Node* q){
+int DesignExtractor::compare(Node* p,Node* q){
    if(p == NULL && q == NULL){
 	   return 1;
    }
