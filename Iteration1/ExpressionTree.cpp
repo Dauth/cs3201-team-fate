@@ -198,7 +198,7 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 			expressionCharType = constant;
 		}
 
-		root->setRoot(procNode);
+		//root->setRoot(procNode);
 		
 		std::string str(1, expressionChar);
 		if(leftOrRight == LEFT){

@@ -35,9 +35,9 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
 	std::vector<Node*> familyVector;	//this is to store node* in the order  0=procedure 1-...=while,if,else
 	std::vector<Node*> stmLstParentVector;	//this is to store current statementlists of the procedure, while and ifelse
-	int bracesNo = -1;
+	unsigned int bracesNo = -1;
 	
-	for(int i = 0; i < sourceVector.size(); i++){
+	for(unsigned int i = 0; i < sourceVector.size(); i++){
 			line = sourceVector[i];
 			int statementType = getStatementType(line);
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
@@ -52,27 +52,35 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				stmLstParentVector.push_back(stmLst);
 
 			}else if(statementType == PROCEDURESTM && !bracesStack.empty()){
-				cout<<"----PROCEDURE WITHIN A PROCEDURE----";
+				//cout<<"----PROCEDURE WITHIN A PROCEDURE----";
 			}else{
 				if(statementType == WHILESTM){
 					bracesStack.push("{");
 
 					std::string varName = extractStatementPart(WHILESTM, line);
 
-					Node* whileStm = pkb->createNode(whileLoop, i + 1);
-					
+					Node* whileStm = nullptr;
+					Node* whileVar = nullptr;
 
-					Node* whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
+					if(stmLstParentVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
+						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, familyVector[familyVector.size() - 1], familyVector.front());
+						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, familyVector[familyVector.size() - 1], familyVector.front());//leftnode
+					}else if(stmLstParentVector.size() == 1){// only a procedure statementlist in it
+						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, nullptr, familyVector.front());
+						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
+					}
+					
+					
 					whileStm->setLeftChild(whileVar);
-					whileVar->setRoot(familyVector.front());
-					whileVar->setParent(familyVector[familyVector.size() - 1]);
+
+					//whileVar->setRoot(familyVector.front());
+					//whileVar->setParent(familyVector[familyVector.size() - 1]);
 
 					Node* whileStmLst = pkb->createNode(statementList, i + 1);	//rightnode
-					
-
 					whileStm->setRightChild(whileStmLst);
-					whileStmLst->setRoot(familyVector.front());
-					whileStmLst->setParent(familyVector[familyVector.size() - 1]);
+
+					//whileStmLst->setRoot(familyVector.front());
+					//whileStmLst->setParent(familyVector[familyVector.size() - 1]);
 
 					familyVector.push_back(whileStm);	
 					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(whileStmLst);
@@ -81,38 +89,40 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
 
 					if(callProcName.compare(currentProcName) == 0){
-						cout<<"----RECURSIVE CALL NOT ALLOWED----";
+						//cout<<"----RECURSIVE CALL NOT ALLOWED----";
 					}
 
 					Node* tCall = pkb->createNode(call, i + 1, callProcName);
 
-					tCall->setParent(familyVector[familyVector.size() - 1]);
-					tCall->setRoot(familyVector.front());
+					//tCall->setParent(familyVector[familyVector.size() - 1]);
+					//tCall->setRoot(familyVector.front());
 
 					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(tCall);
 
 				}else if(statementType == ASSIGNSTM){
-						Node* assignStm = pkb->createNode(assignment, i + 1);
+						Node* assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, nullptr, familyVector.front());
 
 						Node* assignVar = pkb->createNode(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line), 
 							nullptr, assignStm, nullptr, familyVector.front());
+
 						assignStm->setLeftChild(assignVar);
-						assignVar->setRoot(familyVector.front());
-						assignVar->setParent(familyVector[familyVector.size() - 1]);
+						stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(assignStm);
+						//assignVar->setRoot(familyVector.front());
+						//assignVar->setParent(familyVector[familyVector.size() - 1]);
 
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
-						Node* parentNode = NULL;
+						Node* parentNode = nullptr;
 						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
 							parentNode = familyVector[familyVector.size() - 1];
 						}
 						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
 
 						assignStm->setRightChild(assignExp);
-						assignExp->setRoot(familyVector.front());
-						assignExp->setParent(familyVector[familyVector.size() - 1]);
+						//assignExp->setRoot(familyVector.front());
+						//assignExp->setParent(familyVector[familyVector.size() - 1]);
 						
 						
 				}
@@ -121,7 +131,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 			if(bracesNo = getNumOfClosingbraces(line)){
 				if(bracesNo > bracesStack.size()){
-					cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES";
+					//cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES";
 				}
 				while(bracesNo > 0){
 					bracesStack.pop();
@@ -139,11 +149,11 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	regex procedure("procedure\s+\w+\s*{$");
-	regex callProc("call\s+(\w+);}*$");
-	regex whileLoop("while\s+\w*\s*{$");
-	regex assignStm("\w+=[A-z0-9*+-\s]+;}*$");
-
+	std::regex procedure("procedure\\s+[A-z]+\\s*\\{$");
+	std::regex callProc("call\\s+[A-z]+\\;\\}*$");
+	std::regex whileLoop("while\\s+[A-z]+\\s*\\{$");
+	std::regex assignStm("[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\}*$");
+	
 	int result = -1;
 
 	if(regex_match(input, procedure)){
@@ -165,12 +175,12 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	regex procedureName("procedure\s+(\w+)\s*{$");
-	regex callProcName("call\s+(\w+);}*$");
-	regex whileLoopVar("while\s+(\w*)\s*{$");
-	regex assignStmLeftHand("(\w+)=[A-z0-9*+-]+;}*$");
-	regex assignStmRightHand("(\w+=([A-z0-9*+-\s]+);}*$");
-	smatch match;
+	std::regex procedureName("procedure\\s+([A-z])+\\s*\\{$");
+	std::regex callProcName("call\\s+([A-z])+\\;\\}*$");
+	std::regex whileLoopVar("while\\s+([A-z])+\\s*\\{$");
+	std::regex assignStmLeftHand("([A-z])+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\}*$");
+	std::regex assignStmRightHand("[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s])+\\;\\}*$");
+	std::smatch match;
 	
 	std::string outcome = "";
 
