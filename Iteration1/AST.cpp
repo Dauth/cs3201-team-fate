@@ -7,6 +7,7 @@
 #include "ExpressionTree.h"
 #include "AST.h"
 #include <regex>
+#include "Twin.h"
 
 const int PROCEDURESTM = 1;
 const int CALLSTM = 2;
@@ -33,8 +34,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string currentProcName;
 	std::vector<Node*> mainProg;
 	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
-	std::vector<Node*> familyVector;	//this is to store node* in the order  0=procedure 1-...=while,if,else
-	std::vector<Node*> stmLstParentVector;	//this is to store current statementlists of the procedure, while and ifelse
+	std::vector<Twin*> twinVector;//Twin store as   <stmNode, stmListNode>
 	unsigned int bracesNo = -1;
 	
 	for(unsigned int i = 0; i < sourceVector.size(); i++){
@@ -48,8 +48,9 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				mainProg.push_back(procStm);
 
 				bracesStack.push("{");
-				familyVector.push_back(procStm);
-				stmLstParentVector.push_back(stmLst);
+
+				Twin* tTwin = new Twin(procStm, stmLst);
+				twinVector.push_back(tTwin);
 
 			}else if(statementType == PROCEDURESTM && !bracesStack.empty()){
 				//cout<<"----PROCEDURE WITHIN A PROCEDURE----";
@@ -62,28 +63,25 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					Node* whileStm = nullptr;
 					Node* whileVar = nullptr;
 
-					if(stmLstParentVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
-						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, familyVector[familyVector.size() - 1], familyVector.front());
-						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, familyVector[familyVector.size() - 1], familyVector.front());//leftnode
-					}else if(stmLstParentVector.size() == 1){// only a procedure statementlist in it
-						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, nullptr, familyVector.front());
-						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
-					}
-					
-					
-					whileStm->setLeftChild(whileVar);
+					Node* parentNode = nullptr;
+					Node* procNode = procNode = twinVector.front()->getStmNode();
 
-					//whileVar->setRoot(familyVector.front());
-					//whileVar->setParent(familyVector[familyVector.size() - 1]);
+					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
+						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
+						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, parentNode, procNode);
+						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, parentNode, procNode);//leftnode
+					}else if(twinVector.size() == 1){// only a procedure statementlist in it
+						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, nullptr, procNode);
+						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, procNode);//leftnode
+					}
+							
+					whileStm->setLeftChild(whileVar);
 
 					Node* whileStmLst = pkb->createNode(statementList, i + 1);	//rightnode
 					whileStm->setRightChild(whileStmLst);
 
-					//whileStmLst->setRoot(familyVector.front());
-					//whileStmLst->setParent(familyVector[familyVector.size() - 1]);
-
-					familyVector.push_back(whileStm);	
-					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(whileStmLst);
+					Twin* tTwin = new Twin(whileStm, whileStmLst);
+					twinVector.push_back(tTwin);
 
 				}else if(getStatementType(line) == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
@@ -94,37 +92,36 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 					Node* tCall = pkb->createNode(call, i + 1, callProcName);
 
-					//tCall->setParent(familyVector[familyVector.size() - 1]);
-					//tCall->setRoot(familyVector.front());
-
-					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(tCall);
+					twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(tCall);
 
 				}else if(statementType == ASSIGNSTM){
-						Node* assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, nullptr, familyVector.front());
+					std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
 
-						Node* assignVar = pkb->createNode(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line), 
-							nullptr, assignStm, nullptr, familyVector.front());
+					Node* parentNode = nullptr;
+					Node* procNode = twinVector.front()->getStmNode();
+					Node* assignStm = nullptr;
+					Node* assignVar = nullptr;
+
+					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
+						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
+						assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, parentNode, procNode);
+						assignVar = pkb->createNode(variable, i + 1, varName, 
+							nullptr, assignStm, parentNode, procNode);
+					}else if(twinVector.size() == 1){// only a procedure statementlist in it
+						assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, nullptr, procNode);
+						assignVar = pkb->createNode(variable, i + 1, varName, 
+							nullptr, assignStm, nullptr, procNode);
+					}
 
 						assignStm->setLeftChild(assignVar);
-						stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(assignStm);
-						//assignVar->setRoot(familyVector.front());
-						//assignVar->setParent(familyVector[familyVector.size() - 1]);
-
+						twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
-						Node* parentNode = nullptr;
-						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
-							parentNode = familyVector[familyVector.size() - 1];
-						}
-						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
+						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, procNode, parentNode);
 
-						assignStm->setRightChild(assignExp);
-						//assignExp->setRoot(familyVector.front());
-						//assignExp->setParent(familyVector[familyVector.size() - 1]);
-						
-						
+						assignStm->setRightChild(assignExp);												
 				}
 				
 			}
@@ -135,8 +132,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				}
 				while(bracesNo > 0){
 					bracesStack.pop();
-					familyVector.erase(familyVector.end() - 1);
-					stmLstParentVector.erase(stmLstParentVector.end() - 1);
+					twinVector.erase(twinVector.end() - 1);
 				}
 			}
 	}
