@@ -15,6 +15,16 @@ Variable* VariableTable::getOrCreateVariable(std::string varName) {
 	}
 }
 
+std::vector<Node*> VariableTable::getVariableNodes() {
+	std::vector<Node*> nodes;
+	for(std::map<std::string, Variable*>::iterator it = table.begin(); it != table.end(); ++it) {
+		Variable* var = it->second;
+		std::vector<Node*> varNodes = var->getNodes();
+		nodes.insert(nodes.end(), varNodes.begin(), varNodes.end());
+	}
+	return nodes;
+}
+
 int VariableTable::getVariableCount() {
 	return table.size();
 }
@@ -33,12 +43,16 @@ std::vector<Node*> VariableTable::getUsedBy(std::string varName) {
 	return table[varName]->getUsedBy();
 }
 
-void VariableTable::addModifiedBy(std::string varName, Node* pnode) {
-	table[varName]->addModifiedBy(pnode);
+void VariableTable::addModifiedBy(std::string varName, Node* node) {
+	table[varName]->addModifiedBy(node);
 }
 
-void VariableTable::addUsedBy(std::string varName, Node* pnode) {
-	table[varName]->addUsedBy(pnode);
+void VariableTable::addUsedBy(std::string varName, Node* node) {
+	table[varName]->addUsedBy(node);
+}
+
+void VariableTable::addNode(std::string varName, Node* node) {
+	table[varName]->addNode(node);
 }
 
 void VariableTable::debug() {

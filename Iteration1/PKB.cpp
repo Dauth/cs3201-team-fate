@@ -5,7 +5,10 @@ PKB::PKB () {
 
 }
 
-std::vector<Node*> PKB::getStatement(synt_type st) {
+std::vector<Node*> PKB::getNodes(synt_type st) {
+	if(st == variable) {
+		return variableTable.getVariableNodes();
+	}
 	return statementTable.getStatements(st);
 }
 
@@ -25,6 +28,7 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 	Node* node = new Node(st, line, value);
 	if(st == variable) {
 		Variable* var = variableTable.getOrCreateVariable(value);
+		variableTable.addNode(value, node);
 		node->setVar(var);
 	}
 

@@ -41,7 +41,7 @@ public:
 
 	void addStatement(Node*, Node*);
 
-	std::vector<Node*> getStatement(synt_type);
+	std::vector<Node*> getNodes(synt_type);
 	int getCount(synt_type);
 
 	//argument is the _ in modifies ( _ , v )

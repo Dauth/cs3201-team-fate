@@ -18,10 +18,18 @@ std::vector<Node*> Variable::getModifiedBy() {
 	return std::vector<Node*> (modifiedBy.begin(), modifiedBy.end());
 }
 
+std::vector<Node*> Variable::getNodes() {
+	return nodes;
+}
+
 void Variable::addUsedBy(Node* node) {
 	usedBy.insert(node);
 }
 
 void Variable::addModifiedBy(Node* node) {
 	modifiedBy.insert(node);
+}
+
+void Variable::addNode(Node* node) {
+	nodes.push_back(node);
 }

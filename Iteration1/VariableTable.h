@@ -11,13 +11,14 @@ class VariableTable {
 public:
 	VariableTable();
 	Variable* getOrCreateVariable(std::string);
+	std::vector<Node*> getVariableNodes();
 	int getVariableCount();
 	std::vector<Node*> getModifiedBy(std::string);
 	std::vector<Node*> getUsedBy(std::string);
 
 	void addModifiedBy(std::string, Node*);
 	void addUsedBy(std::string, Node*);
-
+	void addNode(std::string, Node*);
 	void debug();
 };
 
