@@ -53,7 +53,11 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				twinVector.push_back(tTwin);
 
 			}else if(statementType == PROCEDURESTM && !bracesStack.empty()){
-				//cout<<"----PROCEDURE WITHIN A PROCEDURE----";
+				try{
+					throw i + 1;
+				}catch(int e){
+					std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+				}
 			}else{
 				if(statementType == WHILESTM){
 					bracesStack.push("{");
@@ -85,9 +89,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 				}else if(getStatementType(line) == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
-
-					if(callProcName.compare(currentProcName) == 0){
-						//cout<<"----RECURSIVE CALL NOT ALLOWED----";
+					try{
+						if(callProcName.compare(currentProcName) == 0){
+							throw i + 1;
+						}
+					}catch(int e){
+						std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
 					}
 
 					Node* tCall = pkb->createNode(call, i + 1, callProcName);
@@ -127,9 +134,13 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				
 			}
 
-			if(bracesNo = getNumOfClosingbraces(line)){
-				if(bracesNo > bracesStack.size()){
-					//cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES";
+			if(bracesNo = getNumOfClosingbraces(line) != -1){
+				try{
+					if(bracesNo > bracesStack.size()){
+						throw i + 1;
+					}
+				}catch(int e){
+					std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
 				}
 				while(bracesNo > 0){
 					bracesStack.pop();
@@ -207,15 +218,15 @@ Parameters: string
 Return:		int
 */
 int AST::getNumOfClosingbraces(std::string input){
-	std::regex closingBraces(";}*$");
+	std::regex closingBraces("\\s*\\t*(\\}*)$");
 	std::smatch match;
 
 	int result = -1;
 
-	if(std::regex_search(input, match, closingBraces)){
-		result = match[0].length();
-	}
-
+	std::regex_search(input, match, closingBraces);
+	if(match.length() > 0){
+        result = match[1].length();
+    }
 	return result;
 }
 
