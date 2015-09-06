@@ -27,7 +27,7 @@ std::vector <char> ExpressionTree::expressionConverter(std::string inflixString)
 	std::vector <char> resultVector;
 	char cChar;
 	
-	for(int i = 0; i < inflixString.length(); i++){
+	for(unsigned int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
 		const char *bChar = new char(cChar);
 		char wChar;
@@ -93,11 +93,19 @@ bool ExpressionTree::isOperand(char cChar){
 }
 
 bool ExpressionTree::isAlpha(char cChar){
-	return isalpha(cChar);
+	bool result = false;
+	if(isalpha(cChar) != 0){
+		result = true;
+	}
+	return result;
 }
 
 bool ExpressionTree::isDigit(char cChar){
-	return isdigit(cChar);
+	bool result = false;
+	if(isdigit(cChar) != 0){
+		result = true;
+	}
+	return result;
 }
 
 /*
@@ -146,7 +154,7 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	std::stack <std::string> tStack;
 	std::string cChar;
 
-	for(int i = 0; i < inflixString.length(); i++){
+	for(unsigned int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
 		if(cChar.compare("(") == 0){
 			tStack.push(cChar);
