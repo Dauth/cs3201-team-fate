@@ -19,8 +19,14 @@ string concatStmt = "";
 bool resultBool = false;
 QueryTree rootTree;
 Symbol newSymbol;
+bool suchThatQueryPass = false;
+
 regex stmtRef("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
+
+// INDENT | "_"| "INDENT" | INTEGER
 regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+
+// INDENT | "_" | "INDENT"
 regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
@@ -159,23 +165,81 @@ void GetToken(char *currentToken)
 
 		case SUCHTHAT_CL: 
 			{ // 
+				regex fullPattern("([^\\(]+\\([^\\)]+\\))");
 				if(!concatStmt.empty())
 				{
 					concatStmt == "";
 				}
 
 				concatStmt.append(currentToken);
-				if (regex_match(concatStmt,entRef))
+
+				if (regex_match(concatStmt,fullPattern))
 				{
 					// means Modifies(..,...)
-					printf("%s \n", currentToken);
+					string supposedRelationEntity = "";
+					string firstParameter = "";
+					string secondParameter = "";
+
+					bool inParameters = false;
+
+					for(std::string::size_type i = 0; i < concatStmt.size(); ++i) {
+						if (concatStmt[i] == '(')
+						{
+							// Begin getting the parameters
+							std::vector<char> writable(supposedRelationEntity.begin(), supposedRelationEntity.end());
+							writable.push_back('\0');
+							getType(&writable[0]);
+							bool inParameters = true;
+						}
+						else if (inParameters)
+						{
+
+						}
+						else if (concatStmt[i] == ',')
+						{
+
+						}
+						else if (!inParameters)
+						{
+							supposedRelationEntity += concatStmt[i]; 
+						}
+					}
+					printf("%s herehere \n", supposedRelationEntity);
 				}
-				printf("%s \n", currentToken);
+				
 			}break;
 
 		} // end of switch
 	}
 
+}
+
+query_type getType (char* queryType)
+{
+	if (strcmp(queryType,"Uses"))
+	{
+		return query_type::uses;
+	}
+	else if (strcmp(queryType,"Modifies"))
+	{
+		return query_type::modifies;
+	}
+	else if (strcmp(queryType,"Calls"))
+	{
+		return query_type::calls;
+	}
+	else if (strcmp(queryType,"Calls*"))
+	{
+		return query_type::callsStar;
+	}
+	else if (strcmp(queryType,"Parent"))
+	{
+		return query_type::parent;
+	}
+	else if (strcmp(queryType,"Parent*"))
+	{
+		return query_type::parentStar;
+	}
 }
 
 void Match (char *c)
@@ -265,6 +329,10 @@ int main()
 		Match(token);
 		token = strtok_s(NULL, s,&end_str);
 
+	}
+	if (!suchThatQueryPass)
+	{
+		//Throw error for query part
 	}
 	int tt;
 	cin >>  tt;
