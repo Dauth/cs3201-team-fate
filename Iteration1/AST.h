@@ -18,7 +18,6 @@ private:
 public:
 	AST(PKB*, ExpressionTree*);
 	std::vector<Node*> AST::buildAST(std::vector<std::string>);
-
 };
 
 #endif
