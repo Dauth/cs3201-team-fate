@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Node.h"
 #include "PKB.h"
+#include "ExpressionTree.h"
 #include<string>
 #include "Twin.h"
 

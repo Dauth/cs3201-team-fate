@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -22,7 +23,7 @@ using namespace std;
 AST::AST(PKB* p, ExpressionTree* e){
 	pkb = p;
 	expTree = e;
-};
+}
 
 /*
 This function processes a vector which contains the source file

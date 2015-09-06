@@ -1,20 +1,23 @@
-#include<string>
-#include<vector>
+#include "stdafx.h"
+#include <string>
+#include <vector>
 #include <fstream> 
-
+#include "AST.h"
+#include "SimpleParser.h"
 
 
 using namespace std;
 
-SimpleParser::SimpleParser(){}
-std::vector<Node*> tree;
+SimpleParser::SimpleParser(AST* a){
+	ast = a;
+}
 
-
-std::vector<string> readSourceFile(std:;string sourceFile){
+std::vector<std::string> SimpleParser::readSourceFile(std::string sourceFile){
 	std::vector<string> sourceVector;
+	std::ifstream infile(sourceFile);
 	std::string line;
-
-	while(getLine(sourceFile, line){
+	
+	while(std::getline(infile, line)){
 		if(!line.empty()){
 			sourceVector.push_back(line);
 		}
@@ -22,6 +25,6 @@ std::vector<string> readSourceFile(std:;string sourceFile){
 	return sourceVector;
 }
 
-void execute(std::vector<string> sourceVector){
-	tree = buildAST(sourceVector);
+std::vector<Node*> SimpleParser::execute(std::vector<string> sourceVector){
+	std::vector<Node*> resultTree = ast->buildAST(sourceVector);
 }

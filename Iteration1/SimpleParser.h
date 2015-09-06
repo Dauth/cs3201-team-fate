@@ -2,13 +2,20 @@
 #define SIMPLEPARSER_H
 
 #include "stdafx.h"
+#include "AST.h"
+#include <string>
+#include <vector>
 
 
 class SimpleParser {
-	
+	AST* ast;
+
+private:
+
 public:
-	std::vector<node*>SimpleParser::readSourceFile(std::string);
-	void SimpleParser::execute(vector<node*>);
+	SimpleParser(AST*);
+	std::vector<std::string>SimpleParser::readSourceFile(std::string);
+	std::vector<Node*>SimpleParser::execute(std::vector<std::string>);
 
 };
 
