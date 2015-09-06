@@ -31,7 +31,7 @@ Return:		vector<Node*>
 std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string line;
 	std::string currentProcName;
-	std:vector<Node*> mainProg;
+	std::vector<Node*> mainProg;
 	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
 	std::vector<Node*> familyVector;	//this is to store node* in the order  0=procedure 1-...=while,if,else
 	std::vector<Node*> stmLstParentVector;	//this is to store current statementlists of the procedure, while and ifelse
