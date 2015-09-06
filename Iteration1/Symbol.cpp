@@ -19,7 +19,7 @@ void Symbol::setResult(int index)
 {
 	symbolTable.at(index)->setResult(true);
 }
-std::vector<Data*> Symbol::getQuery()
+std::vector<Data*>& Symbol::getQuery()
 {	
 	return symbolTable;
 }
@@ -34,6 +34,7 @@ int Symbol::getIndex(std::string var)
 		if((**i).getVar()==var)
 			return std::distance(symbolTable.begin(), i);
 	}
+	return -1;
 }
 bool Symbol::exists(std::string var)
 {

@@ -1,8 +1,6 @@
+#include "stdafx.h"
 #include "ExpressionTree.h"
 #include <stack>
-#include <string>
-#include <vector>
-#include "PKB.h"
 #include <cstdlib>
 
 const int LEFT = 1;
@@ -15,9 +13,9 @@ const char* CLOSEDBRACKETS = ")";
 const char* OPENBRACES = "{";
 const char* CLOSEDBRACES = "}";
 
-ExpressionTree::ExpressionTree(PKB* p){pkb = p;};
-
-using namespace std;
+ExpressionTree::ExpressionTree(PKB* p) {
+	pkb = p;
+}
 
 /*
 This function converts an inflix expression to postflix.
@@ -25,7 +23,7 @@ Parameters: String - a string that consists of operand and operator
 Return:		array
 */
 std::vector <char> ExpressionTree::expressionConverter(std::string inflixString){
-	stack <char> tStack;
+	std::stack <char> tStack;
 	std::vector <char> resultVector;
 	char cChar;
 	
@@ -145,7 +143,7 @@ Return:		bool
 */
 bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	bool result = false;
-	stack <std::string> tStack;
+	std::stack <std::string> tStack;
 	std::string cChar;
 
 	for(int i = 0; i < inflixString.length(); i++){
@@ -223,15 +221,15 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 
 Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
 	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	Node* operatorRoot = new Node(expression, str);
+	Node* operatorRoot = new Node(expression, 0, str);
 
 	for(int i = postflixExp.size() - 2; i >= 0; i++){
 		std::string expressionChar(1, postflixExp[i]);
 		if(isOperator(postflixExp[i])){
-			Node* tNode = new Node(expression, expressionChar);
+			Node* tNode = new Node(expression, 0, expressionChar);
 			operatorRoot = insertSON(operatorRoot, tNode);
 		}else if (isOperand(postflixExp[i])){
-			Node* tNode = new Node(constant, expressionChar);
+			Node* tNode = new Node(constant, 0, expressionChar);
 			operatorRoot = insertSON(operatorRoot, tNode);
 		}
 	}

@@ -2,7 +2,6 @@
 #define EXPRESSIONTREE_H
 
 #include "stdafx.h"
-#include "Node.h"
 #include "PKB.h"
 
 class ExpressionTree{

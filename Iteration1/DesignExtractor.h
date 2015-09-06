@@ -3,12 +3,14 @@
 #include "stdafx.h"
 #include "Node.h"
 #include "PKB.h"
+#include "ExpressionTree.h"
 
 class DesignExtractor{
 	PKB* pkb;
-	ExpressionTree et;
+	ExpressionTree* et;
+	int compare(Node*, Node*);
 public:
-	DesignExtractor(PKB*);
+	DesignExtractor(PKB*,ExpressionTree*);
 
 	std::vector<Node*> getFollowingStar(int statementLine);
 	std::vector<Node*> getFollowingStar(synt_type type);

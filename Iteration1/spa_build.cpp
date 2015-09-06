@@ -8,6 +8,19 @@
 int _tmain(int argc, _TCHAR* argv[]) {
 	PKB pkb;
 
+	// procedure test {
+	// 1. y = 3
+	// 2. x = 4
+	// 3. z = x + y
+	// 4. While x {
+	// 5.	a = z + y + x
+	// 6.	b = a + z
+	// 7.	While y {
+	// 8.		t = a + x }
+	// 9.	c = z + x }
+	// 10. x = x + z
+	// 11. a = 3 + y
+
 	// usedby, modifiedby, parent, procedure
 
 	// procedure test {
@@ -79,48 +92,69 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	s6e_plus->setRightChild(s6v_z);
 	whileStmtLst->addStmt(s6);
 
-	// 7. c = z + x }
-	Node* s7 = pkb.createNode(assignment, 7, "", nullptr, nullptr, s4, proc);
-	Node* s7a = pkb.createNode(variable, 7, "c", nullptr, s7, s4, proc);
-	Node* s7v_z = pkb.createNode(variable, 7, "z", s7, nullptr, s4, proc);
-	Node* s7e_plus = pkb.createNode(expression, 7, "+", s7, nullptr, nullptr, proc);
-	Node* s7v_x = pkb.createNode(variable, 7, "x", s7, nullptr, s4, proc);
-	s7->setLeftChild(s7a);
-	s7->setRightChild(s7e_plus);
-	s7e_plus->setLeftChild(s7v_z);
-	s7e_plus->setRightChild(s7v_x);
+	// 7. While y {
+	Node* s7 = pkb.createNode(whileLoop, 7, "", nullptr, nullptr, s4, proc);
+	Node* s7v_x = pkb.createNode(variable, 7, "y", s7, nullptr, s4, proc);
+	Node* whileStmtLst2 = pkb.createNode(statementList, 7);
+	s7->setLeftChild(s7v_x);
+	s7->setRightChild(whileStmtLst2);
 	whileStmtLst->addStmt(s7);
 
-	// 8. x = x + z
-	Node* s8 = pkb.createNode(assignment, 8, "", nullptr, nullptr, nullptr, proc);
-	Node* s8a = pkb.createNode(variable, 8, "x", nullptr, s8, nullptr, proc);
-	Node* s8v_x = pkb.createNode(variable, 8, "x", s8, nullptr, nullptr, proc);
+
+	// 8. t = a + x }
+	Node* s8 = pkb.createNode(assignment, 8, "", nullptr, nullptr, s7, proc);
+	Node* s8a = pkb.createNode(variable, 8, "t", nullptr, s8, s7, proc);
+	Node* s8v_a = pkb.createNode(variable, 8, "a", s8, nullptr, s7, proc);
 	Node* s8e_plus = pkb.createNode(expression, 8, "+", s8, nullptr, nullptr, proc);
-	Node* s8v_z = pkb.createNode(variable, 8, "z", s8, nullptr, nullptr, proc);
+	Node* s8v_z = pkb.createNode(variable, 8, "x", s6, nullptr, s7, proc);
 	s8->setLeftChild(s8a);
 	s8->setRightChild(s8e_plus);
-	s8e_plus->setLeftChild(s8v_x);
+	s8e_plus->setLeftChild(s8v_a);
 	s8e_plus->setRightChild(s8v_z);
-	testStmtLst1->addStmt(s8);
+	whileStmtLst2->addStmt(s8);
 
-	// 9. a = 3 + y
-	Node* s9 = pkb.createNode(assignment, 9, "", nullptr, nullptr, nullptr, proc);
-	Node* s9a = pkb.createNode(variable, 9, "a", nullptr, s9, nullptr, proc);
-	Node* s9c_3 = pkb.createNode(constant, 9, "3");
+	// 9. c = z + x }
+	Node* s9 = pkb.createNode(assignment, 9, "", nullptr, nullptr, s4, proc);
+	Node* s9a = pkb.createNode(variable, 9, "c", nullptr, s9, s4, proc);
+	Node* s9v_z = pkb.createNode(variable, 9, "z", s9, nullptr, s4, proc);
 	Node* s9e_plus = pkb.createNode(expression, 9, "+", s9, nullptr, nullptr, proc);
-	Node* s9v_z = pkb.createNode(variable, 9, "y", s9, nullptr, nullptr, proc);
+	Node* s9v_x = pkb.createNode(variable, 9, "x", s9, nullptr, s4, proc);
 	s9->setLeftChild(s9a);
 	s9->setRightChild(s9e_plus);
-	s9e_plus->setLeftChild(s9c_3);
-	s9e_plus->setRightChild(s9v_z);
-	testStmtLst1->addStmt(s9);
+	s9e_plus->setLeftChild(s9v_z);
+	s9e_plus->setRightChild(s9v_x);
+	whileStmtLst->addStmt(s9);
+
+	// 10. x = x + z
+	Node* s10 = pkb.createNode(assignment, 10, "", nullptr, nullptr, nullptr, proc);
+	Node* s10a = pkb.createNode(variable, 10, "x", nullptr, s10, nullptr, proc);
+	Node* s10v_x = pkb.createNode(variable, 10, "x", s10, nullptr, nullptr, proc);
+	Node* s10e_plus = pkb.createNode(expression, 10, "+", s10, nullptr, nullptr, proc);
+	Node* s10v_z = pkb.createNode(variable, 10, "z", s10, nullptr, nullptr, proc);
+	s10->setLeftChild(s10a);
+	s10->setRightChild(s10e_plus);
+	s10e_plus->setLeftChild(s10v_x);
+	s10e_plus->setRightChild(s10v_z);
+	testStmtLst1->addStmt(s10);
+
+	// 11. a = 3 + y
+	Node* s11 = pkb.createNode(assignment, 11, "", nullptr, nullptr, nullptr, proc);
+	Node* s11a = pkb.createNode(variable, 11, "a", nullptr, s11, nullptr, proc);
+	Node* s11c_3 = pkb.createNode(constant, 11, "3");
+	Node* s11e_plus = pkb.createNode(expression, 11, "+", s11, nullptr, nullptr, proc);
+	Node* s11v_z = pkb.createNode(variable, 11, "y", s11, nullptr, nullptr, proc);
+	s11->setLeftChild(s11a);
+	s11->setRightChild(s11e_plus);
+	s11e_plus->setLeftChild(s11c_3);
+	s11e_plus->setRightChild(s11v_z);
+	testStmtLst1->addStmt(s11);
 
 	std::vector<Node*> result;
 
 	// Modifies ("test", v)
 	std::cout << "Qeury is Modifies(\"test\", v) \n"; 
 	result = pkb.getModifies("test");
-	std::cout << "Obtained " << result.size() << " results\n"; // 8
+	std::cout << "Obtained " << result.size() << " results\n"; // 9
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
@@ -136,7 +170,15 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Modifies (assignment, v)
 	std::cout << "\n\n\Query is Modifies(assignment, v) \n"; 
 	result = pkb.getModifies(assignment);
-	std::cout << "Obtained " << result.size() << " results\n"; // 8
+	std::cout << "Obtained " << result.size() << " results\n"; // 9
+	for(int i=0; i<result.size(); i++) {
+		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
+	} 
+
+	// Modifies (whileLoop, v)
+	std::cout << "\n\n\Query is whileLoop(assignment, v) \n"; 
+	result = pkb.getModifies(whileLoop);
+	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
@@ -144,7 +186,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Modifies (s/p, "y")
 	std::cout << "\n\n\Query is Modifies(s/p, \"y\") \n"; 
 	result = pkb.getModifiedBy("y");
-	std::cout << "Obtained " << result.size() << " results\n"; // 9
+	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
 	} 
@@ -152,15 +194,23 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Modifies (s/p, variable)
 	std::cout << "\n\nQeury is Modifies(s/p, variable) \n"; 
 	result = pkb.getModifiedBy(variable);
-	std::cout << "Obtained " << result.size() << " results\n"; // 13
+	std::cout << "Obtained " << result.size() << " results\n"; // 12
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", v ) ";
 	}
 
+	// Modifies (s/p, "y")
+	std::cout << "\n\n\Query is Modifies(s/p, \"t\") \n"; 
+	result = pkb.getModifiedBy("t");
+	std::cout << "Obtained " << result.size() << " results\n"; // 4
+	for(int i=0; i<result.size(); i++) {
+		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
+	} 
+
 	// Uses ("test", v)
 	std::cout << "\n\nQuery is Uses(\"test\", v) \n"; 
 	result = pkb.getUses("test");
-	std::cout << "Obtained " << result.size() << " results\n"; // 8
+	std::cout << "Obtained " << result.size() << " results\n"; // 16
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
@@ -168,7 +218,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Uses (5, v)
 	std::cout << "\n\n\Query is Uses(5, v) \n"; 
 	result = pkb.getUses(5);
-	std::cout << "Obtained " << result.size() << " results\n"; // 5
+	std::cout << "Obtained " << result.size() << " results\n"; // 3
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	}
@@ -176,15 +226,23 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Uses (assignment, v)
 	std::cout << "\n\n\Query is Uses(assignment, v) \n"; 
 	result = pkb.getUses(assignment);
-	std::cout << "Obtained " << result.size() << " results\n"; // 12
+	std::cout << "Obtained " << result.size() << " results\n"; // 14
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
+	} 
+
+	// Uses (whileLoop, v)
+	std::cout << "\n\n\Query is Uses(whileLoop, v) \n"; 
+	result = pkb.getUses(whileLoop);
+	std::cout << "Obtained " << result.size() << " results\n"; // 11
+	for(int i=0; i<result.size(); i++) {
+		std::cout << "( whileLoop, " << result[i]->getVariable()->getName() << " ) ";
 	} 
 
 	// Uses (s, "y")
 	std::cout << "\n\n\Query is Uses(s/p, \"y\") \n"; 
 	result = pkb.getUsedBy("y");
-	std::cout << "Obtained " << result.size() << " results\n"; // 4
+	std::cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
 	} 
@@ -192,7 +250,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Uses (s, variable)
 	std::cout << "\n\n\Query is Uses(s/p, variable) \n"; 
 	result = pkb.getUsedBy(variable);
-	std::cout << "Obtained " << result.size() << " results\n"; // 8
+	std::cout << "Obtained " << result.size() << " results\n"; // 10
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", v ) ";
 	} 
@@ -200,7 +258,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Parent (4, s)
 	std::cout << "\n\nQuery is Parent(4, s) \n"; 
 	result = pkb.getChildren(4);
-	std::cout << "Obtained " << result.size() << " results\n"; // 3
+	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( 4, " << result[i]->getLine() << " ) ";
 	} 
@@ -208,9 +266,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Parent (whileLoop, s)
 	std::cout << "\n\nQuery is Parent(whileLoop, s) \n"; 
 	result = pkb.getChildren(whileLoop);
-	std::cout << "Obtained " << result.size() << " results\n"; // 3
+	std::cout << "Obtained " << result.size() << " results\n"; // 5
 	for(int i=0; i<result.size(); i++) {
-		std::cout << "( 4, " << result[i]->getLine() << " ) ";
+		std::cout << "( whileLoop, " << result[i]->getLine() << " ) ";
 	} 
 
 	// Parent (s, 6)
@@ -224,13 +282,13 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// Parent (s, assignment)
 	std::cout << "\n\nQuery is Parent(s, assignment) \n"; 
 	result = pkb.getParents(assignment);
-	std::cout << "Obtained " << result.size() << " results\n"; // 1
+	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", a ) ";
 	} 
 
 	// follows (2, s)
-	std::cout << "\n\nQuery is Follows(4, s) \n"; 
+	std::cout << "\n\nQuery is Follows(2, s) \n"; 
 	result = pkb.getFollowing(2);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
@@ -240,7 +298,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// follows (whileLoop, s)
 	std::cout << "\n\nQuery is Follows(whileLoop, s) \n"; 
 	result = pkb.getFollowing(whileLoop);
-	std::cout << "Obtained " << result.size() << " results\n"; // 1
+	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( whileLoop, " << result[i]->getLine() << " ) ";
 	} 
@@ -254,9 +312,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	} 
 
 	// follows (s, assignment)
-	std::cout << "\n\nQuery is Parent(s, assignment) \n"; 
+	std::cout << "\n\nQuery is follows(s, assignment) \n"; 
 	result = pkb.getFollowedBy(assignment);
-	std::cout << "Obtained " << result.size() << " results\n"; // 1
+	std::cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", a ) ";
 	} 
