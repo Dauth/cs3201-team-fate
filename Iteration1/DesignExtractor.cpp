@@ -4,9 +4,9 @@
 #include "PKB.h"
 #include <vector>
 
-DesignExtractor::DesignExtractor(PKB* p){
+DesignExtractor::DesignExtractor(PKB* p,ExpressionTree* e){
 	pkb = p;
-	ExpressionTree et(pkb);
+	et = e;
 }
 
 //Functions for Parent*
@@ -179,11 +179,11 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		std::string firstChar = right.substr(0,0);
 
 		if (firstChar != "_"){
-			tNode = et.exptreeSetupSON(et.expressionConverter(right));
+			tNode = et->exptreeSetupSON(et->expressionConverter(right));
 		}
 
 		else{
-			tNode = et.exptreeSetupSON(et.expressionConverter(right.substr(1,right.length()-2)));
+			tNode = et->exptreeSetupSON(et->expressionConverter(right.substr(1,right.length()-2)));
 		}
 
 		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
