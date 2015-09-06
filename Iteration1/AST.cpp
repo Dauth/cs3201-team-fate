@@ -114,14 +114,15 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					}
 
 						assignStm->setLeftChild(assignVar);
-						twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
-						
+					
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
 						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, procNode, parentNode);
 
-						assignStm->setRightChild(assignExp);												
+						assignStm->setRightChild(assignExp);	
+
+						twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
 				}
 				
 			}
@@ -146,9 +147,9 @@ Return:		int
 */
 int AST::getStatementType(std::string input){
 	std::regex procedure("procedure\\s+[A-z]+\\s*\\{$");
-	std::regex callProc("call\\s+[A-z]+\\;\\}*$");
-	std::regex whileLoop("while\\s+[A-z]+\\s*\\{$");
-	std::regex assignStm("[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\}*$");
+	std::regex callProc("\\s*\\t*call\\s+[A-z]+\\;\\s*\\}*$");
+	std::regex whileLoop("\\s*\\t*while\\s+[A-z]+\\s*\\{$");
+	std::regex assignStm("\\s*\\t*[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\s*\\}*$");
 	
 	int result = -1;
 
@@ -165,17 +166,17 @@ int AST::getStatementType(std::string input){
 }
 
 /*
-This function returns a string which can be one of the following:procedure's name, name of procedure to be called, 
+This function returns a string without white spaces which can be one of the following:procedure's name, name of procedure to be called, 
 control variable of the while loop, variable of assignment, expresion of assignment
 Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("procedure\\s+([A-z])+\\s*\\{$");
-	std::regex callProcName("call\\s+([A-z])+\\;\\}*$");
-	std::regex whileLoopVar("while\\s+([A-z])+\\s*\\{$");
-	std::regex assignStmLeftHand("([A-z])+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\}*$");
-	std::regex assignStmRightHand("[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s])+\\;\\}*$");
+	std::regex procedureName("procedure\\s+([A-z]+)\\s*\\{$");
+	std::regex callProcName("\\s*\\t*call\\s+([A-z]+)\\;\\s*\\}*$");
+	std::regex whileLoopVar("\\s*\\t*while\\s+([A-z]+)\\s*\\{$");
+	std::regex assignStmLeftHand("\\s*\\t*([A-z]+)\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\s*\\}*$");
+	std::regex assignStmRightHand("\\s*\\t*[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s]+)\\;\\s*\\}*$");
 	std::smatch match;
 	
 	std::string outcome = "";
@@ -191,8 +192,13 @@ std::string AST::extractStatementPart(int inputType, std::string input){
 	}else if(inputType == ASSIGNSTMEXP){
 		std::regex_search(input, match, assignStmRightHand);
 	}
-
-	return match[0];
+  
+  if(match.length() > 0){
+    outcome = match[1];
+    outcome.erase(std::remove(outcome.begin(), outcome.end(), ' '),outcome.end());
+  }
+  
+	return outcome;
 }
 
 /*
@@ -213,5 +219,13 @@ int AST::getNumOfClosingbraces(std::string input){
 	return result;
 }
 
+std::vector<std::string> AST::printAST(std::vector<Node*> astVector){
+	for(unsigned int i = 0; i < astVector.size(); i++){
+		Node* procNode = astVector[i];
+		
+		Node* stmLst = procNode->getLeftChild();
+		stmLst->getStmtLst();
 
+	}
+}
 
