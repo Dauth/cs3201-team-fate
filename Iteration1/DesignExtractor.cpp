@@ -6,7 +6,7 @@
 
 DesignExtractor::DesignExtractor(PKB* p){
 	pkb = p;
-	ExpressionTree et;
+	ExpressionTree et(pkb);
 }
 
 //Functions for Parent*
@@ -189,7 +189,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
 		for (unsigned int i = 0 ; i < exprList.size() ; i++){
 			Node* tNode2 = exprList.at(i);
-			int compareResult = compare(tNode2,tNode);
+			int compareResult = DesignExtractor::compare(tNode2,tNode);
 			if(compareResult != 0){
 				Node* parentNode = tNode2 ->getParent();
 				if (firstChar != "_"){

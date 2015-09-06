@@ -3,10 +3,12 @@
 #include "stdafx.h"
 #include "Node.h"
 #include "PKB.h"
+#include "ExpressionTree.h"
 
 class DesignExtractor{
 	PKB* pkb;
 	ExpressionTree et;
+	int compare(Node*, Node*);
 public:
 	DesignExtractor(PKB*);
 
