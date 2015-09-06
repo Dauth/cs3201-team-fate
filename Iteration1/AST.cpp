@@ -18,10 +18,10 @@ const int ASSIGNSTMEXP = 5;
 using namespace std;
 
 
-AST::AST(){
-	PKB pkb;
-	ExpressionTree expTree;
-}
+AST::AST(PKB* p, ExpressionTree* e){
+	pkb = p;
+	expTree = e;
+};
 
 /*
 This function processes a vector which contains the source file
@@ -42,8 +42,8 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			int statementType = getStatementType(line);
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
-				Node* procStm = pkb.createProcedure(currentProcName);
-				Node* stmLst = pkb.createNode(statementList, i + 1);
+				Node* procStm = pkb->createProcedure(currentProcName);
+				Node* stmLst = pkb->createNode(statementList, i + 1);
 				procStm->setLeftChild(stmLst);
 				mainProg.push_back(procStm);
 
@@ -59,15 +59,15 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 					std::string varName = extractStatementPart(WHILESTM, line);
 
-					Node* whileStm = pkb.createNode(whileLoop, i + 1);
+					Node* whileStm = pkb->createNode(whileLoop, i + 1);
 					
 
-					Node* whileVar = pkb.createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
+					Node* whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, familyVector.front());//leftnode
 					whileStm->setLeftChild(whileVar);
 					whileVar->setRoot(familyVector.front());
 					whileVar->setParent(familyVector[familyVector.size() - 1]);
 
-					Node* whileStmLst = pkb.createNode(statementList, i + 1);	//rightnode
+					Node* whileStmLst = pkb->createNode(statementList, i + 1);	//rightnode
 					
 
 					whileStm->setRightChild(whileStmLst);
@@ -84,7 +84,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 						cout<<"----RECURSIVE CALL NOT ALLOWED----";
 					}
 
-					Node* tCall = pkb.createNode(call, i + 1, callProcName);
+					Node* tCall = pkb->createNode(call, i + 1, callProcName);
 
 					tCall->setParent(familyVector[familyVector.size() - 1]);
 					tCall->setRoot(familyVector.front());
@@ -92,9 +92,9 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					stmLstParentVector[stmLstParentVector.size() - 1]->addStmt(tCall);
 
 				}else if(statementType == ASSIGNSTM){
-						Node* assignStm = pkb.createNode(assignment, i + 1);
+						Node* assignStm = pkb->createNode(assignment, i + 1);
 
-						Node* assignVar = pkb.createNode(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line), 
+						Node* assignVar = pkb->createNode(variable, i + 1, extractStatementPart(ASSIGNSTMVAR, line), 
 							nullptr, assignStm, nullptr, familyVector.front());
 						assignStm->setLeftChild(assignVar);
 						assignVar->setRoot(familyVector.front());
@@ -102,13 +102,13 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 						
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
-						std::vector<char> postflix = expTree.expressionConverter(inflix);
+						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
 						Node* parentNode = NULL;
 						if(familyVector.size() > 1){// since procNode is inside the list, it is to prevent it from being set as parent of other nodes
 							parentNode = familyVector[familyVector.size() - 1];
 						}
-						Node* assignExp = expTree.exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
+						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, familyVector.front(), parentNode);
 
 						assignStm->setRightChild(assignExp);
 						assignExp->setRoot(familyVector.front());
@@ -139,10 +139,10 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	std::regex procedure("procedure\s+\w+\s*{$");
-	std::regex callProc("call\s+(\w+);}*$");
-	std::regex whileLoop("while\s+\w*\s*{$");
-	std::regex assignStm("\w+=[A-z0-9*+-\s]+;}*$");
+	regex procedure("procedure\s+\w+\s*{$");
+	regex callProc("call\s+(\w+);}*$");
+	regex whileLoop("while\s+\w*\s*{$");
+	regex assignStm("\w+=[A-z0-9*+-\s]+;}*$");
 
 	int result = -1;
 
@@ -165,12 +165,12 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("procedure\s+(\w+)\s*{$");
-	std::regex callProcName("call\s+(\w+);}*$");
-	std::regex whileLoopVar("while\s+(\w*)\s*{$");
-	std::regex assignStmLeftHand("(\w+)=[A-z0-9*+-]+;}*$");
-	std::regex assignStmRightHand("(\w+=([A-z0-9*+-\s]+);}*$");
-	std::smatch match;
+	regex procedureName("procedure\s+(\w+)\s*{$");
+	regex callProcName("call\s+(\w+);}*$");
+	regex whileLoopVar("while\s+(\w*)\s*{$");
+	regex assignStmLeftHand("(\w+)=[A-z0-9*+-]+;}*$");
+	regex assignStmRightHand("(\w+=([A-z0-9*+-\s]+);}*$");
+	smatch match;
 	
 	std::string outcome = "";
 
