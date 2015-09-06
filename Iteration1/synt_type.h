@@ -9,5 +9,6 @@ enum synt_type {
 	variable,
 	expression,
 	constant,
-	integer
+	integer,
+	errorr
 };

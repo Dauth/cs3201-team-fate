@@ -10,5 +10,6 @@ enum query_type {
 	next,
 	nextStar,
 	affects,
-	affectsStar
+	affectsStar,
+	error,
 };
