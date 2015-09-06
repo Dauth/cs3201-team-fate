@@ -17,53 +17,125 @@ void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
 
 void QueryEvaluator::evaluatePattern() {
 	PatternNode* pattern = tree->getPattern();
-	std::vector<Node*> result;
 	while(pattern) {
-		if(pattern->getMiddleParam()->getType() == expression) {
-			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), pattern->getMiddleParam()->getParam(), pattern->getRightParam()->getParam());
-		} else {
-			result = dEx->searchWithPattern(pattern->getLeftParam()->getType(), "_", pattern->getRightParam()->getParam());
-		}
-		hasResult = resultNotEmpty(pattern->getLeftParam(), result);
+		evaluateSinglePattern(pattern);
+		pattern = tree->getPattern();
 	}
+}
+
+void QueryEvaluator::evaluateSinglePattern(PatternNode* p) {
+	std::vector<Node*> tempResult;
+	if(p->getMiddleParam()->getType() == expression) {
+		tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), p->getMiddleParam()->getParam(), p->getRightParam()->getParam());
+	} else {
+		std::vector<Node*> var;
+		int index = symbol->getIndex(p->getMiddleParam()->getParam());
+		if(symbol->getQuery().at(index)->getPKBOutput().empty()) {
+			tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), "_", p->getRightParam()->getParam());
+		} else {
+			std::set<Node*> temp;
+			std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
+			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
+				tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), (**i).getVariable()->getName(), p->getRightParam()->getParam());
+				for(std::vector<Node*>::iterator j = tempResult.begin(); j != tempResult.end(); j++){
+				temp.insert(*j);
+			}
+		}
+		tempResult.clear();
+		for(std::set<Node*>::iterator i = temp.begin(); i != temp.end(); i++) {
+			tempResult.push_back(*i);
+			}
+		}
+		var = getVarFromPattern(tempResult);
+		hasResult = resultNotEmpty(p->getMiddleParam(), var);
+		if(!tempResult.empty()) {
+			sc.addPattern(p);
+		}
+	}
+	hasResult = resultNotEmpty(p->getLeftParam(), tempResult);
 }
 
 void QueryEvaluator::evaluateQuery() {
 	QueryNode* query = tree->getQuery();
-	std::vector<Node*> result;
 	while(query) {
-		ParamNode* left = query->getLeftParam();
-		ParamNode* right = query->getRightParam();
-		ParamNode* arg = getOptimal(left, right);
-		if(left == arg) {
-			result = evaluateRight(query->getType(), arg);
-			hasResult = resultNotEmpty(right, result);
-		} else {
-			result = evaluateLeft(query->getType(), arg);
-			hasResult = resultNotEmpty(left, result);
-		}
+		evaluateSingleQuery(query);
 		query = tree->getQuery();
 	}
 }
 
-std::vector<Node*> QueryEvaluator::evaluateLeft(query_type type, ParamNode* pnode) {
-	if(pnode->getType() == integer) {
-		return evaluateLeftByType(type, std::stoi(pnode->getParam()));
-	} else if(pnode->getType() == expression) {
-		return evaluateLeftByType(type, pnode->getParam());
+void QueryEvaluator::evaluateSingleQuery(QueryNode* q) {
+	ParamNode* left = q->getLeftParam();
+	ParamNode* right = q->getRightParam();
+	ParamNode* arg = getOptimal(left, right);
+	if(left == arg) {
+		hasResult = evaluateRight(right, q->getType(), left);
+		if(hasResult && left->getType() != integer && left->getType() != expression) {
+			hasResult = evaluateLeft(left, q->getType(), right);
+			sc.addQuery(q);
+		}
 	} else {
-		return evaluateLeftByType(type, pnode->getType());
+		hasResult = evaluateLeft(left, q->getType(), right);
+		if(hasResult && right->getType() != integer && right->getType() != expression) {
+			hasResult = evaluateRight(right, q->getType(), left);
+			sc.addQuery(q);
+		}
 	}
 }
 
-std::vector<Node*> QueryEvaluator::evaluateRight(query_type type, ParamNode* pnode) {
-	if(pnode->getType() == integer) {
-		return evaluateRightByType(type, std::stoi(pnode->getParam()));
-	} else if(pnode->getType() == expression) {
-		return evaluateRightByType(type, pnode->getParam());
+bool QueryEvaluator::evaluateLeft(ParamNode* rNode, query_type type, ParamNode* lNode) {
+	std::vector<Node*> result;
+	if(lNode->getType() == integer) {
+		result = evaluateLeftByType(type, std::stoi(lNode->getParam()));
+	} else if(lNode->getType() == expression) {
+		result = evaluateLeftByType(type, lNode->getParam());
 	} else {
-		return evaluateRightByType(type, pnode->getType());
+		int index = symbol->getIndex(lNode->getParam());
+		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
+		if(varVec.empty()) {
+			result = evaluateLeftByType(type, lNode->getType());
+		} else {
+			std::set<Node*> temp;
+			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
+				result = evaluateLeftByType(type, (**i).getVariable()->getName());
+				for(std::vector<Node*>::iterator j = result.begin(); j != result.end(); j++) {
+					temp.insert(*j);
+				}
+			}
+			result.clear();
+			for(std::set<Node*>::iterator i = temp.begin(); i != temp.end(); i++) {
+				result.push_back(*i);
+			}
+		}
 	}
+	return resultNotEmpty(rNode, result);
+}
+
+bool QueryEvaluator::evaluateRight(ParamNode* lNode, query_type type, ParamNode* rNode) {
+	std::vector<Node*> result;
+	if(rNode->getType() == integer) {
+		result = evaluateRightByType(type, std::stoi(rNode->getParam()));
+	} else if(rNode->getType() == expression) {
+		result = evaluateRightByType(type, rNode->getParam());
+	} else {
+		int index = symbol->getIndex(rNode->getParam());
+		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
+		if(varVec.empty()) {
+			result = evaluateRightByType(type, rNode->getType());
+		} else {
+			std::set<Node*> temp;
+			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
+				result = evaluateRightByType(type, (**i).getVariable()->getName());
+				for(std::vector<Node*>::iterator j = result.begin(); j != result.end(); i++) {
+					temp.insert(*j);
+				}
+			}
+			result.clear();
+			for(std::set<Node*>::iterator i = temp.begin(); i != temp.end(); i++) {
+				result.push_back(*i);
+			}
+		}
+	}
+	return resultNotEmpty(lNode, result);
 }
 
 std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, int lineNum) {
@@ -242,38 +314,69 @@ ParamNode* QueryEvaluator::getOptimal(ParamNode* left, ParamNode* right) {
 	}
 }
 
+std::vector<Node*> QueryEvaluator::getVarFromPattern(std::vector<Node*> nVec) {
+	std::vector<Node*> vVec;
+	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); ++i) {
+		vVec.push_back((**i).getLeftChild());
+
+	}
+	return vVec;
+}
+
 bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
 	int symIndex = symbol->getIndex(pNode->getParam());
 	std::vector<Node*> resultVec;
-	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); i++) {
+
+	//get all Node* with same type as pNode
+	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); ++i) {
 		if(pNode->getType() == (**i).getType()) {
 			resultVec.push_back(*i);
 		}
 	}
+
 	std::vector<Node*> symVec = symbol->getQuery().at(symIndex)->getPKBOutput();
+
+	//intersect resultVec and symVec
 	if(resultVec.size() == 0) {
 		return false;
-	} else if(symVec.size() == 0) {
-		symbol->getQuery().at(symIndex)->setPKBOutput(resultVec);
 	} else {
-		std::vector<Node*> newVec;
-		for(std::vector<Node*>::iterator i = resultVec.begin(); i != resultVec.end(); i++) {
-			for(std::vector<Node*>::iterator j = symVec.begin(); j != symVec.end(); j++) {
-				if(*i == *j) {
-					newVec.push_back(*i);
-					break;
+		if(symVec.size() == 0) {
+			symbol->getQuery().at(symIndex)->setPKBOutput(resultVec);
+		} else {
+			std::vector<Node*> newVec;
+			for(std::vector<Node*>::iterator i = resultVec.begin(); i != resultVec.end(); i++) {
+				for(std::vector<Node*>::iterator j = symVec.begin(); j != symVec.end(); j++) {
+					if(*i == *j) {
+						newVec.push_back(*i);
+						break;
+					}
 				}
 			}
+			symbol->getQuery().at(symIndex)->setPKBOutput(newVec);
 		}
-		symbol->getQuery().at(symIndex)->setPKBOutput(newVec);
+		if(symVec.size() > symbol->getQuery().at(symIndex)->getPKBOutput().size()) {
+			changePartners(pNode);
+		}
 	}
 	return true;
+}
+
+void QueryEvaluator::changePartners(ParamNode* pNode) {
+	std::vector<PatternNode*> pVec = sc.getPatterns(pNode->getParam());
+	for(std::vector<PatternNode*>::iterator i = pVec.begin(); i != pVec.end(); i++) {
+		evaluateSinglePattern(*i);
+	}
+	std::vector<QueryNode*> qVec = sc.getQueries(pNode->getParam());
+	for(std::vector<QueryNode*>::iterator i = qVec.begin(); i != qVec.end(); i++) {
+		evaluateSingleQuery(*i);
+	}
 }
 
 void QueryEvaluator::evaluateResult() {
 	std::string result;
 	if(hasResult) {
-		for(std::vector<Data*>::iterator i = symbol->getQuery().begin(); i != symbol->getQuery().end(); i++) {
+		std::vector<Data*> symData = symbol->getQuery();
+		for(std::vector<Data*>::iterator i = symData.begin(); i != symData.end(); i++) {
 			if((**i).getResult()) {
 				result = getStringResult(*i);
 				break;
@@ -290,29 +393,37 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 	std::string sResult;
 	std::vector<Node*> nResult;
 	if(sData->getPKBOutput().size() == 0) {
-		nResult = pkb->getStatement(sData->getVarType());
+		nResult = pkb->getNodes(sData->getVarType());
 	} else {
 		nResult = sData->getPKBOutput();
 	}
 	if(sData->getVarType() != variable) {
-		std::ostringstream oss;
-		oss << nResult.at(0)->getLine();
-		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
-			oss << ", ";
-			oss << (**i).getLine();
+		std::set<int> sortedRes;
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
+			sortedRes.insert((**i).getLine());
 		}
-		sResult.append(oss.str());
+		if(!sortedRes.empty()) {
+			std::ostringstream oss;
+			std::set<int>::iterator i = sortedRes.begin();
+			oss << *i;
+			for(i++; i != sortedRes.end(); i++){
+				oss << ", ";
+				oss << *i;
+			}
+			sResult.append(oss.str());
+		}
 	} else {
 		std::set<std::string> sortedRes;
-		sortedRes.insert(nResult.at(0)->getVariable()->getName());
-		for(std::vector<Node*>::iterator i = nResult.begin() + 1; i != nResult.end(); i++){
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
 			sortedRes.insert((**i).getVariable()->getName());
 		}
-		std::set<std::string>::iterator i = sortedRes.begin();
-		sResult.append(*i);
-		for(i++; i != sortedRes.end(); i++){
-			sResult.append(", ");
+		if(!sortedRes.empty()) {
+			std::set<std::string>::iterator i = sortedRes.begin();
 			sResult.append(*i);
+			for(i++; i != sortedRes.end(); i++){
+				sResult.append(", ");
+				sResult.append(*i);
+			}
 		}
 	}
 	return sResult;
