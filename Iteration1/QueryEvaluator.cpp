@@ -95,10 +95,14 @@ bool QueryEvaluator::evaluateLeft(ParamNode* rNode, query_type type, ParamNode* 
 			result = evaluateLeftByType(type, lNode->getType());
 		} else {
 			std::set<Node*> temp;
-			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
-				result = evaluateLeftByType(type, (**i).getVariable()->getName());
-				for(std::vector<Node*>::iterator j = result.begin(); j != result.end(); j++) {
-					temp.insert(*j);
+			for(int i = 0; i < varVec.size(); i++) {
+				if(varVec.at(i)->getType() == variable) {
+					result = evaluateLeftByType(type, varVec.at(i)->getVariable()->getName());
+				} else {
+					result = evaluateLeftByType(type, varVec.at(i)->getLine());
+				}
+				for(int j = 0; j < result.size(); j++) {
+					temp.insert(result.at(j));
 				}
 			}
 			result.clear();
@@ -123,10 +127,14 @@ bool QueryEvaluator::evaluateRight(ParamNode* lNode, query_type type, ParamNode*
 			result = evaluateRightByType(type, rNode->getType());
 		} else {
 			std::set<Node*> temp;
-			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
-				result = evaluateRightByType(type, (**i).getVariable()->getName());
-				for(std::vector<Node*>::iterator j = result.begin(); j != result.end(); i++) {
-					temp.insert(*j);
+			for(int i = 0; i < varVec.size(); i++) {
+				if(varVec.at(i)->getType() == variable) {
+					result = evaluateRightByType(type, varVec.at(i)->getVariable()->getName());
+				} else {
+					result = evaluateRightByType(type, varVec.at(i)->getLine());
+				}
+				for(int j = 0; j < result.size(); j++) {
+					temp.insert(result.at(j));
 				}
 			}
 			result.clear();
