@@ -140,7 +140,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 	std::vector<Node*> result;
 	//if the pattern is for a while loop
 	if (type == whileLoop){
-		std::vector<Node*> whileList = pkb->getStatement(whileLoop);
+		std::vector<Node*> whileList = pkb->getNodes(whileLoop);
 		if (left == "_"){
 			result = whileList;
 		}
@@ -159,11 +159,11 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		//if the expression was "_"
 		if (right == "_"){
 			if (left == "_"){
-				result = pkb->getStatement(assignment);
+				result = pkb->getNodes(assignment);
 				return result;
 			}
 			else{
-				std::vector<Node*> assignList  = pkb->getStatement(assignment);
+				std::vector<Node*> assignList  = pkb->getNodes(assignment);
 				for(unsigned int i = 0 ; i < assignList.size() ; i++){
 					if(assignList.at(i)->getLeftChild()->getVariable()->getName() == left){
 						result.push_back(assignList.at(i));

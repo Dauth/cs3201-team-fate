@@ -19,7 +19,7 @@ void Symbol::setResult(int index)
 {
 	symbolTable.at(index)->setResult(true);
 }
-std::vector<Data*>& Symbol::getQuery()
+std::vector<Data*> Symbol::getQuery()
 {	
 	return symbolTable;
 }

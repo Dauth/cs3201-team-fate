@@ -9,15 +9,18 @@ class Variable {
 	std::string name;
 	std::set<Node*> usedBy;
 	std::set<Node*> modifiedBy;
+	std::vector<Node*> nodes;
 	
 public:
 	Variable(std::string);
 	std::string getName();
 	std::vector<Node*> getUsedBy();
 	std::vector<Node*> getModifiedBy();
+	std::vector<Node*> getNodes();
 
 	void addUsedBy(Node*);
 	void addModifiedBy(Node*);
+	void addNode(Node*);
 };
 
 #endif
