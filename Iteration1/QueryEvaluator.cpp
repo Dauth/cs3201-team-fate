@@ -83,17 +83,17 @@ void QueryEvaluator::evaluateSingleQuery(QueryNode* q) {
 	}
 }
 
-bool QueryEvaluator::evaluateLeft(ParamNode* rNode, query_type type, ParamNode* lNode) {
+bool QueryEvaluator::evaluateLeft(ParamNode* lNode, query_type type, ParamNode* rNode) {
 	std::vector<Node*> result;
-	if(lNode->getType() == integer) {
-		result = evaluateLeftByType(type, std::stoi(lNode->getParam()));
-	} else if(lNode->getType() == expression) {
-		result = evaluateLeftByType(type, lNode->getParam());
+	if(rNode->getType() == integer) {
+		result = evaluateLeftByType(type, std::stoi(rNode->getParam()));
+	} else if(rNode->getType() == expression) {
+		result = evaluateLeftByType(type, rNode->getParam());
 	} else {
-		int index = symbol->getIndex(lNode->getParam());
+		int index = symbol->getIndex(rNode->getParam());
 		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
 		if(varVec.empty()) {
-			result = evaluateLeftByType(type, lNode->getType());
+			result = evaluateLeftByType(type, rNode->getType());
 		} else {
 			std::set<Node*> temp;
 			for(int i = 0; i < varVec.size(); i++) {
@@ -112,20 +112,20 @@ bool QueryEvaluator::evaluateLeft(ParamNode* rNode, query_type type, ParamNode* 
 			}
 		}
 	}
-	return resultNotEmpty(rNode, result);
+	return resultNotEmpty(lNode, result);
 }
 
-bool QueryEvaluator::evaluateRight(ParamNode* lNode, query_type type, ParamNode* rNode) {
+bool QueryEvaluator::evaluateRight(ParamNode* rNode, query_type type, ParamNode* lNode) {
 	std::vector<Node*> result;
-	if(rNode->getType() == integer) {
-		result = evaluateRightByType(type, std::stoi(rNode->getParam()));
-	} else if(rNode->getType() == expression) {
-		result = evaluateRightByType(type, rNode->getParam());
+	if(lNode->getType() == integer) {
+		result = evaluateRightByType(type, std::stoi(lNode->getParam()));
+	} else if(lNode->getType() == expression) {
+		result = evaluateRightByType(type, lNode->getParam());
 	} else {
-		int index = symbol->getIndex(rNode->getParam());
+		int index = symbol->getIndex(lNode->getParam());
 		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
 		if(varVec.empty()) {
-			result = evaluateRightByType(type, rNode->getType());
+			result = evaluateRightByType(type, lNode->getType());
 		} else {
 			std::set<Node*> temp;
 			for(int i = 0; i < varVec.size(); i++) {
@@ -144,89 +144,11 @@ bool QueryEvaluator::evaluateRight(ParamNode* lNode, query_type type, ParamNode*
 			}
 		}
 	}
-	return resultNotEmpty(lNode, result);
+	return resultNotEmpty(rNode, result);
 }
 
 std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, int lineNum) {
 	switch(type) {
-		case follows		:
-			return pkb->getFollowing(lineNum);
-		case followsStar	:
-			return dEx->getFollowingStar(lineNum);
-		case parent			:
-			return pkb->getChildren(lineNum);
-		case parentStar		:
-			return dEx->getChildrenStar(lineNum);
-		/*case calls			:
-		case callsStar		:
-		case next			:
-		case nextStar		:
-		case affects		:
-		case affectsStar	:*/
-		default				:
-			std::vector<Node*> empty;
-			return empty;
-	}
-}
-
-std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, std::string expr) {
-	switch(type) {
-		case modifies		:
-			return pkb->getModifiedBy(expr);
-		case uses			:
-			return pkb->getUsedBy(expr);
-		case follows		:
-			return pkb->getFollowing(statement);
-		case followsStar	:
-			return dEx->getFollowingStar(statement);
-		case parent			:
-			return pkb->getChildren(statement);
-		case parentStar		:
-			return dEx->getChildrenStar(statement);
-		/*case calls			:
-		case callsStar		:
-		case next			:
-		case nextStar		:
-		case affects		:
-		case affectsStar	:*/
-		default				:
-			std::vector<Node*> empty;
-			return empty;
-	}
-}
-
-std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type qType, synt_type sType) {
-	switch(qType) {
-		case modifies		:
-			return pkb->getModifiedBy(sType);
-		case uses			:
-			return pkb->getUsedBy(sType);
-		case follows		:
-			return pkb->getFollowing(sType);
-		case followsStar	:
-			return dEx->getFollowingStar(sType);
-		case parent			:
-			return pkb->getChildren(sType);
-		case parentStar		:
-			return dEx->getChildrenStar(sType);
-		/*case calls			:
-		case callsStar		:
-		case next			:
-		case nextStar		:
-		case affects		:
-		case affectsStar	:*/
-		default				:
-			std::vector<Node*> empty;
-			return empty;
-	}
-}
-
-std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, int lineNum) {
-	switch(type) {
-		case modifies		:
-			return pkb->getModifies(lineNum);
-		case uses			:
-			return pkb->getUses(lineNum);
 		case follows		:
 			return pkb->getFollowedBy(lineNum);
 		case followsStar	:
@@ -247,6 +169,84 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, int line
 	}
 }
 
+std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, std::string expr) {
+	switch(type) {
+		case modifies		:
+			return pkb->getModifiedBy(expr);
+		case uses			:
+			return pkb->getUsedBy(expr);
+		case follows		:
+			return pkb->getFollowedBy(statement);
+		case followsStar	:
+			return dEx->getFollowedByStar(statement);
+		case parent			:
+			return pkb->getParent(statement);
+		case parentStar		:
+			return dEx->getParentsStar(statement);
+		/*case calls			:
+		case callsStar		:
+		case next			:
+		case nextStar		:
+		case affects		:
+		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
+	}
+}
+
+std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type qType, synt_type sType) {
+	switch(qType) {
+		case modifies		:
+			return pkb->getModifiedBy(sType);
+		case uses			:
+			return pkb->getUsedBy(sType);
+		case follows		:
+			return pkb->getFollowedBy(sType);
+		case followsStar	:
+			return dEx->getFollowedByStar(sType);
+		case parent			:
+			return pkb->getParent(sType);
+		case parentStar		:
+			return dEx->getParentsStar(sType);
+		/*case calls			:
+		case callsStar		:
+		case next			:
+		case nextStar		:
+		case affects		:
+		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
+	}
+}
+
+std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, int lineNum) {
+	switch(type) {
+		case modifies		:
+			return pkb->getModifies(lineNum);
+		case uses			:
+			return pkb->getUses(lineNum);
+		case follows		:
+			return pkb->getFollowing(lineNum);
+		case followsStar	:
+			return dEx->getFollowingStar(lineNum);
+		case parent			:
+			return pkb->getChildren(lineNum);
+		case parentStar		:
+			return dEx->getChildrenStar(lineNum);
+		/*case calls			:
+		case callsStar		:
+		case next			:
+		case nextStar		:
+		case affects		:
+		case affectsStar	:*/
+		default				:
+			std::vector<Node*> empty;
+			return empty;
+	}
+}
+
 std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, std::string expr) {
 	switch(type) {
 		case modifies		:
@@ -254,13 +254,13 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, std::str
 		case uses			:
 			return pkb->getUses(expr);
 		case follows		:
-			return pkb->getFollowedBy(statement);
+			return pkb->getFollowing(statement);
 		case followsStar	:
-			return dEx->getFollowedByStar(statement);
+			return dEx->getFollowingStar(statement);
 		case parent			:
-			return pkb->getParents(statement);
+			return pkb->getChildren(statement);
 		case parentStar		:
-			return dEx->getParentsStar(statement);
+			return dEx->getChildrenStar(statement);
 		/*case calls			:
 		case callsStar		:
 		case next			:
@@ -280,13 +280,13 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type qType, synt_ty
 		case uses			:
 			return pkb->getUses(sType);
 		case follows		:
-			return pkb->getFollowedBy(sType);
+			return pkb->getFollowing(sType);
 		case followsStar	:
-			return dEx->getFollowedByStar(sType);
+			return dEx->getFollowingStar(sType);
 		case parent			:
-			return pkb->getParents(sType);
+			return pkb->getChildren(sType);
 		case parentStar		:
-			return dEx->getParentsStar(sType);
+			return dEx->getChildrenStar(sType);
 		/*case calls			:
 		case callsStar		:
 		case next			:
@@ -302,21 +302,18 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type qType, synt_ty
 ParamNode* QueryEvaluator::getOptimal(ParamNode* left, ParamNode* right) {
 	int leftTypeNum = std::numeric_limits<int>::max();
 	int rightTypeNum = std::numeric_limits<int>::max();
-	if(left->getParam() != "_") {
-		leftTypeNum = pkb->getCount(left->getType());
-	}
-	if(right->getParam() != "_") {
-		rightTypeNum = pkb->getCount(right->getType());
-	}
 	if(left->getType() == integer) {
 		return left;
 	} else if(right->getType() == integer) {
 		return right;
-	} else if(left->getType() == expression && left->getParam() == "_") {
+	} else if(left->getType() == expression) {
 		return left;
-	} else if(right->getType() == expression && right->getParam() == "_") {
+	} else if(right->getType() == expression) {
 		return right;
-	} else if(leftTypeNum < rightTypeNum) {
+	} 
+	leftTypeNum = pkb->getCount(left->getType());
+	rightTypeNum = pkb->getCount(right->getType());
+	if(leftTypeNum < rightTypeNum) {
 		return left;
 	} else {
 		return right;
