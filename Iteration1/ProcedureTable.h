@@ -9,7 +9,8 @@ class ProcedureTable {
 	
 public:
 	ProcedureTable();
-	Node* getOrCreateProcedure(std::string);
+	Node* createProcedure(std::string);
+	Node* getProcedure(std::string);
 };
 
 #endif

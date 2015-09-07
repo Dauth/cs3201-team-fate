@@ -19,8 +19,9 @@ int PKB::getCount(synt_type st) {
 	return statementTable.getStatementCount(st);
 }
 
+// if returns nullpt procedure already exists
 Node* PKB::createProcedure(std::string procName) {
-	return procedureTable.getOrCreateProcedure(procName);
+	return procedureTable.createProcedure(procName);
 }
 
 Node* PKB::createNode(synt_type st, int line, std::string value, 
@@ -90,7 +91,7 @@ void PKB::handleParent(Node* child, Node* parent) {
 }
 
 std::vector<Node*> PKB::getModifies(std::string procName) {
-	Node* procedure = procedureTable.getOrCreateProcedure(procName);
+	Node* procedure = procedureTable.getProcedure(procName);
 	return modifiesTable.getModified(procedure);
 }
 
@@ -125,7 +126,7 @@ std::vector<Node*> PKB::getModifiedBy(synt_type st) {
 }
 
 std::vector<Node*> PKB::getUses(std::string procName) {
-	Node* procedure = procedureTable.getOrCreateProcedure(procName);
+	Node* procedure = procedureTable.getProcedure(procName);
 	return usesTable.getUsed(procedure);
 }
 
@@ -176,11 +177,13 @@ std::vector<Node*> PKB::getChildren(synt_type st) {
 }
 
 std::vector<Node*> PKB::getParent(int statementLine) {
-	Node* child = statementTable.getStatement(statementLine);
-	Node* parent = child->getParent()->getParent();
 	std::vector<Node*> parents;
-	if(parent != nullptr && (parent->getType() == whileLoop || parent->getType() == ifelse)) {
-		parents.push_back(parent);
+	Node* child = statementTable.getStatement(statementLine);
+	if (child != nullptr) {
+		Node* parent = child->getParent()->getParent();
+		if(parent != nullptr && (parent->getType() == whileLoop || parent->getType() == ifelse)) {
+			parents.push_back(parent);
+		}
 	}
 	return parents;
 }
@@ -196,11 +199,14 @@ std::vector<Node*> PKB::getParents(synt_type st) {
 
 std::vector<Node*> PKB::getFollowing(int statementLine) {
 	Node* statement = statementTable.getStatement(statementLine);
-	Node* node = getFollowing(statement);
-	if(node != nullptr) {
-		return std::vector<Node*>(1, node);
+	std::vector<Node*> following;
+	if (statement != nullptr) {
+		Node* node = getFollowing(statement);
+		if(node != nullptr) {
+			following.push_back(node);
+		}
 	}
-	return std::vector<Node*>();
+	return following;
 }
 
 //private
@@ -227,11 +233,14 @@ std::vector<Node*> PKB::getFollowing(synt_type st) {
 
 std::vector<Node*> PKB::getFollowedBy(int statementLine) {
 	Node* statement = statementTable.getStatement(statementLine);
-	Node* node = getFollowedBy(statement);
-	if(node != nullptr) {
-		return std::vector<Node*>(1, node);
+	std::vector<Node*> followedBy;
+	if (statement != nullptr) {
+		Node* node = getFollowedBy(statement);
+		if(node != nullptr) {
+			followedBy.push_back(node);
+		}
 	}
-	return std::vector<Node*>();
+	return followedBy;
 }
 
 //private

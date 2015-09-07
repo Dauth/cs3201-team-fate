@@ -6,6 +6,9 @@ StatementTable::StatementTable () {
 }
 
 Node* StatementTable::getStatement(int statementNum) {
+	if ( table.find(statementNum) == table.end() ) {
+		return nullptr;
+	}
 	return table[statementNum];
 }
 
