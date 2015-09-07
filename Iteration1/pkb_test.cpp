@@ -5,24 +5,8 @@
 #include <iostream>
 #include "PKB.h"
 
-int _tmain(int argc, _TCHAR* argv[]) {
-	PKB pkb;
 
-	// procedure test {
-	// 1. y = 3
-	// 2. x = 4
-	// 3. z = x + y
-	// 4. While x {
-	// 5.	a = z + y + x
-	// 6.	b = a + z
-	// 7.	While y {
-	// 8.		t = a + x }
-	// 9.	c = z + x }
-	// 10. x = x + z
-	// 11. a = 3 + y
-
-	// usedby, modifiedby, parent, procedure
-
+void setupTestData(PKB &pkb) {
 	// procedure test {
 	Node* proc = pkb.createProcedure("test");
 	Node* testStmtLst1 = pkb.createNode(statementList, 1);
@@ -148,50 +132,66 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	s11e_plus->setLeftChild(s11c_3);
 	s11e_plus->setRightChild(s11v_z);
 	testStmtLst1->addStmt(s11);
+}
 
+// Modifies ("test", v)
+void testModifiesProc(PKB &pkb) {
 	std::vector<Node*> result;
-
-	// Modifies ("test", v)
-	std::cout << "Qeury is Modifies(\"test\", v) \n"; 
+	std::cout << "Query is Modifies(\"test\", v) \n"; 
 	result = pkb.getModifies("test");
 	std::cout << "Obtained " << result.size() << " results\n"; // 9
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
-	// Modifies (5, v)
+// Modifies (5, v)
+void testModifiesStmt(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Modifies(5, v) \n"; 
 	result = pkb.getModifies(5);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Modifies (assignment, v)
+void testModifiesAssign(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Modifies(assignment, v) \n"; 
 	result = pkb.getModifies(assignment);
 	std::cout << "Obtained " << result.size() << " results\n"; // 9
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Modifies (whileLoop, v)
-	std::cout << "\n\n\Query is whileLoop(assignment, v) \n"; 
+void testModifiesWhile(PKB &pkb) {
+	std::vector<Node*> result;
+	std::cout << "\n\n\Query is Modifies(whileLoop, v) \n"; 
 	result = pkb.getModifies(whileLoop);
 	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Modifies (s/p, "y")
+void testModifiedBySpecifiedVar(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Modifies(s/p, \"y\") \n"; 
 	result = pkb.getModifiedBy("y");
 	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
 	} 
+}
 
 	// Modifies (s/p, variable)
+void testModifiedByVarType(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQeury is Modifies(s/p, variable) \n"; 
 	result = pkb.getModifiedBy(variable);
 	std::cout << "Obtained " << result.size() << " results\n"; // 12
@@ -199,126 +199,233 @@ int _tmain(int argc, _TCHAR* argv[]) {
 		std::cout << "( " << result[i]->getLine() << ", v ) ";
 	}
 
-	// Modifies (s/p, "y")
+}
+
+	// Modifies (s/p, "t")
+void testModifiedByNested(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Modifies(s/p, \"t\") \n"; 
 	result = pkb.getModifiedBy("t");
 	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
 	} 
+}
 
 	// Uses ("test", v)
+void testUsesProc(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Uses(\"test\", v) \n"; 
 	result = pkb.getUses("test");
 	std::cout << "Obtained " << result.size() << " results\n"; // 16
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Uses (5, v)
+void testUsesStmt(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Uses(5, v) \n"; 
 	result = pkb.getUses(5);
 	std::cout << "Obtained " << result.size() << " results\n"; // 3
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	}
+}
 
 	// Uses (assignment, v)
+void testUsesAssign(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Uses(assignment, v) \n"; 
 	result = pkb.getUses(assignment);
 	std::cout << "Obtained " << result.size() << " results\n"; // 14
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Uses (whileLoop, v)
+void testUsesWhile(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Uses(whileLoop, v) \n"; 
 	result = pkb.getUses(whileLoop);
 	std::cout << "Obtained " << result.size() << " results\n"; // 11
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( whileLoop, " << result[i]->getVariable()->getName() << " ) ";
 	} 
+}
 
 	// Uses (s, "y")
+void testUsedBySpecificVar(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Uses(s/p, \"y\") \n"; 
 	result = pkb.getUsedBy("y");
 	std::cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", \"y\" ) ";
 	} 
+}
 
 	// Uses (s, variable)
+void testUsedByVarType(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\n\Query is Uses(s/p, variable) \n"; 
 	result = pkb.getUsedBy(variable);
 	std::cout << "Obtained " << result.size() << " results\n"; // 10
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", v ) ";
 	} 
+}
 
 	// Parent (4, s)
+void testParentStatement(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Parent(4, s) \n"; 
 	result = pkb.getChildren(4);
 	std::cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( 4, " << result[i]->getLine() << " ) ";
 	} 
+}
 
 	// Parent (whileLoop, s)
+void testParentWhile(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Parent(whileLoop, s) \n"; 
 	result = pkb.getChildren(whileLoop);
 	std::cout << "Obtained " << result.size() << " results\n"; // 5
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( whileLoop, " << result[i]->getLine() << " ) ";
 	} 
+}
 
 	// Parent (s, 6)
+void testChildStatement(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Parent(s, 6) \n"; 
 	result = pkb.getParent(6);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", 6 ) ";
 	} 
+}
 
 	// Parent (s, assignment)
+void testChildAssign(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Parent(s, assignment) \n"; 
 	result = pkb.getParents(assignment);
 	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", a ) ";
 	} 
+}
 
 	// follows (2, s)
+void testFollowsStatement(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Follows(2, s) \n"; 
 	result = pkb.getFollowing(2);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( 2, " << result[i]->getLine() << " ) ";
 	} 
+}
 
 	// follows (whileLoop, s)
+void testFollowsWhile(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is Follows(whileLoop, s) \n"; 
 	result = pkb.getFollowing(whileLoop);
 	std::cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( whileLoop, " << result[i]->getLine() << " ) ";
-	} 
+	}
+}
 
 	// follows (s, 6)
+void testFollowedByStatement(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is follows(s, 6) \n"; 
 	result = pkb.getFollowedBy(6);
 	std::cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", 6 ) ";
 	} 
+}
 
 	// follows (s, assignment)
+void testFollowedByAssignment(PKB &pkb) {
+	std::vector<Node*> result;
 	std::cout << "\n\nQuery is follows(s, assignment) \n"; 
 	result = pkb.getFollowedBy(assignment);
 	std::cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {
 		std::cout << "( " << result[i]->getLine() << ", a ) ";
 	} 
+}
+
+int _tmain(int argc, _TCHAR* argv[]) {
+
+	PKB pkb;
+
+	// procedure test {
+	// 1. y = 3
+	// 2. x = 4
+	// 3. z = x + y
+	// 4. While x {
+	// 5.	a = z + y + x
+	// 6.	b = a + z
+	// 7.	While y {
+	// 8.		t = a + x }
+	// 9.	c = z + x }
+	// 10. x = x + z
+	// 11. a = 3 + y
+
+	setupTestData(pkb);
+	// Modifies ("test", v)
+	testModifiesProc(pkb);
+	// Modifies (5, v)
+	testModifiesStmt(pkb);
+	// Modifies (assignment, v)
+	testModifiesAssign(pkb);
+	// Modifies (whileLoop, v)
+	testModifiesWhile(pkb);
+	// Modifies (s/p, "y")
+	testModifiedBySpecifiedVar(pkb);
+	// Modifies (s/p, variable)
+	testModifiedByVarType(pkb);
+	// Modifies (s/p, "t")
+	testModifiedByNested(pkb);
+	// Uses ("test", v)
+	testUsesProc(pkb);
+	// Uses (5, v)
+	testUsesStmt(pkb);
+	// Uses (assignment, v)
+	testUsesAssign(pkb);
+	// Uses (whileLoop, v)
+	testUsesWhile(pkb);
+	// Uses (s, "y")
+	testUsedBySpecificVar(pkb);
+	// Uses (s, variable)
+	testUsedByVarType(pkb);
+	// Parent (4, s)
+	testParentStatement(pkb);
+	// Parent (whileLoop, s)
+	testParentWhile(pkb);
+	// Parent (s, 6)
+	testChildStatement(pkb);
+	// Parent (s, assignment)
+	testChildAssign(pkb);
+	// follows (2, s)
+	testFollowsStatement(pkb);
+	// follows (whileLoop, s)
+	testFollowsWhile(pkb);
+	// follows (s, 6)
+	testFollowedByStatement(pkb);
+	// follows (s, assignment)
+	testFollowedByAssignment(pkb);
 
 	std::cin.get();
 }
-
