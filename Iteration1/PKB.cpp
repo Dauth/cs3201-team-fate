@@ -265,6 +265,15 @@ std::vector<Node*> PKB::getExpressions(std::string expr, std::string varName) {
 	return expressionTable.getExpressions(expr, var);
 }
 
+std::vector<Node*> PKB::getRootExpressions(std::string expr) {
+	return expressionTable.getRootExpressions(expr);
+}
+
+std::vector<Node*> PKB::getRootExpressions(std::string expr, std::string varName) {
+	Variable* var = variableTable.getOrCreateVariable(varName);
+	return expressionTable.getRootExpressions(expr, var);
+}
+
 void PKB::debug() {
 
 }

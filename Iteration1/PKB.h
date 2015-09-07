@@ -80,6 +80,8 @@ public:
 	
 	std::vector<Node*> getExpressions(std::string);
 	std::vector<Node*> getExpressions(std::string, std::string);
+	std::vector<Node*> getRootExpressions(std::string);
+	std::vector<Node*> getRootExpressions(std::string, std::string);
 	void debug();
 };
 
