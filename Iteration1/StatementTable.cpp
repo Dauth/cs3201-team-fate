@@ -2,7 +2,7 @@
 #include "StatementTable.h"
 
 StatementTable::StatementTable () {
-
+	count[statement] = 0;
 }
 
 Node* StatementTable::getStatement(int statementNum) {
@@ -28,7 +28,8 @@ std::vector<Node*> StatementTable::getStatements(synt_type st) {
 	std::vector<Node*> nodes;
     for(std::map<int, Node*>::iterator it = table.begin(); it != table.end(); ++it) {
 		Node* node = it->second;
-		if (node->getType() == st) {
+		synt_type nt = node->getType();
+		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
 			nodes.push_back(node);
 		}
     }
@@ -42,6 +43,7 @@ void StatementTable::addStatement(int statementNum, Node* statementNode) {
 		count[statementNode->getType()] = 1; // magic number!!
 	} else {
 		int current = count[statementNode->getType()];
-		count[statementNode->getType()] = current += 1; // magic number!!
+		count[statementNode->getType()] = current + 1; // magic number!!
 	}
+	count[statement] = count[statement] + 1;
 }

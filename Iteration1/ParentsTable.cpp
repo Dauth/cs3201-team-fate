@@ -25,7 +25,8 @@ std::vector<Node*> ParentsTable::getChildren(synt_type st) {
 	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
 		std::vector<Node*> children = it->second;
 		for(int i=0; i<children.size(); i++) {
-			if(children[i]->getType() == st) {
+		synt_type nt = children[i]->getType();
+		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
 				allChildren.push_back(children[i]);
 			}
 		}

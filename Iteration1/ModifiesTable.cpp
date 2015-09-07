@@ -17,7 +17,8 @@ std::vector<Node*> ModifiesTable::getModifiers(synt_type st) {
 	std::vector<Node*> modifiers;
 	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); ++it) {
 		Node *node = it->first;
-		if (node->getType() == st) {
+		synt_type nt = node->getType();
+		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
 			modifiers.push_back(node);
 		}
     }
