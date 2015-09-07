@@ -8,6 +8,8 @@
 #include "QueryNode.h"
 #include "Symbol.h"
 #include "ParamNode.h"
+//#include "QueryEvaluator.h"
+// LINE 656 is where it is supposed to call evaluate from QueryEvaluator
 
 using namespace std;
 
@@ -15,11 +17,15 @@ enum TOKEN { SELECT, RESULT_CL, WITH_CL, SUCHTHAT_CL, PATTERN_CL };
 
 TOKEN currToken = TOKEN::SELECT;
 bool expectingThat = false;
-string concatStmt = "";
 bool resultBool = false;
-QueryTree rootTree;
+bool tupleError = false;
+bool nonExistantSyn = false;
+string concatStmt = "";
+
+QueryTree* rootTree = new QueryTree();
 Symbol newSymbol;
 bool suchThatQueryPass = false;
+bool patternPass = false;
 const string errorMsg = "ERROR : %s";
 
 //regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
@@ -35,9 +41,40 @@ regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z
 regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
+regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
+regex underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
 
 
-
+bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string secondParam, string thirdParam)
+{
+	bool valid = false;
+	regex underScore ("_");
+	if (currentSyn == synt_type::assignment)
+	{
+		if (regex_match(firstParam,varRef))
+		{
+			if (regex_match(secondParam,expressionSpec) || regex_match(secondParam,underScoresBothSides))
+			{
+				valid = true;
+			}
+		}
+	}
+	else if (currentSyn == synt_type::whileLoop)
+	{
+		if (regex_match(firstParam,varRef) && regex_match(secondParam, underScore))
+		{
+			valid = true;
+		}
+	}
+	else if (currentSyn == synt_type::ifelse)
+	{
+		if (regex_match(firstParam,varRef) && regex_match(secondParam,underScore) && regex_match(thirdParam, underScore))
+		{
+			valid = true;
+		}
+	}
+	return valid;
+}
 bool verifyCorrectParameters(query_type queryClause,string firstParam, string secondParam)
 {
 	bool valid = false;
@@ -130,11 +167,18 @@ bool verifyCorrectParameters(query_type queryClause,string firstParam, string se
 
 synt_type getSynType (string synType)
 {
-	regex doubleQuotes ("\"[^\"]\"");
+	regex doubleQuotes ("\"[^\"]+\"");
+	regex underScoreBothSides("_\"[^\"]+\"_");
+	regex underScoreOnly("_");
+
 	regex integer ("\\d+");
 	synt_type toReturn = synt_type::errorr;
 
-	if (regex_match(synType,doubleQuotes))
+	if (regex_match(synType,doubleQuotes)|| regex_match(synType,underScoreBothSides))
+	{
+		toReturn = synt_type::expression;
+	}
+	else if (regex_match(synType,underScoreOnly))
 	{
 		toReturn = synt_type::expression;
 	}
@@ -228,7 +272,7 @@ vector<string> split(const char *str, char c = ' ')
 	return result;
 }
 
-void GetToken(char *currentToken)
+void ProcessEachToken(char *currentToken)
 {
 	if (strcmp(currentToken,"Select") == 0)
 	{
@@ -260,18 +304,22 @@ void GetToken(char *currentToken)
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
 				
-				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+),([^\\)]+|[^\,]+)\\))");
+				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)(,([^\\)]+|[^\,]+)\\))+)");
 
 				concatStmt.append(currentToken);
 
 				if (regex_match(concatStmt,fullPattern))
 				{
 					string supposedSynonym = "";
+					synt_type patternSyn;
 					string firstParameter = "";
 					string secondParameter = "";
+					string thirdParameter = "";
 
 					bool inParameters = false;
 					bool passedFirstParam = false;
+					bool passedSecondParam = false;
+					bool ifSyn = false;
 
 					for(std::string::size_type i = 0; i < concatStmt.size(); ++i) {
 						if (concatStmt[i] == '(')
@@ -282,7 +330,20 @@ void GetToken(char *currentToken)
 							if (!isSynonymExist)
 							{
 								//TODO THROW ERROR because no such synonym in symbol table
+								nonExistantSyn = true;
 								break;
+							}
+							else
+							{
+								patternSyn = newSymbol.getSyntType(supposedSynonym);
+								if (patternSyn != synt_type::assignment | patternSyn != synt_type::whileLoop | patternSyn != synt_type::ifelse )
+								{
+									// TODO THROW ERROR because pattern only accepts three types of synonyms
+								}
+								if (patternSyn == synt_type::ifelse)
+								{
+									ifSyn = true;
+								}
 							}
 							inParameters = true;
 						}
@@ -292,27 +353,63 @@ void GetToken(char *currentToken)
 						}
 						else if (inParameters && concatStmt[i] != ',')
 						{
-							if(passedFirstParam) 
+							if (!ifSyn)
 							{
-								secondParameter += concatStmt[i];
+								if(passedFirstParam) 
+								{
+									secondParameter += concatStmt[i];
+								}
+								else {firstParameter += concatStmt[i]; }
 							}
-							else {firstParameter += concatStmt[i]; }
+							else
+							{
+								if(!passedFirstParam)
+								{
+									firstParameter += concatStmt[i];
+								}
+								else if (!passedSecondParam)
+								{
+									secondParameter += concatStmt[i];
+								}
+								else 
+								{
+									thirdParameter += concatStmt[i];
+								}
+
+							}
 						}
 						else if (concatStmt[i] == ',')
 						{
-							passedFirstParam = true;
+							if (!passedFirstParam)
+							{
+								passedFirstParam = true;
+							}
+							else
+							{
+								passedSecondParam = true;
+							}
 						}
 						else if (!inParameters)
 						{
 							supposedSynonym += concatStmt[i]; 
 						}
 					}
-
-
+					
+					if (verifyCorrectParameters(patternSyn,firstParameter,secondParameter,thirdParameter))
+					{
+						ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
+						synt_type middleParamSynType = getSynType(firstParameter);
+						synt_type rightParamSynType = getSynType(secondParameter);
+						ParamNode* middleParamNode = new ParamNode (middleParamSynType, firstParameter);
+						ParamNode* rightParamNode = new ParamNode (rightParamSynType,secondParameter);
+						PatternNode* newPattern = new PatternNode(leftParamNode,middleParamNode, rightParamNode);
+						rootTree->addPattern(newPattern);
+						patternPass = true;
+					}
 				}
 				else
 				{
-					// TODO THROW ERROR because pattern is in the wrong syntax
+					// TODO THROW ERROR because pattern is in the wrong syntax (doesn't match regex)
 				}
 				
 				
@@ -340,7 +437,7 @@ void GetToken(char *currentToken)
 					// code over here
 					for(std::vector<string>::iterator i = variablesTuple.begin(); i != variablesTuple.end(); i++)
 					{
-						if (!newSymbol.exists(*i)) { break;} // TODO THROW ERROR because variable doesn't exist
+						if (!newSymbol.exists(*i)) { tupleError = true; break;} // TODO THROW ERROR because variable doesn't exist
 					}
 
 				}
@@ -350,7 +447,7 @@ void GetToken(char *currentToken)
 				}
 				else
 				{
-					if (!newSymbol.exists(currentToken)) { } //TODO THROW ERROR because variable doesn't exist
+					if (!newSymbol.exists(currentToken)) { nonExistantSyn = true; } //TODO THROW ERROR because variable doesn't exist
 				}
 			}break;
 
@@ -421,11 +518,12 @@ void GetToken(char *currentToken)
 							ParamNode* firstParamNode = new ParamNode(firstSyn,firstParameter);
 							ParamNode* secondParamNode = new ParamNode (secondSyn, secondParameter);
 							QueryNode* newQuery = new QueryNode(queryClause,firstParamNode, secondParamNode);
-							rootTree.addQuery(newQuery);
+							rootTree->addQuery(newQuery);
+							suchThatQueryPass = true;
 						}			
 
 					}
-					suchThatQueryPass = true;
+					
 				}
 				// Else the such that clause doesn't match the regex, thus THROW ERROR
 				else
@@ -472,6 +570,34 @@ void Match (char *c)
 				{
 					newSyntType = synt_type::procedure;
 				}
+				else if (strcmp(pch,"stmtLst") == 0)
+				{
+					newSyntType = synt_type::statementList;
+				}
+				else if (strcmp(pch,"stmt") == 0 )
+				{
+					newSyntType = synt_type::statement;
+				}
+				else if (strcmp(pch,"call") == 0)
+				{
+					newSyntType = synt_type::call;
+				}
+				else if (strcmp(pch,"if") == 0)
+				{
+					newSyntType = synt_type::ifelse;
+				}
+				else if (strcmp(pch,"variable") == 0)
+				{
+					newSyntType = synt_type::variable;
+				}
+				else if (strcmp(pch,"constant") == 0)
+				{
+					newSyntType = synt_type::constant;
+				}
+				else if (strcmp(pch,"prog_line") == 0)
+				{
+					newSyntType = synt_type::progline;
+				}
 				entityTypeFound = true;
 			}
 			else
@@ -495,7 +621,7 @@ void Match (char *c)
 		while (pch != NULL)
 		{
 			printf ("For each word in select statement : %s\n",pch);
-			GetToken(pch);
+			ProcessEachToken(pch);
 			pch = strtok_s (NULL, " ",&end_token);
 		}
 	}
@@ -522,11 +648,20 @@ int main()
 	{
 		Match(token);
 		token = strtok_s(NULL, s,&end_str);
-
+		if (tupleError)
+		{
+			break;
+		}
 	}
-	if (!suchThatQueryPass)
+	if (!suchThatQueryPass | tupleError | nonExistantSyn |!patternPass)
 	{
 		//Throw error for query part
+	}
+	else // means there were no errors
+	{
+		printf("QUERY TREE DONE. NOW TO EVALUATE");
+		//QueryEvaluator evaluator (&newSymbol,rootTree);
+
 	}
 	int tt;
 	cin >>  tt;
