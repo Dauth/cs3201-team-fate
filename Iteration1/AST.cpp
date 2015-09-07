@@ -120,10 +120,20 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 						assignVar = pkb->createNode(variable, i + 1, varName, 
 							nullptr, assignStm, nullptr, procNode);
 					}
-
+					
 						assignStm->setLeftChild(assignVar);
 					
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
+						bool isInflixBalance = expTree->isInflixBalanced(inflix);
+
+						try{
+							if(!isInflixBalance){
+								throw i + 1;
+							}
+						}catch (int e){
+							std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
+						}
+
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
 						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, procNode, parentNode);
