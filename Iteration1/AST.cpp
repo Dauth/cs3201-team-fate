@@ -44,6 +44,15 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
 				Node* procStm = pkb->createProcedure(currentProcName);
+
+				try{
+					if(procStm == nullptr){
+						throw i + 1;
+					}
+				}catch(int e){
+					std::cout<<"DUPLICATED PROCEDURE APPEARED IN PROGRAM AT LINE NO:"<<e<<std::endl;
+				}
+
 				Node* stmLst = pkb->createNode(statementList, i + 1);
 				procStm->setLeftChild(stmLst);
 				mainProg.push_back(procStm);
