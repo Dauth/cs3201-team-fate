@@ -162,12 +162,12 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 			}
 		}
 	}
-	//when more opening then closing brackets
+	//same number of opening and closing brackets
 	if(tStack.empty()){
 		result = true;
 	}
 
-	return result;
+	return result;//if it is false here, there are more opening then closing brackets
 }
 
 
