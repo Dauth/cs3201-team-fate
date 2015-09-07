@@ -29,22 +29,19 @@ std::vector <char> ExpressionTree::expressionConverter(std::string inflixString)
 	
 	for(unsigned int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
-		const char *bChar = new char(cChar);
+		const char *bChar = &cChar;
 		char wChar;
 		
-		if(strcmp(bChar, OPENBRACKETS) == 0){
+		if(cChar == '('){
 			tStack.push(cChar);
-		}else if (strcmp(bChar, CLOSEDBRACKETS) == 0){
-			while(!tStack.empty()){
-				 wChar = tStack.top();
-				 tStack.pop();
-				 const char *dChar = new char(wChar);
-				 if(strcmp(dChar, OPENBRACKETS) == 0){
-					resultVector.push_back(wChar);	//push all operators which reside within the brackets
-				 }else{
-					 tStack.pop();
-				 }
+		}else if (cChar == ')'){
+			while(!tStack.empty() && tStack.top() != '('){
+				wChar = tStack.top();
+				tStack.pop();
+				const char *dChar = &wChar;
+				resultVector.push_back(wChar);	//push all operators which reside within the brackets					
 			}
+		tStack.pop();//to remove open brackets
 		}
 
 		if (isOperand(cChar)){
@@ -62,12 +59,11 @@ std::vector <char> ExpressionTree::expressionConverter(std::string inflixString)
 				tStack.push(cChar);
 			}
 		}
-
-		while(!tStack.empty()){
+	}
+  		while(!tStack.empty()){
 			resultVector.push_back(tStack.top());
 			tStack.pop();
 		}
-	}
 	return resultVector;
 }
 
@@ -115,7 +111,7 @@ Return:		bool
 */
 bool ExpressionTree::isOperator(char cChar){
 	bool result = false;
-	const char *bChar = new char(cChar);
+	const char *bChar = &cChar;
 	
 	if(strcmp(bChar, TIMES) == 0 || strcmp(bChar, PLUS) == 0 || strcmp(bChar, MINUS) == 0){
 		result = true;
@@ -132,7 +128,7 @@ Return:		int
 */
 int ExpressionTree::getPrecedence(char oOperator){
 	int result = -1;
-	const char *bChar = new char(oOperator);
+	const char *bChar = &oOperator;
 	
 	if(strcmp(bChar, TIMES) == 0){
 		result = 2;
