@@ -26,5 +26,5 @@ std::vector<std::string> SimpleParser::readSourceFile(std::string sourceFile){
 }
 
 std::vector<Node*> SimpleParser::execute(std::vector<string> sourceVector){
-	std::vector<Node*> resultTree = ast->buildAST(sourceVector);
+	return ast->buildAST(sourceVector);
 }

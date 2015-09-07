@@ -14,13 +14,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	DesignExtractor de = DesignExtractor(&pkb, &et);
 	QueryEvaluator qe = QueryEvaluator(&pkb, &de);
 
-	std::vector<std::string> r = sp.readSourceFile("C:\\Users\Kamui\Documents\Visual Studio 2010\Projects\cs3201projtest\simpletest.txt");
+	std::vector<std::string> r = sp.readSourceFile("C:\\Users\\temporal\\Documents\\simpletest.txt");
 	std::vector<Node*> a = sp.execute(r);
-	Node* proc = a[0];
-	std::cout << proc->getValue();
 
-	
-	/*
 	std::cout<< "variable v; assign a; stmt s; while w;";
 	Symbol* sym = new Symbol("v", variable);
 	sym->setVar("a", assignment);

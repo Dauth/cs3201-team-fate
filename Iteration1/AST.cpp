@@ -32,6 +32,7 @@ Return:		vector<Node*>
 */
 std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string line;
+	int lineNumber = 1;
 	std::string currentProcName;
 	std::vector<Node*> mainProg;
 	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
@@ -40,6 +41,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	
 	for(unsigned int i = 0; i < sourceVector.size(); i++){
 			line = sourceVector[i];
+			//std::cout << lineNumber << "." << line << "\n";
 			int statementType = getStatementType(line);
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
@@ -82,20 +84,24 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
 						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
-						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, parentNode, procNode);
-						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, parentNode, procNode);//leftnode
+						whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, parentNode, procNode);
+						whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, parentNode, procNode);//leftnode
 					}else if(twinVector.size() == 1){// only a procedure statementlist in it
-						whileStm = pkb->createNode(whileLoop, i + 1, "", nullptr, nullptr, nullptr, procNode);
-						whileVar = pkb->createNode(variable, i + 1, varName, nullptr, nullptr, procNode);//leftnode
+						whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, nullptr, procNode);
+						whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, nullptr, procNode);//leftnode
 					}
 							
 					whileStm->setLeftChild(whileVar);
 
-					Node* whileStmLst = pkb->createNode(statementList, i + 1);	//rightnode
+					Node* whileStmLst = pkb->createNode(statementList, lineNumber);	//rightnode
 					whileStm->setRightChild(whileStmLst);
 
 					Twin* tTwin = new Twin(whileStm, whileStmLst);
+
+					twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(whileStm);
+
 					twinVector.push_back(tTwin);
+					lineNumber += 1;
 
 				}else if(getStatementType(line) == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
@@ -107,11 +113,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 						std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
 					}
 
-					Node* tCall = pkb->createNode(call, i + 1, callProcName);
+					Node* tCall = pkb->createNode(call,lineNumber, callProcName);
 
 					twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(tCall);
-
+					lineNumber += 1;
 				}else if(statementType == ASSIGNSTM){
+
 					std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
 
 					Node* parentNode = nullptr;
@@ -121,12 +128,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
 						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
-						assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, parentNode, procNode);
-						assignVar = pkb->createNode(variable, i + 1, varName, 
+						assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, parentNode, procNode);
+						assignVar = pkb->createNode(variable, lineNumber, varName, 
 							nullptr, assignStm, parentNode, procNode);
 					}else if(twinVector.size() == 1){// only a procedure statementlist in it
-						assignStm = pkb->createNode(assignment, i + 1, "", nullptr, nullptr, nullptr, procNode);
-						assignVar = pkb->createNode(variable, i + 1, varName, 
+						assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, nullptr, procNode);
+						assignVar = pkb->createNode(variable, lineNumber, varName, 
 							nullptr, assignStm, nullptr, procNode);
 					}
 					
@@ -145,11 +152,13 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
-						Node* assignExp = expTree->exptreeSetup(postflix, i + 1, assignStm, procNode, parentNode);
+						Node* assignExp = expTree->exptreeSetup(postflix, lineNumber, assignStm, procNode, parentNode);
 
 						assignStm->setRightChild(assignExp);	
 
 						twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
+
+						lineNumber += 1;
 				}
 				
 			}
@@ -165,6 +174,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				while(bracesNo > 0){
 					bracesStack.pop();
 					twinVector.erase(twinVector.end() - 1);
+					bracesNo -= 1;
 				}
 			}
 	}

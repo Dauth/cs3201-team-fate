@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <string>
 #include <vector>
+#include <fstream>
 #include "QueryEvaluator.h"
 
 class QueryParser {
@@ -15,4 +16,5 @@ public:
 	QueryParser(qe*);
 	std::vector<std::string>QueryParser::readSourceFile(std::string);
 
+};
 #endif

@@ -173,9 +173,9 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 
 Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	Node* operatorRoot = pkb->createNode(expression, lineNo, str);
-	
-	for(int i = postflixExp.size() - 2; i >= 0; i++){
+	Node* operatorRoot = pkb->createNode(expression, lineNo, str, assignStmNode);
+
+	for(int i = postflixExp.size() - 2; i >= 0; i--){
 		char expressionChar = postflixExp[i];
 
 		if(isOperand(expressionChar) || isOperator(expressionChar)){//ignore brackets and other stuff
@@ -198,6 +198,8 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 			expressionCharType = variable;
 		}else if(isDigit(expressionChar)){
 			expressionCharType = constant;
+		} else {
+			expressionCharType = expression;
 		}
 
 		//root->setRoot(procNode);
@@ -213,9 +215,9 @@ Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char ex
 		}
 	}
 	else{
-		if(root->getRightChild() == NULL || isOperator(root->getRightChild()->getValue()[0])){
+		if(root->getRightChild() == nullptr || isOperator(root->getRightChild()->getValue()[0])){
 			root = insert(root->getRightChild(), root, RIGHT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
-		}else if(root->getLeftChild() == NULL && isOperator(root->getLeftChild()->getValue()[0])){
+		}else if(root->getLeftChild() == nullptr && isOperator(root->getLeftChild()->getValue()[0])){
 			root = insert(root->getLeftChild(), root, LEFT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
 		}
 	}
@@ -227,7 +229,7 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
 	std::string str(1, postflixExp[postflixExp.size() - 1]);
 	Node* operatorRoot = new Node(expression, 0, str);
 
-	for(int i = postflixExp.size() - 2; i >= 0; i++){
+	for(int i = postflixExp.size() - 2; i >= 0; i--){
 		std::string expressionChar(1, postflixExp[i]);
 		if(isOperator(postflixExp[i])){
 			Node* tNode = new Node(expression, 0, expressionChar);

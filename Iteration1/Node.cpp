@@ -6,6 +6,12 @@ Node::Node (synt_type st, int l, std::string v) {
 	SYNT_TYPE = st;
 	value = v;
 	line = l;
+	leftChild = nullptr;
+	rightChild = nullptr;
+	root = nullptr;
+	parent = nullptr;
+	expParent = nullptr;
+	var = nullptr;
 }
 
 Node::Node (synt_type st, std::string v) {
