@@ -157,12 +157,12 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 		}else if (cChar == ')'){
 			if(!tStack.empty()){
 				tStack.pop();
-			}else{	//e.g  5+)6+7
+			}else{	//when more closing then opening brackets
 				return result;
 			}
 		}
 	}
-
+	//when more opening then closing brackets
 	if(tStack.empty()){
 		result = true;
 	}
