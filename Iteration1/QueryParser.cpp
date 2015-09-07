@@ -303,7 +303,7 @@ void ProcessEachToken(char *currentToken)
 		case PATTERN_CL: 
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
-				
+
 				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)(,([^\\)]+|[^\,]+)\\))+)");
 
 				concatStmt.append(currentToken);
@@ -394,7 +394,7 @@ void ProcessEachToken(char *currentToken)
 							supposedSynonym += concatStmt[i]; 
 						}
 					}
-					
+
 					if (verifyCorrectParameters(patternSyn,firstParameter,secondParameter,thirdParameter))
 					{
 						ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
@@ -411,8 +411,8 @@ void ProcessEachToken(char *currentToken)
 				{
 					// TODO THROW ERROR because pattern is in the wrong syntax (doesn't match regex)
 				}
-				
-				
+
+
 			}
 			break;
 		case RESULT_CL: 
@@ -523,14 +523,14 @@ void ProcessEachToken(char *currentToken)
 						}			
 
 					}
-					
+
 				}
 				// Else the such that clause doesn't match the regex, thus THROW ERROR
 				else
 				{
 					//TODO THROW ERROR because the such that clause doesn't match the regex
 				}
-				
+
 			}break;
 
 		} // end of switch
@@ -605,7 +605,7 @@ void Match (char *c)
 				++count;
 				// store each variable in the symbol table
 				newSymbol.setVar(pch,newSyntType);
-				
+
 			}
 			pch = strtok_s (NULL, " ,",&end_token);
 		}
@@ -670,6 +670,19 @@ int main()
 	return 0;
 }
 
+vector<string> readSourceFile(std::string sourceFile){
+
+	string STRING;
+	ifstream infile;
+	infile.open (sourceFile);
+	while(!infile.eof()) // To get you all the lines.
+	{
+		getline(infile,STRING); // Saves the line in STRING.
+		cout<<STRING<<endl; // Prints our STRING.
+	}
+	infile.close();
+	system ("pause");
+}
 
 void print( vector <string> & v )
 {
