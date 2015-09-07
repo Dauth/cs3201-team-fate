@@ -147,14 +147,14 @@ Return:		bool
 */
 bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	bool result = false;
-	std::stack <std::string> tStack;
-	std::string cChar;
+	std::stack <char> tStack;
+	char cChar;
 
 	for(unsigned int i = 0; i < inflixString.length(); i++){
 		cChar = inflixString[i];
-		if(cChar.compare("(") == 0){
+		if(cChar == '('){
 			tStack.push(cChar);
-		}else if (cChar.compare(")") == 0){
+		}else if (cChar == ')'){
 			if(!tStack.empty()){
 				tStack.pop();
 			}else{	//e.g  5+)6+7
