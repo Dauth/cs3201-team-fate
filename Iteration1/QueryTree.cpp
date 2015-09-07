@@ -4,6 +4,8 @@
 QueryTree::QueryTree () {
 	firstQuery = NULL;
 	firstPattern = NULL;
+	currQuery = NULL;
+	currPattern = NULL;
 	lastAddedQuery = NULL;
 	lastAddedPattern = NULL;
 }

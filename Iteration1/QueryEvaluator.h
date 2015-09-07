@@ -14,7 +14,7 @@ class QueryEvaluator {
 	bool hasResult;
 	PKB* pkb;
 	DesignExtractor* dEx;
-	SymbolConnection sc;
+	SymbolConnection* sc;
 
 	void evaluatePattern();
 	void evaluateQuery();
