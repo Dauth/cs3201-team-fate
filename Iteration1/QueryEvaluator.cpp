@@ -7,6 +7,7 @@ QueryEvaluator::QueryEvaluator(PKB* p, DesignExtractor* de) {
 }
 
 void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
+	sc = new SymbolConnection();
 	hasResult = true;
 	symbol = s;
 	tree = qt;
@@ -49,7 +50,7 @@ void QueryEvaluator::evaluateSinglePattern(PatternNode* p) {
 		var = getVarFromPattern(tempResult);
 		hasResult = resultNotEmpty(p->getMiddleParam(), var);
 		if(!tempResult.empty()) {
-			sc.addPattern(p);
+			sc->addPattern(p);
 		}
 	}
 	hasResult = resultNotEmpty(p->getLeftParam(), tempResult);
@@ -71,13 +72,13 @@ void QueryEvaluator::evaluateSingleQuery(QueryNode* q) {
 		hasResult = evaluateRight(right, q->getType(), left);
 		if(hasResult && left->getType() != integer && left->getType() != expression) {
 			hasResult = evaluateLeft(left, q->getType(), right);
-			sc.addQuery(q);
+			sc->addQuery(q);
 		}
 	} else {
 		hasResult = evaluateLeft(left, q->getType(), right);
 		if(hasResult && right->getType() != integer && right->getType() != expression) {
 			hasResult = evaluateRight(right, q->getType(), left);
-			sc.addQuery(q);
+			sc->addQuery(q);
 		}
 	}
 }
@@ -337,7 +338,9 @@ bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
 
 	//get all Node* with same type as pNode
 	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); ++i) {
-		if(pNode->getType() == (**i).getType()) {
+		if(pNode->getType() == statement && ((**i).getType() == whileLoop || (**i).getType() == ifelse || (**i).getType() == assignment || (**i).getType() == call)) {
+			resultVec.push_back(*i);
+		} else if(pNode->getType() == (**i).getType()) {
 			resultVec.push_back(*i);
 		}
 	}
@@ -370,11 +373,11 @@ bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
 }
 
 void QueryEvaluator::changePartners(ParamNode* pNode) {
-	std::vector<PatternNode*> pVec = sc.getPatterns(pNode->getParam());
+	std::vector<PatternNode*> pVec = sc->getPatterns(pNode->getParam());
 	for(std::vector<PatternNode*>::iterator i = pVec.begin(); i != pVec.end(); i++) {
 		evaluateSinglePattern(*i);
 	}
-	std::vector<QueryNode*> qVec = sc.getQueries(pNode->getParam());
+	std::vector<QueryNode*> qVec = sc->getQueries(pNode->getParam());
 	for(std::vector<QueryNode*>::iterator i = qVec.begin(); i != qVec.end(); i++) {
 		evaluateSingleQuery(*i);
 	}
