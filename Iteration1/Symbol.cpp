@@ -51,7 +51,7 @@ bool Symbol::exists(std::string var)
 }
 synt_type Symbol::getSyntType(std::string var)
 {
-	synt_type toReturn = synt_type::errorr;
+	synt_type toReturn = synError;
 
 	for(std::vector<Data*>::iterator i = symbolTable.begin(); i != symbolTable.end(); i++)
 	{
