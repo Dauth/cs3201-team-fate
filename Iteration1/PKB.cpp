@@ -86,7 +86,6 @@ void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) 
 }
 
 void PKB::handleParent(Node* child, Node* parent) {
-	child->setParent(parent);
 	parentsTable.addChild(parent, child);
 }
 
@@ -281,8 +280,4 @@ std::vector<Node*> PKB::getRootExpressions(std::string expr) {
 std::vector<Node*> PKB::getRootExpressions(std::string expr, std::string varName) {
 	Variable* var = variableTable.getOrCreateVariable(varName);
 	return expressionTable.getRootExpressions(expr, var);
-}
-
-void PKB::debug() {
-
 }

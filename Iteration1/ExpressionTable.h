@@ -15,7 +15,6 @@ public:
 	std::vector<Node*> getRootExpressions(std::string, Variable*);
 
 	void addExpression(Node*);
-	void debug();
 };
 
 #endif

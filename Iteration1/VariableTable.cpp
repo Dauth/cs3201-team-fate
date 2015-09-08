@@ -54,7 +54,3 @@ void VariableTable::addUsedBy(std::string varName, Node* node) {
 void VariableTable::addNode(std::string varName, Node* node) {
 	table[varName]->addNode(node);
 }
-
-void VariableTable::debug() {
-	std::cout << table.size() << "\n";
-}
