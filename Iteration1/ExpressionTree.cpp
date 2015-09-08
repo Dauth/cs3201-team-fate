@@ -183,98 +183,56 @@ synt_type ExpressionTree::getSyntType(char expressionChar){
 }
 
 Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
-	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	synt_type expressionCharType = getSyntType(postflixExp[postflixExp.size() - 1]);
-
-	Node* operatorRoot = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
-
-	for(int i = postflixExp.size() - 2; i >= 0; i--){
-		char expressionChar = postflixExp[i];
-
-		if(isOperand(expressionChar) || isOperator(expressionChar)){//ignore brackets and other stuff
-			operatorRoot = insert(operatorRoot, operatorRoot, -1, expressionChar, lineNo, assignStmNode, procNode, parentNode);
-		}
-	}
-	return operatorRoot;
-}
-
-/*
-This function builds the expression tree
-Parameters: 
-Return:		Node*
-*/
-
-Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	synt_type expressionCharType;
-	if(root == nullptr){
-		expressionCharType = getSyntType(expressionChar);
-		//root->setRoot(procNode);
-		
-		std::string str(1, expressionChar);
-		if(leftOrRight == LEFT){
-			root = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
-			dupRoot->setLeftChild(root);
+	std::stack<Node*> operandStack;
 
-		}else if (leftOrRight == RIGHT){
-			root = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
-			dupRoot->setRightChild(root);
-		}
-	}
-	else{
-		if(root->getRightChild() == nullptr || isOperator(root->getRightChild()->getValue()[0])){
-			root = insert(root->getRightChild(), root, RIGHT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
-		}else if(root->getLeftChild() == nullptr && isOperator(root->getLeftChild()->getValue()[0])){
-			root = insert(root->getLeftChild(), root, LEFT, expressionChar, lineNo, assignStmNode, procNode, parentNode);
-		}
-	}
-	return root;
-}
-
-
-Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
-	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	synt_type expressionCharType = getSyntType(postflixExp[postflixExp.size() - 1]);
-	Node* operatorRoot = new Node(expressionCharType, 0, str);
-
-	for(int i = postflixExp.size() - 2; i >= 0; i--){
+	for(int i = 0; i < postflixExp.size(); i++){
 		std::string expressionChar(1, postflixExp[i]);
 		expressionCharType = getSyntType(postflixExp[i]);
-		if(isOperator(postflixExp[i])){
-			Node* tNode = new Node(expressionCharType, 0, expressionChar);
-			operatorRoot = insertSON(operatorRoot, tNode);
-		}else if (isOperand(postflixExp[i])){
-			Node* tNode = new Node(expressionCharType, 0, expressionChar);
-			operatorRoot = insertSON(operatorRoot, tNode);
+
+		if(isOperand(postflixExp[i])){
+			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
+			operandStack.push(tNode);
+		}else if (isOperator(postflixExp[i])){
+			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
+			tNode->setRightChild(operandStack.top());
+			operandStack.pop();
+
+			tNode->setLeftChild(operandStack.top());
+			operandStack.pop();
+
+			operandStack.push(tNode);
 		}
 	}
-	return operatorRoot;
+
+	return operandStack.top();
 }
 
-/*
-This function builds the expression tree
-Parameters: 
-Return:		Node*
-*/
+Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
+	synt_type expressionCharType;
+	std::stack<Node*> operandStack;
 
-Node* ExpressionTree::insertSON(Node* root, Node* node){
-	if(root == nullptr ){
-		root = node;
-	}
-	else{
-		if(root->getRightChild() == nullptr){
-			root->setRightChild(node);
-			node->setParent(root);
-			insertSON(root->getRightChild(), node);
-		}else if(isOperator(root->getRightChild()->getValue()[0])){
-			insertSON(root->getRightChild(), node);
-		}else if(root->getLeftChild() == nullptr){
-			root->setLeftChild(node);
-			node->setParent(root);
-			insertSON(root->getLeftChild(), node);
-		}else if (isOperator(root->getLeftChild()->getValue()[0])){
-			insertSON(root->getLeftChild(), node);
+	for(int i = 0; i < postflixExp.size(); i++){
+		std::string expressionChar(1, postflixExp[i]);
+		expressionCharType = getSyntType(postflixExp[i]);
+		Node* tNode = new Node(expressionCharType, 0, expressionChar);
+
+		if(isOperand(postflixExp[i])){
+			operandStack.push(tNode);
+		}else if (isOperator(postflixExp[i])){
+			operandStack.top()->setParent(tNode);
+			tNode->setRightChild(operandStack.top());
+			operandStack.pop();
+
+			operandStack.top()->setParent(tNode);
+			tNode->setLeftChild(operandStack.top());
+			operandStack.pop();
+
+			operandStack.push(tNode);
 		}
 	}
-	return root;
+
+	return operandStack.top();
 }
+
 

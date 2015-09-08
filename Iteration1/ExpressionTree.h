@@ -13,8 +13,6 @@ private:
 	bool ExpressionTree::isAlpha(char);
 	bool ExpressionTree::isDigit(char);
 	int ExpressionTree::getPrecedence(char);
-	Node* ExpressionTree::insert(Node*, Node*, int, char, int, Node*, Node*, Node*);
-	Node* ExpressionTree::insertSON(Node*, Node*);
 	synt_type ExpressionTree::getSyntType(char);
 
 public:
