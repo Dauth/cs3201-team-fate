@@ -9,6 +9,9 @@ std::vector<Node*> PKB::getNodes(synt_type st) {
 	if(st == variable) {
 		return variableTable.getVariableNodes();
 	}
+	if(st == constant) {
+		return constants;
+	}
 	return statementTable.getStatements(st);
 }
 
@@ -31,6 +34,8 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 		Variable* var = variableTable.getOrCreateVariable(value);
 		variableTable.addNode(value, node);
 		node->setVar(var);
+	} else if (st == constant) {
+		constants.push_back(node);
 	}
 
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {

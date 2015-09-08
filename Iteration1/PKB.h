@@ -21,6 +21,7 @@ class PKB {
 	ExpressionTable expressionTable;
 	ProcedureTable procedureTable;
 	StatementTable statementTable;
+	std::vector<Node*> constants;
 
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
