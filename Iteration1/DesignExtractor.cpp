@@ -36,7 +36,7 @@ std::vector<Node*> DesignExtractor::getChildrenStar(synt_type type){
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		if(tempList.at(i) -> getType() == whileLoop){
-			std::vector<Node*> tempList2 = getChildrenStar(tempList.at(i)->getType());
+			std::vector<Node*> tempList2 = getChildrenStar(tempList.at(i)->getLine());
 			childList.insert(childList.end(),tempList2.begin(),tempList2.end());
 		}
 	}
@@ -66,7 +66,7 @@ std::vector<Node*> DesignExtractor::getParentsStar(synt_type type){
 	parentList = pkb->getParent(type);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getLine());
 		parentList.insert(parentList.end(),tempList2.begin(),tempList2.end());
 	}
 	return parentList;
@@ -97,7 +97,7 @@ std::vector<Node*> DesignExtractor::getFollowingStar(synt_type type){
 	followList = pkb->getFollowing(type);
 	std::vector<Node*> tempList = followList;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getLine());
 		followList.insert(followList.end(),tempList2.begin(),tempList2.end());
 	}
 
@@ -127,7 +127,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 	followedBy = pkb->getFollowedBy(type);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
-		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getType());
+		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
 		followedBy.insert(followedBy.end(),tempList2.begin(),tempList2.end());
 	}
 
