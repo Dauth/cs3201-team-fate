@@ -49,7 +49,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					throw i + 1;
 				}
 			}catch(int e){
-				std::cout<<"UNKNOWN STATEMENT TYPE DETECTED AT LINE NO:"<<e<<std::endl;
+				std::cout<<"UNKNOWN STATEMENT TYPE OR DOES NOT END WITH SEMICOLON DETECTED AT LINE NO:"<<e<<std::endl;
 			}
 
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
