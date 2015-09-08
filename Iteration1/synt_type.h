@@ -10,5 +10,6 @@ enum synt_type {
 	expression,
 	constant,
 	integer,
-	errorr
+	synError,
+	progline
 };
