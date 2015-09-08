@@ -18,7 +18,7 @@ void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
 
 void QueryEvaluator::evaluatePattern() {
 	PatternNode* pattern = tree->getPattern();
-	while(pattern) {
+	while(pattern && hasResult) {
 		evaluateSinglePattern(pattern);
 		pattern = tree->getPattern();
 	}
@@ -58,7 +58,7 @@ void QueryEvaluator::evaluateSinglePattern(PatternNode* p) {
 
 void QueryEvaluator::evaluateQuery() {
 	QueryNode* query = tree->getQuery();
-	while(query) {
+	while(query && hasResult) {
 		evaluateSingleQuery(query);
 		query = tree->getQuery();
 	}
@@ -67,18 +67,22 @@ void QueryEvaluator::evaluateQuery() {
 void QueryEvaluator::evaluateSingleQuery(QueryNode* q) {
 	ParamNode* left = q->getLeftParam();
 	ParamNode* right = q->getRightParam();
-	ParamNode* arg = getOptimal(left, right);
-	if(left == arg) {
-		hasResult = evaluateRight(right, q->getType(), left);
-		if(hasResult && left->getType() != integer && left->getType() != expression) {
-			hasResult = evaluateLeft(left, q->getType(), right);
-			sc->addQuery(q);
-		}
+	if((q->getType() == follows || q->getType() == followsStar || q->getType() == parent || q->getType() == parentStar) && left->getParam() == right->getParam()) {
+		hasResult = false;
 	} else {
-		hasResult = evaluateLeft(left, q->getType(), right);
-		if(hasResult && right->getType() != integer && right->getType() != expression) {
+		ParamNode* arg = getOptimal(left, right);
+		if(left == arg) {
 			hasResult = evaluateRight(right, q->getType(), left);
-			sc->addQuery(q);
+			if(hasResult && left->getType() != integer && left->getType() != expression) {
+				hasResult = evaluateLeft(left, q->getType(), right);
+				sc->addQuery(q);
+			}
+		} else {
+			hasResult = evaluateLeft(left, q->getType(), right);
+			if(hasResult && right->getType() != integer && right->getType() != expression) {
+				hasResult = evaluateRight(right, q->getType(), left);
+				sc->addQuery(q);
+			}
 		}
 	}
 }
@@ -324,7 +328,6 @@ std::vector<Node*> QueryEvaluator::getVarFromPattern(std::vector<Node*> nVec) {
 	std::vector<Node*> vVec;
 	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); ++i) {
 		vVec.push_back((**i).getLeftChild());
-
 	}
 	return vVec;
 }
@@ -334,11 +337,13 @@ bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
 	std::vector<Node*> resultVec;
 
 	//get all Node* with same type as pNode
-	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); ++i) {
-		if(pNode->getType() == statement && ((**i).getType() == whileLoop || (**i).getType() == ifelse || (**i).getType() == assignment || (**i).getType() == call)) {
+	for(std::vector<Node*>::iterator i = nVec.begin(); i != nVec.end(); i++) {
+		if((pNode->getType() == statement && ((**i).getType() == whileLoop || (**i).getType() == ifelse || (**i).getType() == assignment || (**i).getType() == call)) || pNode->getType() == (**i).getType()) {
 			resultVec.push_back(*i);
-		} else if(pNode->getType() == (**i).getType()) {
-			resultVec.push_back(*i);
+		} else if(pNode->getType() == integer && std::stoi(pNode->getParam()) == (**i).getLine()) {
+			return true;
+		} else if(pNode->getType() == expression && pNode->getParam() == (**i).getVariable()->getName()) {
+			return true;
 		}
 	}
 
@@ -390,9 +395,9 @@ void QueryEvaluator::evaluateResult() {
 				break;
 			}
 		}
-		if(result.empty()) {
+		/*if(result.empty()) {
 			result = "true";
-		}
+		}*/
 	}
 	std::cout<<result;
 }
