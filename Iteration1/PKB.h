@@ -80,9 +80,7 @@ public:
 	std::vector<Node*> getFollowedBy(synt_type);
 	
 	std::vector<Node*> getExpressions(std::string);
-	std::vector<Node*> getExpressions(std::string, std::string);
 	std::vector<Node*> getRootExpressions(std::string);
-	std::vector<Node*> getRootExpressions(std::string, std::string);
 };
 
 #endif

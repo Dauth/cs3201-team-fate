@@ -10,9 +10,7 @@ class ExpressionTable {
 public:
 	ExpressionTable();
 	std::vector<Node*> getExpressions(std::string);
-	std::vector<Node*> getExpressions(std::string, Variable*);
 	std::vector<Node*> getRootExpressions(std::string);
-	std::vector<Node*> getRootExpressions(std::string, Variable*);
 
 	void addExpression(Node*);
 };

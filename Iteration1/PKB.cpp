@@ -37,13 +37,16 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 	} else if (st == constant) {
 		constants.push_back(node);
 	}
-
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {
 		statementTable.addStatement(line, node);
 	} else if (st == expression ) {
 		expressionTable.addExpression(node);
 		node->setVar(usedBy->getVariable());
 	}
+	if ((st == constant || st == variable ) && usedBy != nullptr && usedBy->getType() == assignment) {
+		expressionTable.addExpression(node);
+	}
+
 	if (modifiedBy != nullptr && st == variable) {
 		handleModifiedBy(node, modifiedBy, procedure, parent);
 	}
@@ -273,16 +276,6 @@ std::vector<Node*> PKB::getExpressions(std::string expr) {
 	return expressionTable.getExpressions(expr);
 }
 
-std::vector<Node*> PKB::getExpressions(std::string expr, std::string varName) {
-	Variable* var = variableTable.getOrCreateVariable(varName);
-	return expressionTable.getExpressions(expr, var);
-}
-
 std::vector<Node*> PKB::getRootExpressions(std::string expr) {
 	return expressionTable.getRootExpressions(expr);
-}
-
-std::vector<Node*> PKB::getRootExpressions(std::string expr, std::string varName) {
-	Variable* var = variableTable.getOrCreateVariable(varName);
-	return expressionTable.getRootExpressions(expr, var);
 }
