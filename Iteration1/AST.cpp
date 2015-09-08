@@ -44,14 +44,6 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			//std::cout << lineNumber << "." << line << "\n";
 			int statementType = getStatementType(line);
 
-			try{
-				if(statementType == -1){
-					throw i + 1;
-				}
-			}catch(int e){
-				std::cout<<"UNKNOWN STATEMENT TYPE OR DOES NOT END WITH SEMICOLON DETECTED AT LINE NO:"<<e<<std::endl;
-			}
-
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
 				Node* procStm = pkb->createProcedure(currentProcName);
