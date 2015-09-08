@@ -87,8 +87,8 @@ void Node::setRightChild(Node* node) {
 }
 
 void Node::addStmt(Node* node) {
-	indexLst[node] = stmtLst.size();
-	stmtLst[stmtLst.size()] = node;
+	indexLst[node] = stmtLst.size() + 1;
+	stmtLst[stmtLst.size() + 1] = node; //magic number!!
 	node->setParent(this);
 }
 

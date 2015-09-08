@@ -212,7 +212,7 @@ std::vector<Node*> PKB::getFollowing(int statementLine) {
 Node* PKB::getFollowing(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
-	if(index < stmtLstNode->getIndexLst().size()) {
+	if(index < (stmtLstNode->getIndexLst().size())) {
 		return stmtLstNode->getStmtLst()[index + 1]; // magic number!!!
 	}
 	return nullptr;
