@@ -41,10 +41,11 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 		statementTable.addStatement(line, node);
 	} else if (st == expression ) {
 		expressionTable.addExpression(node);
-		node->setVar(usedBy->getVariable());
+		node->setExpParent(usedBy);
 	}
 	if ((st == constant || st == variable ) && usedBy != nullptr && usedBy->getType() == assignment) {
 		expressionTable.addExpression(node);
+		node->setExpParent(usedBy);
 	}
 
 	if (modifiedBy != nullptr && st == variable) {
