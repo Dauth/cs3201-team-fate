@@ -66,6 +66,14 @@ bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string sec
 			{
 				valid = true;
 			}
+			else
+			{
+				errorMsg += "- Invalid second parameter of the pattern.";
+			}
+		}
+		else
+		{
+			errorMsg += "- Invalid first parameter of the pattern.";
 		}
 	}
 	else if (currentSyn == synt_type::whileLoop)
@@ -316,7 +324,7 @@ void ProcessEachToken(char *currentToken)
 		case TOKEN::PATTERN_CL: 
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
-
+				patternExist = true;
 				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)(\,([^\\)]+|[^\,]+)\\))+)");
 
 				concatStmt.append(currentToken);
@@ -447,6 +455,7 @@ void ProcessEachToken(char *currentToken)
 					for(std::vector<string>::iterator i = variablesTuple.begin(); i != variablesTuple.end(); i++)
 					{
 						if (!newSymbol.exists(*i)) { tupleError = true; break;} // TODO THROW ERROR because variable doesn't exist
+						else {newSymbol.setResult(newSymbol.getIndex(currentToken));}
 					}
 					concatStmt = "";
 
@@ -466,7 +475,7 @@ void ProcessEachToken(char *currentToken)
 					} //TODO THROW ERROR because variable doesn't exist
 					else
 					{
-
+						newSymbol.setResult(newSymbol.getIndex(currentToken));
 					}
 				}
 			}break;
@@ -688,7 +697,7 @@ void readSourceFile(std::string sourceFile){
 				break;
 			}
 		}
-		if ((suchThatQueryPass == false && suchThatQueryExist))
+		if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
 		{
 			//Throw error for query part
 			cout << errorMsg;
@@ -704,7 +713,7 @@ void readSourceFile(std::string sourceFile){
 	system ("pause");
 }
 
-
+// Start here
 int main()
 {
 	string sourceFile;
