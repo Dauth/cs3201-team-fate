@@ -217,13 +217,13 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 					}
 				}
 				else{
+					while(parentNode->getType()!= assignment){
+						parentNode = parentNode ->getParent();
+					}
 					if (left == "_"){
 						result.push_back(parentNode);	
 					}
 					else{
-						while(parentNode->getType()!= assignment){
-							parentNode = parentNode ->getParent();
-						}
 						if(parentNode->getLeftChild()->getVariable()->getName() == left){
 							result.push_back(parentNode);
 						}
