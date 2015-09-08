@@ -22,9 +22,9 @@ std::vector<Node*> StatementTable::getStatements() {
 
 int StatementTable::getStatementCount(synt_type st) {
 	if ( count.find(st) == count.end() ) {
-		return count[st];
+		return 0;
 	}
-	return 0;
+	return count[st];
 }
 
 std::vector<Node*> StatementTable::getStatements(synt_type st) {
