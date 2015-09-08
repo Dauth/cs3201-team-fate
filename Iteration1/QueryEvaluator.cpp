@@ -410,7 +410,33 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 	} else {
 		nResult = sData->getPKBOutput();
 	}
-	if(sData->getVarType() != variable) {
+	if(sData->getVarType() == constant) {
+		std::set<std::string> sortedRes;
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
+			sortedRes.insert((**i).getValue());
+		}
+		if(!sortedRes.empty()) {
+			std::set<std::string>::iterator i = sortedRes.begin();
+			sResult.append(*i);
+			for(i++; i != sortedRes.end(); i++){
+				sResult.append(", ");
+				sResult.append(*i);
+			}
+		}
+	} else if(sData->getVarType() == variable) {
+		std::set<std::string> sortedRes;
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
+			sortedRes.insert((**i).getVariable()->getName());
+		}
+		if(!sortedRes.empty()) {
+			std::set<std::string>::iterator i = sortedRes.begin();
+			sResult.append(*i);
+			for(i++; i != sortedRes.end(); i++){
+				sResult.append(", ");
+				sResult.append(*i);
+			}
+		}
+	} else {
 		std::set<int> sortedRes;
 		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
 			sortedRes.insert((**i).getLine());
@@ -424,19 +450,6 @@ std::string QueryEvaluator::getStringResult(Data* sData) {
 				oss << *i;
 			}
 			sResult.append(oss.str());
-		}
-	} else {
-		std::set<std::string> sortedRes;
-		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
-			sortedRes.insert((**i).getVariable()->getName());
-		}
-		if(!sortedRes.empty()) {
-			std::set<std::string>::iterator i = sortedRes.begin();
-			sResult.append(*i);
-			for(i++; i != sortedRes.end(); i++){
-				sResult.append(", ");
-				sResult.append(*i);
-			}
 		}
 	}
 	return sResult;
