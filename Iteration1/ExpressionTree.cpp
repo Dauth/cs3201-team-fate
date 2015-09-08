@@ -170,10 +170,23 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	return result;//if it is false here, there are more opening then closing brackets
 }
 
+synt_type ExpressionTree::getSyntType(char expressionChar){
+	synt_type expressionCharType;
+	if(isAlpha(expressionChar)){
+			expressionCharType = variable;
+		}else if(isDigit(expressionChar)){
+			expressionCharType = constant;
+		} else {
+			expressionCharType = expression;
+		}
+		return expressionCharType;
+}
 
 Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	std::string str(1, postflixExp[postflixExp.size() - 1]);
-	Node* operatorRoot = pkb->createNode(expression, lineNo, str, assignStmNode);
+	synt_type expressionCharType = getSyntType(postflixExp[postflixExp.size() - 1]);
+
+	Node* operatorRoot = pkb->createNode(expressionCharType, lineNo, str, assignStmNode, nullptr, parentNode, procNode);
 
 	for(int i = postflixExp.size() - 2; i >= 0; i--){
 		char expressionChar = postflixExp[i];
@@ -194,14 +207,7 @@ Return:		Node*
 Node* ExpressionTree::insert(Node* root, Node* dupRoot, int leftOrRight, char expressionChar, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	synt_type expressionCharType;
 	if(root == nullptr){
-		if(isAlpha(expressionChar)){
-			expressionCharType = variable;
-		}else if(isDigit(expressionChar)){
-			expressionCharType = constant;
-		} else {
-			expressionCharType = expression;
-		}
-
+		expressionCharType = getSyntType(expressionChar);
 		//root->setRoot(procNode);
 		
 		std::string str(1, expressionChar);
