@@ -115,7 +115,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(int statementLine){
 	if (pkb->getFollowedBy(statementLine).empty()){
 		return followedBy;
 	}
-	followedBy = pkb->getFollowedBy(statementList);
+	followedBy = pkb->getFollowedBy(statementLine);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
