@@ -150,6 +150,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 
 std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string left,std::string right){
 	std::vector<Node*> result;
+	std::string firstChar = right.substr(0,0);
 	//if the pattern is for a while loop
 	if (type == whileLoop){
 		std::vector<Node*> whileList = pkb->getNodes(whileLoop);
@@ -166,9 +167,10 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 	}
 
 	//elseif type = "ifstat"
+
 	//if the pattern is for an assignment
 	else{
-		//if the expression was "_"
+		//if the right side was "_"
 		if (right == "_"){
 			if (left == "_"){
 				result = pkb->getNodes(assignment);
@@ -185,11 +187,43 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 				return result;
 			}
 		}
+		//if the right side is not an expression (eg. variable or constant)
+		if (!DesignExtractor::isExpression(right)){
+			std::vector<Node*> exprList;
+			if (firstChar == "_" ){
+				exprList = pkb->getExpressions(right.substr(1,right.length()-2));
+				for (unsigned int i = 0 ; i < exprList.size() ; i++ ){
+					Node* parentNode = exprList.at(i)->getExpParent();
+					if (left == "_"){
+						result.push_back(parentNode);	
+					}
+					else{
+						if(parentNode->getLeftChild()->getVariable()->getName() == left){
+							result.push_back(parentNode);
+						}
+					}
+				}
 
-		//if the expression was not "_"
+				return result;
+			}
+			
+			exprList = pkb->getRootExpressions(right.substr(1,right.length()-2));
+			for (unsigned int i = 0 ; i < exprList.size() ; i++ ){
+				Node* parentNode = exprList.at(i)->getParent();
+				if ( left == "_" ){
+					result.push_back(parentNode);
+				}
+				else{
+					if(parentNode->getLeftChild()->getVariable()->getName() == left){
+						result.push_back(parentNode);
+					}
+				}
+			}
+			return result;
+		}
+
+		//if the right was not "_" and it is an expression
 		Node* tNode;
-		std::string firstChar = right.substr(0,0);
-
 		if (firstChar != "_"){
 			tNode = et->exptreeSetupSON(et->expressionConverter(right));
 		}
@@ -203,7 +237,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 			Node* tNode2 = exprList.at(i);
 			int compareResult = compare(tNode2,tNode);
 			if(compareResult != 0){
-				Node* parentNode = tNode2 ->getParent();
+				Node* parentNode = tNode2->getParent();
 				if (firstChar != "_"){
 					if(parentNode->getType() == assignment){
 						if (left == "_"){
@@ -217,9 +251,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 					}
 				}
 				else{
-					while(parentNode->getType()!= assignment){
-						parentNode = parentNode ->getParent();
-					}
+					parentNode = tNode2->getExpParent();
 					if (left == "_"){
 						result.push_back(parentNode);	
 					}
@@ -250,4 +282,11 @@ int DesignExtractor::compare(Node* p,Node* q){
    }
    else
 		return 0;
+}
+bool DesignExtractor::isExpression(std::string s){
+	if(s.find("+") != std::string::npos){
+		return true;
+	}
+
+	return false;
 }

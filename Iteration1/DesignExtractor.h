@@ -9,6 +9,7 @@ class DesignExtractor{
 	PKB* pkb;
 	ExpressionTree* et;
 	int compare(Node*, Node*);
+	bool isExpression(std::string);
 public:
 	DesignExtractor(PKB*,ExpressionTree*);
 
