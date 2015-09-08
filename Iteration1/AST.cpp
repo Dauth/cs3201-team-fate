@@ -43,6 +43,15 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			line = sourceVector[i];
 			//std::cout << lineNumber << "." << line << "\n";
 			int statementType = getStatementType(line);
+
+			try{
+				if(statementType == -1){
+					throw i + 1;
+				}
+			}catch(int e){
+				std::cout<<"UNKNOWN STATEMENT TYPE OR DOES NOT END WITH SEMICOLON DETECTED AT LINE NO:"<<e<<std::endl;
+			}
+
 			if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
 				Node* procStm = pkb->createProcedure(currentProcName);
@@ -103,7 +112,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					twinVector.push_back(tTwin);
 					lineNumber += 1;
 
-				}else if(getStatementType(line) == CALLSTM){
+				}else if(statementType == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
 					try{
 						if(callProcName.compare(currentProcName) == 0){
