@@ -580,7 +580,7 @@ void Match (char *c)
 
 		while (pch != NULL)
 		{
-			printf ("Split design entity ',' : %s\n",pch);
+			//printf ("Split design entity ',' : %s\n",pch);
 
 			if (!entityTypeFound)
 			{
@@ -646,7 +646,7 @@ void Match (char *c)
 
 		while (pch != NULL)
 		{
-			printf ("For each word in select statement : %s\n",pch);
+			//printf ("For each word in select statement : %s\n",pch);
 			ProcessEachToken(pch);
 			pch = strtok_s (NULL, " ",&end_token);
 		}
@@ -654,6 +654,56 @@ void Match (char *c)
 	else
 	{
 		errorMsg += "Syntax error in synonym declaration!;\n";
+	}
+
+}
+
+
+void readQuery(std::string i)
+{
+	const char* s = ";";
+	char *end_str;
+	char *token;
+
+	rootTree = new QueryTree();
+
+	expectingThat = false;
+	resultBool = false;
+	tupleError = false;
+	nonExistantSyn = false;
+	suchThatQueryExist = false;
+	patternExist = false;
+	suchThatQueryPass = false;
+	patternPass = false;
+
+	char *a=new char[i.size()+1];
+	a[i.size()]=0;
+	memcpy(a,i.c_str(),i.size());
+
+	token = strtok_s(a,s,&end_str);
+
+	/* walk through other tokens */
+
+	while( token != NULL ) 
+	{
+		Match(token);
+		token = strtok_s(NULL, s,&end_str);
+		if (tupleError)
+		{
+			break;
+		}
+	}
+	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
+	{
+		//Throw error for query part
+		cout << errorMsg;
+	}
+	else // means there were no errors
+	{
+		printf("QUERY TREE DONE. NOW TO EVALUATE");
+		//QueryEvaluator evaluator (&newSymbol,rootTree);
+		system("pause");
+
 	}
 
 }
@@ -717,9 +767,11 @@ void readSourceFile(std::string sourceFile){
 int main()
 {
 	string sourceFile;
+	getline(cin,sourceFile);
+	readQuery(sourceFile);
 
-	cin >>  sourceFile;
-	readSourceFile(sourceFile);
+	//cin >>  sourceFile;
+	//readSourceFile(sourceFile);
 
 	return 0;
 }

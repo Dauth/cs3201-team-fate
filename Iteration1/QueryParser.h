@@ -13,6 +13,10 @@ private:
 
 public:
 	QueryParser(qe*);
-	std::list<std::string>QueryParser::readSourceFile(std::string);
+	// expects input to be a filename.
+	void QueryParser::readSourceFile(std::string);
+	
+	// expects one query concat together into one line.
+	void QueryParser::readQuery(std::string);
 
 #endif
