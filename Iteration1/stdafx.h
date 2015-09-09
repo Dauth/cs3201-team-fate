@@ -13,6 +13,7 @@
 #include <sstream>
 #include <map>
 #include <set>
+#include <list>
 #include "synt_type.h"
 
 

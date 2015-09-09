@@ -1,20 +1,8 @@
-#include <iostream>
-#include <string>
-#include <vector>
+#include "stdafx.h"
 #include <ctype.h>
-#include <stdio.h>
 #include <regex>
 #include <fstream>
-#include "Symbol.h"
-#include "ParamNode.h"
-
-#include "QueryTree.h"
-#include "QueryNode.h"
 #include "QueryParser.h"
-#include "QueryEvaluator.h"
-
-// LINE 765 is where it is supposed to call evaluate from QueryEvaluator
-
 
 using namespace std;
 
@@ -34,33 +22,33 @@ bool suchThatQueryPass;
 bool patternPass;
 
 QueryTree* rootTree;
-Symbol newSymbol;
+Symbol* newSymbol;
 
 
-std::string concatStmt = "";
-std::string errorMsg = "ERROR(s) : \n";
+string concatStmt;
+string errorMsg = "ERROR(s) : \n";
 
 //regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
 
 // INDENT | "_" | INTEGER
-const std::regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
-const std::regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
 
 // INDENT | "_"| "INDENT" | INTEGER
-const std::regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 // INDENT | "_" | "INDENT"
-const std::regex  varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
-const std::regex  expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
-const std::regex  underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
+regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"|_");
+regex underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
 
-QueryParser::QueryParser(QueryEvaluator* q){
-	qe = q;
+QueryParser::QueryParser () {
+
 }
 
-bool verifyCorrectParameters(synt_type currentSyn, std::string firstParam, std::string secondParam, std::string thirdParam)
+bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string secondParam, string thirdParam)
 {
 	bool valid = false;
 	regex underScore ("_");
@@ -70,6 +58,7 @@ bool verifyCorrectParameters(synt_type currentSyn, std::string firstParam, std::
 		{
 			if (regex_match(secondParam,expressionSpec) || regex_match(secondParam,underScoresBothSides))
 			{
+
 				valid = true;
 			}
 			else
@@ -98,7 +87,7 @@ bool verifyCorrectParameters(synt_type currentSyn, std::string firstParam, std::
 	}
 	return valid;
 }
-bool verifyCorrectParameters(query_type queryClause,std::string firstParam, std::string secondParam)
+bool verifyCorrectParameters(query_type queryClause,string firstParam, string secondParam)
 {
 	bool valid = false;
 	if (queryClause == query_type::modifies)
@@ -188,7 +177,7 @@ bool verifyCorrectParameters(query_type queryClause,std::string firstParam, std:
 	return valid;
 }
 
-synt_type getSynType (std::string synType)
+synt_type getSynType (string synType)
 {
 	regex doubleQuotes ("\"[^\"]+\"");
 	regex underScoreBothSides("_\"[^\"]+\"_");
@@ -211,9 +200,9 @@ synt_type getSynType (std::string synType)
 	}
 	else
 	{
-		if(newSymbol.exists(synType))
+		if(newSymbol->exists(synType))
 		{
-			toReturn = newSymbol.getSyntType(synType);
+			toReturn = newSymbol->getSyntType(synType);
 		}
 	}
 	return toReturn;
@@ -241,7 +230,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::parent;
 	}
-	else if (strcmp(queryType,"Parent*") == 0)
+	else if (strcmp(queryType,"ParentT") == 0)
 	{
 		return query_type::parentStar;
 	}
@@ -249,7 +238,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::follows;
 	}
-	else if (strcmp(queryType, "Follows*") == 0)
+	else if (strcmp(queryType, "FollowsT") == 0)
 	{
 		return query_type::followsStar;
 	}
@@ -257,7 +246,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::next;
 	}
-	else if (strcmp(queryType, "Next*") == 0)
+	else if (strcmp(queryType, "NextT") == 0)
 	{
 		return query_type::nextStar;
 	}
@@ -265,20 +254,20 @@ query_type getType (char* queryType)
 	{
 		return query_type::affects;
 	}
-	else if (strcmp(queryType, "Affects*") == 0)
+	else if (strcmp(queryType, "AffectsT") == 0)
 	{
 		return query_type::affectsStar;
 	}
 	else return query_type::error;
 }
 
-void removeCharsFromString( std::string &str, char* charsToRemove ) {
+void removeCharsFromString( string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
 		str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
 	}
 }
 
-std::vector<std::string> split(const char *str, char c = ' ')
+vector<string> split(const char *str, char c = ' ')
 {
 	vector<string> result;
 
@@ -352,7 +341,7 @@ void ProcessEachToken(char *currentToken)
 						if (concatStmt[i] == '(')
 						{
 							// Begin getting the parameters
-							bool isSynonymExist = newSymbol.exists(supposedSynonym);
+							bool isSynonymExist = newSymbol->exists(supposedSynonym);
 
 							if (!isSynonymExist)
 							{
@@ -362,7 +351,7 @@ void ProcessEachToken(char *currentToken)
 							}
 							else
 							{
-								patternSyn = newSymbol.getSyntType(supposedSynonym);
+								patternSyn = newSymbol->getSyntType(supposedSynonym);
 								if (patternSyn != synt_type::assignment || patternSyn != synt_type::whileLoop || patternSyn != synt_type::ifelse )
 								{
 									// TODO THROW ERROR because pattern only accepts three types of synonyms
@@ -427,6 +416,8 @@ void ProcessEachToken(char *currentToken)
 						ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
 						synt_type middleParamSynType = getSynType(firstParameter);
 						synt_type rightParamSynType = getSynType(secondParameter);
+						removeCharsFromString( secondParameter, "\"" );
+						removeCharsFromString(firstParameter, "\"");
 						ParamNode* middleParamNode = new ParamNode (middleParamSynType, firstParameter);
 						ParamNode* rightParamNode = new ParamNode (rightParamSynType,secondParameter);
 						PatternNode* newPattern = new PatternNode(leftParamNode,middleParamNode, rightParamNode);
@@ -460,8 +451,12 @@ void ProcessEachToken(char *currentToken)
 					// code over here
 					for(std::vector<string>::iterator i = variablesTuple.begin(); i != variablesTuple.end(); i++)
 					{
-						if (!newSymbol.exists(*i)) { tupleError = true; break;} // TODO THROW ERROR because variable doesn't exist
-						else {newSymbol.setResult(newSymbol.getIndex(currentToken));}
+						if (!newSymbol->exists(*i)) {
+							tupleError = true; break;
+						} // TODO THROW ERROR because variable doesn't exist
+						else {
+							newSymbol->setResult(newSymbol->getIndex(currentToken));
+						}
 					}
 					concatStmt = "";
 
@@ -473,7 +468,7 @@ void ProcessEachToken(char *currentToken)
 				}
 				else
 				{
-					if (!newSymbol.exists(currentToken)) 
+					if (!newSymbol->exists(currentToken)) 
 					{ 
 						nonExistantSyn = true; 
 						concatStmt = "";
@@ -481,7 +476,7 @@ void ProcessEachToken(char *currentToken)
 					} //TODO THROW ERROR because variable doesn't exist
 					else
 					{
-						newSymbol.setResult(newSymbol.getIndex(currentToken));
+						newSymbol->setResult(newSymbol->getIndex(currentToken));
 					}
 				}
 			}break;
@@ -636,7 +631,7 @@ void Match (char *c)
 			{
 				++count;
 				// store each variable in the symbol table
-				newSymbol.setVar(pch,newSyntType);
+				newSymbol->setVar(pch,newSyntType);
 
 			}
 			pch = strtok_s (NULL, " ,",&end_token);
@@ -664,70 +659,16 @@ void Match (char *c)
 
 }
 
-
-void QueryParser::readSourceFile(std::string sourceFile){
-
+QueryObject QueryParser::getQueryObject(std::string i){
 	const char* s = ";";
 	char *end_str;
 	char *token;
-
-	std::string i ;
-
-	std::ifstream infile;
-	infile.open (sourceFile);
-
-	while(!infile.eof()) // To get you all the lines.
-	{
-		getline(infile,i); // Saves the line in STRING.
-		rootTree = new QueryTree();
-		expectingThat = false;
-		resultBool = false;
-		tupleError = false;
-		nonExistantSyn = false;
-		suchThatQueryExist = false;
-		patternExist = false;
-		suchThatQueryPass = false;
-		patternPass = false;
-		char *a=new char[i.size()+1];
-		a[i.size()]=0;
-		memcpy(a,i.c_str(),i.size());
-
-		token = strtok_s(a,s,&end_str);
-
-		/* walk through other tokens */
-
-		while( token != NULL ) 
-		{
-			Match(token);
-			token = strtok_s(NULL, s,&end_str);
-			if (tupleError)
-			{
-				break;
-			}
-		}
-		if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
-		{
-			//Throw error for query part
-			std::cout << errorMsg;
-		}
-		else // means there were no errors
-		{
-			printf("QUERY TREE DONE. NOW TO EVALUATE");
-			//QueryEvaluator evaluator (&newSymbol,rootTree);
-
-		}
-	}
-	infile.close();
-	system ("pause");
-}
-void QueryParser::readQuery(std::string i)
-{
-	const char* s = ";";
-	char *end_str;
-	char *token;
-
+	//string concatStmt = "";
+	//you need to reset the original global variable
+	concatStmt = "";
+	QueryObject qo;
 	rootTree = new QueryTree();
-
+	newSymbol = new Symbol();
 	expectingThat = false;
 	resultBool = false;
 	tupleError = false;
@@ -736,7 +677,6 @@ void QueryParser::readQuery(std::string i)
 	patternExist = false;
 	suchThatQueryPass = false;
 	patternPass = false;
-
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
 	memcpy(a,i.c_str(),i.size());
@@ -756,19 +696,15 @@ void QueryParser::readQuery(std::string i)
 	}
 	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
 	{
-		//Throw error for query part
-		std::cout<< errorMsg;
+		qo.symbol = NULL;
+		qo.tree = NULL;
+		return qo;
 	}
 	else // means there were no errors
 	{
-		printf("QUERY TREE DONE. NOW TO EVALUATE");
-		//QueryEvaluator evaluator (&newSymbol,rootTree);
-		system("pause");
-
+		qo.symbol = newSymbol;
+		qo.tree = rootTree;
+		return qo;
 	}
-
+	
 }
-
-
-
-
