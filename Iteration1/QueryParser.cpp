@@ -25,7 +25,7 @@ QueryTree* rootTree;
 Symbol* newSymbol;
 
 
-string concatStmt = "";
+string concatStmt;
 string errorMsg = "ERROR(s) : \n";
 
 //regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
@@ -663,7 +663,7 @@ QueryObject QueryParser::getQueryObject(std::string i){
 	const char* s = ";";
 	char *end_str;
 	char *token;
-
+	string concatStmt = "";
 	QueryObject qo;
 	rootTree = new QueryTree();
 	newSymbol = new Symbol();
