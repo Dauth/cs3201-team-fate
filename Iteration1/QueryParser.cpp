@@ -230,7 +230,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::parent;
 	}
-	else if (strcmp(queryType,"Parent*") == 0)
+	else if (strcmp(queryType,"ParentT") == 0)
 	{
 		return query_type::parentStar;
 	}
@@ -238,7 +238,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::follows;
 	}
-	else if (strcmp(queryType, "Follows*") == 0)
+	else if (strcmp(queryType, "FollowsT") == 0)
 	{
 		return query_type::followsStar;
 	}
@@ -246,7 +246,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::next;
 	}
-	else if (strcmp(queryType, "Next*") == 0)
+	else if (strcmp(queryType, "NextT") == 0)
 	{
 		return query_type::nextStar;
 	}
@@ -254,7 +254,7 @@ query_type getType (char* queryType)
 	{
 		return query_type::affects;
 	}
-	else if (strcmp(queryType, "Affects*") == 0)
+	else if (strcmp(queryType, "AffectsT") == 0)
 	{
 		return query_type::affectsStar;
 	}
@@ -416,8 +416,8 @@ void ProcessEachToken(char *currentToken)
 						ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
 						synt_type middleParamSynType = getSynType(firstParameter);
 						synt_type rightParamSynType = getSynType(secondParameter);
-						removeCharsFromString( secondParam, "\"" );
-						removeCharsFromString(firstParam, "\"");
+						removeCharsFromString( secondParameter, "\"" );
+						removeCharsFromString(firstParameter, "\"");
 						ParamNode* middleParamNode = new ParamNode (middleParamSynType, firstParameter);
 						ParamNode* rightParamNode = new ParamNode (rightParamSynType,secondParameter);
 						PatternNode* newPattern = new PatternNode(leftParamNode,middleParamNode, rightParamNode);
@@ -663,7 +663,9 @@ QueryObject QueryParser::getQueryObject(std::string i){
 	const char* s = ";";
 	char *end_str;
 	char *token;
-	string concatStmt = "";
+	//string concatStmt = "";
+	//you need to reset the original global variable
+	concatStmt = "";
 	QueryObject qo;
 	rootTree = new QueryTree();
 	newSymbol = new Symbol();
