@@ -12,12 +12,11 @@ class QueryParser {
 private:
 
 public:
-	QueryParser(QueryEvaluator*);
+	QueryParser(qe*);
 	// expects input to be a filename.
 	void QueryParser::readSourceFile(std::string);
-
+	
 	// expects one query concat together into one line.
 	void QueryParser::readQuery(std::string);
 
-};
 #endif
