@@ -41,7 +41,7 @@ regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z
 regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
-regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
+regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"|_");
 regex underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
 
 QueryParser::QueryParser () {
@@ -58,6 +58,7 @@ bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string sec
 		{
 			if (regex_match(secondParam,expressionSpec) || regex_match(secondParam,underScoresBothSides))
 			{
+
 				valid = true;
 			}
 			else
@@ -415,6 +416,8 @@ void ProcessEachToken(char *currentToken)
 						ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
 						synt_type middleParamSynType = getSynType(firstParameter);
 						synt_type rightParamSynType = getSynType(secondParameter);
+						removeCharsFromString( secondParam, "\"" );
+						removeCharsFromString(firstParam, "\"");
 						ParamNode* middleParamNode = new ParamNode (middleParamSynType, firstParameter);
 						ParamNode* rightParamNode = new ParamNode (rightParamSynType,secondParameter);
 						PatternNode* newPattern = new PatternNode(leftParamNode,middleParamNode, rightParamNode);
