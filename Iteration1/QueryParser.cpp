@@ -4,13 +4,17 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <regex>
-#include "QueryTree.h"
-#include "QueryNode.h"
+#include <fstream>
 #include "Symbol.h"
 #include "ParamNode.h"
-#include <fstream>
-//#include "QueryEvaluator.h"
-// LINE 656 is where it is supposed to call evaluate from QueryEvaluator
+
+#include "QueryTree.h"
+#include "QueryNode.h"
+#include "QueryParser.h"
+#include "QueryEvaluator.h"
+
+// LINE 765 is where it is supposed to call evaluate from QueryEvaluator
+
 
 using namespace std;
 
@@ -33,28 +37,30 @@ QueryTree* rootTree;
 Symbol newSymbol;
 
 
-string concatStmt = "";
-string errorMsg = "ERROR(s) : \n";
+std::string concatStmt = "";
+std::string errorMsg = "ERROR(s) : \n";
 
 //regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
 
 // INDENT | "_" | INTEGER
-regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
-regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+const std::regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+const std::regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
 
 // INDENT | "_"| "INDENT" | INTEGER
-regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+const std::regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 // INDENT | "_" | "INDENT"
-regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+const std::regex  varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 
-regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
-regex underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
+const std::regex  expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
+const std::regex  underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
 
+QueryParser::QueryParser(QueryEvaluator* q){
+	qe = q;
+}
 
-
-bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string secondParam, string thirdParam)
+bool verifyCorrectParameters(synt_type currentSyn, std::string firstParam, std::string secondParam, std::string thirdParam)
 {
 	bool valid = false;
 	regex underScore ("_");
@@ -92,7 +98,7 @@ bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string sec
 	}
 	return valid;
 }
-bool verifyCorrectParameters(query_type queryClause,string firstParam, string secondParam)
+bool verifyCorrectParameters(query_type queryClause,std::string firstParam, std::string secondParam)
 {
 	bool valid = false;
 	if (queryClause == query_type::modifies)
@@ -182,7 +188,7 @@ bool verifyCorrectParameters(query_type queryClause,string firstParam, string se
 	return valid;
 }
 
-synt_type getSynType (string synType)
+synt_type getSynType (std::string synType)
 {
 	regex doubleQuotes ("\"[^\"]+\"");
 	regex underScoreBothSides("_\"[^\"]+\"_");
@@ -266,13 +272,13 @@ query_type getType (char* queryType)
 	else return query_type::error;
 }
 
-void removeCharsFromString( string &str, char* charsToRemove ) {
+void removeCharsFromString( std::string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
 		str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
 	}
 }
 
-vector<string> split(const char *str, char c = ' ')
+std::vector<std::string> split(const char *str, char c = ' ')
 {
 	vector<string> result;
 
@@ -659,7 +665,62 @@ void Match (char *c)
 }
 
 
-void readQuery(std::string i)
+void QueryParser::readSourceFile(std::string sourceFile){
+
+	const char* s = ";";
+	char *end_str;
+	char *token;
+
+	std::string i ;
+
+	std::ifstream infile;
+	infile.open (sourceFile);
+
+	while(!infile.eof()) // To get you all the lines.
+	{
+		getline(infile,i); // Saves the line in STRING.
+		rootTree = new QueryTree();
+		expectingThat = false;
+		resultBool = false;
+		tupleError = false;
+		nonExistantSyn = false;
+		suchThatQueryExist = false;
+		patternExist = false;
+		suchThatQueryPass = false;
+		patternPass = false;
+		char *a=new char[i.size()+1];
+		a[i.size()]=0;
+		memcpy(a,i.c_str(),i.size());
+
+		token = strtok_s(a,s,&end_str);
+
+		/* walk through other tokens */
+
+		while( token != NULL ) 
+		{
+			Match(token);
+			token = strtok_s(NULL, s,&end_str);
+			if (tupleError)
+			{
+				break;
+			}
+		}
+		if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
+		{
+			//Throw error for query part
+			std::cout << errorMsg;
+		}
+		else // means there were no errors
+		{
+			printf("QUERY TREE DONE. NOW TO EVALUATE");
+			//QueryEvaluator evaluator (&newSymbol,rootTree);
+
+		}
+	}
+	infile.close();
+	system ("pause");
+}
+void QueryParser::readQuery(std::string i)
 {
 	const char* s = ";";
 	char *end_str;
@@ -696,7 +757,7 @@ void readQuery(std::string i)
 	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
 	{
 		//Throw error for query part
-		cout << errorMsg;
+		std::cout<< errorMsg;
 	}
 	else // means there were no errors
 	{
@@ -707,78 +768,7 @@ void readQuery(std::string i)
 	}
 
 }
-void readSourceFile(std::string sourceFile){
 
-	const char* s = ";";
-	char *end_str;
-	char *token;
 
-	string i ;
 
-	ifstream infile;
-	infile.open (sourceFile);
 
-	while(!infile.eof()) // To get you all the lines.
-	{
-		getline(infile,i); // Saves the line in STRING.
-		rootTree = new QueryTree();
-		expectingThat = false;
-		resultBool = false;
-		tupleError = false;
-		nonExistantSyn = false;
-		suchThatQueryExist = false;
-		patternExist = false;
-		suchThatQueryPass = false;
-		patternPass = false;
-		char *a=new char[i.size()+1];
-		a[i.size()]=0;
-		memcpy(a,i.c_str(),i.size());
-
-		token = strtok_s(a,s,&end_str);
-
-		/* walk through other tokens */
-
-		while( token != NULL ) 
-		{
-			Match(token);
-			token = strtok_s(NULL, s,&end_str);
-			if (tupleError)
-			{
-				break;
-			}
-		}
-		if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
-		{
-			//Throw error for query part
-			cout << errorMsg;
-		}
-		else // means there were no errors
-		{
-			printf("QUERY TREE DONE. NOW TO EVALUATE");
-			//QueryEvaluator evaluator (&newSymbol,rootTree);
-
-		}
-	}
-	infile.close();
-	system ("pause");
-}
-
-// Start here
-int main()
-{
-	string sourceFile;
-	getline(cin,sourceFile);
-	readQuery(sourceFile);
-
-	//cin >>  sourceFile;
-	//readSourceFile(sourceFile);
-
-	return 0;
-}
-
-void print( vector <string> & v )
-{
-	for (size_t n = 0; n < v.size(); n++)
-		cout << "\"" << v[ n ] << "\"\n";
-	cout << endl;
-}
