@@ -9,6 +9,7 @@
 #include "AST.h"
 #include <regex>
 #include "Twin.h"
+#include <iostream>
 
 const int PROCEDURESTM = 1;
 const int CALLSTM = 2;
@@ -24,6 +25,7 @@ AST::AST(PKB* p, ExpressionTree* e){
 	pkb = p;
 	expTree = e;
 }
+
 
 /*
 This function processes a vector which contains the source file
@@ -44,19 +46,15 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			//std::cout << lineNumber << "." << line << "\n";
 			int statementType = getStatementType(line);
 
-			if(statementType == PROCEDURESTM && bracesStack.empty()){
+		catchProcedureInceptionException(bracesStack, i, statementType);
+
+		if(statementType == PROCEDURESTM && bracesStack.empty()){
 				currentProcName = extractStatementPart(PROCEDURESTM, line);
 				Node* procStm = pkb->createProcedure(currentProcName);
 
-				try{
-					if(procStm == nullptr){
-						throw i + 1;
-					}
-				}catch(int e){
-					std::cout<<"DUPLICATED PROCEDURE APPEARED IN PROGRAM AT LINE NO:"<<e<<std::endl;
-				}
+			catchDupProcedureException(i, procStm);
 
-				Node* stmLst = pkb->createNode(statementList, i + 1);
+			Node* stmLst = pkb->createNode(statementList, i + 1);
 				procStm->setLeftChild(stmLst);
 				mainProg.push_back(procStm);
 
@@ -65,12 +63,6 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				Twin* tTwin = new Twin(procStm, stmLst);
 				twinVector.push_back(tTwin);
 
-			}else if(statementType == PROCEDURESTM && !bracesStack.empty()){
-				try{
-					throw i + 1;
-				}catch(int e){
-					std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
-				}
 			}else{
 				if(statementType == WHILESTM){
 					bracesStack.push("{");
@@ -106,13 +98,8 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 				}else if(statementType == CALLSTM){
 					std::string callProcName = extractStatementPart(CALLSTM, line);
-					try{
-						if(callProcName.compare(currentProcName) == 0){
-							throw i + 1;
-						}
-					}catch(int e){
-						std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
-					}
+
+					catchRecursiveCallException(currentProcName, i, callProcName);
 
 					Node* tCall = pkb->createNode(call,lineNumber, callProcName);
 
@@ -143,13 +130,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
 						bool isInflixBalance = expTree->isInflixBalanced(inflix);
 
-						try{
-							if(!isInflixBalance){
-								throw i + 1;
-							}
-						}catch (int e){
-							std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
-						}
+						catchUnbalancedInfixException(i, isInflixBalance);
 
 						std::vector<char> postflix = expTree->expressionConverter(inflix);
 						
@@ -169,7 +150,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					if(bracesNo > bracesStack.size()){
 						throw i + 1;
 					}
-				}catch(int e){
+				}catch(unsigned int e){
 					std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
 				}
 				while(bracesNo > 0){
@@ -188,10 +169,10 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	std::regex procedure("procedure\\s+[A-z]+\\s*\\{$");
+	std::regex procedure("\\s*\\t*procedure\\s+[A-z]+\\s*\\{$");
 	std::regex callProc("\\s*\\t*call\\s+[A-z]+\\;\\s*\\}*$");
 	std::regex whileLoop("\\s*\\t*while\\s+[A-z]+\\s*\\{$");
-	std::regex assignStm("\\s*\\t*[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\s*\\}*$");
+	std::regex assignStm("\\s*\\t*[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
 	
 	int result = -1;
 
@@ -214,11 +195,11 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("procedure\\s+([A-z]+)\\s*\\{$");
+	std::regex procedureName("\\s*\\t*procedure\\s+([A-z]+)\\s*\\{$");
 	std::regex callProcName("\\s*\\t*call\\s+([A-z]+)\\;\\s*\\}*$");
 	std::regex whileLoopVar("\\s*\\t*while\\s+([A-z]+)\\s*\\{$");
-	std::regex assignStmLeftHand("\\s*\\t*([A-z]+)\\s*=[A-z0-9\\*\\+\\-\\s]+\\;\\s*\\}*$");
-	std::regex assignStmRightHand("\\s*\\t*[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s]+)\\;\\s*\\}*$");
+	std::regex assignStmLeftHand("\\s*\\t*([A-z]+)\\s*=[A-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
+	std::regex assignStmRightHand("\\s*\\t*[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s\\(\\)]+)\\;\\s*\\}*$");
 	std::smatch match;
 	
 	std::string outcome = "";
@@ -261,3 +242,46 @@ int AST::getNumOfClosingbraces(std::string input){
 	return result;
 }
 
+void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack, unsigned i, int statementType)
+{
+	try{
+		if(statementType == PROCEDURESTM && !bracesStack.empty()){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::catchDupProcedureException(unsigned i, Node* procStm)
+{
+	try{
+		if(procStm == nullptr){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"DUPLICATED PROCEDURE APPEARED IN PROGRAM AT LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName)
+{
+	try{
+		if(callProcName.compare(currentProcName) == 0){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance)
+{
+	try{
+		if(!isInflixBalance){
+			throw i + 1;
+		}
+	}catch (unsigned int e){
+		std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
+	}
+}
