@@ -150,7 +150,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
 
 std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string left,std::string right){
 	std::vector<Node*> result;
-	std::string firstChar = right.substr(0,0);
+	std::string firstChar = right.substr(0,1);
 	//if the pattern is for a while loop
 	if (type == whileLoop){
 		std::vector<Node*> whileList = pkb->getNodes(whileLoop);
