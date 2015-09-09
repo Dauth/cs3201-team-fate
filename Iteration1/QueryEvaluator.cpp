@@ -214,7 +214,7 @@ std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type qType, synt_typ
 		case followsStar	:
 			return dEx->getFollowedByStar(sType);
 		case parent			:
-			return pkb->getParent(sType);
+			return pkb->getParents(sType);
 		case parentStar		:
 			return dEx->getParentsStar(sType);
 		/*case calls			:
