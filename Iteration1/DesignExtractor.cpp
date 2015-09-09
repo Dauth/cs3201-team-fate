@@ -208,7 +208,7 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 				return result;
 			}
 			
-			exprList = pkb->getRootExpressions(right.substr(1,right.length()-2));
+			exprList = pkb->getRootExpressions(right);
 			for (unsigned int i = 0 ; i < exprList.size() ; i++ ){
 				Node* parentNode = exprList.at(i)->getParent();
 				if ( left == "_" ){
