@@ -285,7 +285,7 @@ int DesignExtractor::compare(Node* p,Node* q){
 		return 0;
 }
 bool DesignExtractor::isExpression(std::string s){
-	if(s.find("+") != std::string::npos){
+	if(s.find("+") != std::string::npos || s.find("*") != std::string::npos){
 		return true;
 	}
 
