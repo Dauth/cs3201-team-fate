@@ -2,21 +2,13 @@
 #define QUERYPARSER_H
 
 #include "stdafx.h"
-#include <string>
-#include <vector>
-#include "QueryEvaluator.h"
+#include "QueryObject.h"
 
 class QueryParser {
-	QueryEvaluator* qe;
-
-private:
 
 public:
-	QueryParser(qe*);
-	// expects input to be a filename.
-	void QueryParser::readSourceFile(std::string);
-	
-	// expects one query concat together into one line.
-	void QueryParser::readQuery(std::string);
+	QueryParser ();
+	QueryObject QueryParser::getQueryObject(std::string);
+};
 
 #endif

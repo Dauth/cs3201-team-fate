@@ -29,15 +29,15 @@ class QueryEvaluator {
 	std::vector<Node*> evaluateRightByType(query_type, std::string);
 	std::vector<Node*> evaluateRightByType(query_type, synt_type);
 	std::vector<Node*> getVarFromPattern(std::vector<Node*>);
-	void evaluateResult();
+	std::list<std::string> evaluateResult();
 	ParamNode* getOptimal(ParamNode*, ParamNode*);
 	bool resultNotEmpty(ParamNode*, std::vector<Node*>);
-	std::string getStringResult(Data*);
+	std::list<std::string> getStringResult(Data*);
 	void changePartners(ParamNode*);
 
 public:
 	QueryEvaluator (PKB*, DesignExtractor*);
-	void evaluate(Symbol*, QueryTree*);
+	std::list<std::string> evaluate(Symbol*, QueryTree*);
 };
 
 #endif
