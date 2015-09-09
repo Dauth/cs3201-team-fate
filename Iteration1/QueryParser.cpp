@@ -1,8 +1,16 @@
-#include "stdafx.h"
+#include <iostream>
+#include <string>
+#include <vector>
 #include <ctype.h>
+#include <stdio.h>
 #include <regex>
+#include "QueryTree.h"
+#include "QueryNode.h"
+#include "Symbol.h"
+#include "ParamNode.h"
 #include <fstream>
-#include "QueryParser.h"
+//#include "QueryEvaluator.h"
+// LINE 656 is where it is supposed to call evaluate from QueryEvaluator
 
 using namespace std;
 
@@ -22,7 +30,7 @@ bool suchThatQueryPass;
 bool patternPass;
 
 QueryTree* rootTree;
-Symbol* newSymbol;
+Symbol newSymbol;
 
 
 string concatStmt = "";
@@ -44,9 +52,7 @@ regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\
 regex expressionSpec("\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"");
 regex underScoresBothSides("_\"(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+)((\\+|\\-|\\*)(([a-zA-Z])+(([a-zA-Z])|(\\d)+)*|\\d+))*\"_");
 
-QueryParser::QueryParser () {
 
-}
 
 bool verifyCorrectParameters(synt_type currentSyn, string firstParam, string secondParam, string thirdParam)
 {
@@ -199,9 +205,9 @@ synt_type getSynType (string synType)
 	}
 	else
 	{
-		if(newSymbol->exists(synType))
+		if(newSymbol.exists(synType))
 		{
-			toReturn = newSymbol->getSyntType(synType);
+			toReturn = newSymbol.getSyntType(synType);
 		}
 	}
 	return toReturn;
@@ -340,7 +346,7 @@ void ProcessEachToken(char *currentToken)
 						if (concatStmt[i] == '(')
 						{
 							// Begin getting the parameters
-							bool isSynonymExist = newSymbol->exists(supposedSynonym);
+							bool isSynonymExist = newSymbol.exists(supposedSynonym);
 
 							if (!isSynonymExist)
 							{
@@ -350,7 +356,7 @@ void ProcessEachToken(char *currentToken)
 							}
 							else
 							{
-								patternSyn = newSymbol->getSyntType(supposedSynonym);
+								patternSyn = newSymbol.getSyntType(supposedSynonym);
 								if (patternSyn != synt_type::assignment || patternSyn != synt_type::whileLoop || patternSyn != synt_type::ifelse )
 								{
 									// TODO THROW ERROR because pattern only accepts three types of synonyms
@@ -448,12 +454,8 @@ void ProcessEachToken(char *currentToken)
 					// code over here
 					for(std::vector<string>::iterator i = variablesTuple.begin(); i != variablesTuple.end(); i++)
 					{
-						if (!newSymbol->exists(*i)) {
-							tupleError = true; break;
-						} // TODO THROW ERROR because variable doesn't exist
-						else {
-							newSymbol->setResult(newSymbol->getIndex(currentToken));
-						}
+						if (!newSymbol.exists(*i)) { tupleError = true; break;} // TODO THROW ERROR because variable doesn't exist
+						else {newSymbol.setResult(newSymbol.getIndex(currentToken));}
 					}
 					concatStmt = "";
 
@@ -465,7 +467,7 @@ void ProcessEachToken(char *currentToken)
 				}
 				else
 				{
-					if (!newSymbol->exists(currentToken)) 
+					if (!newSymbol.exists(currentToken)) 
 					{ 
 						nonExistantSyn = true; 
 						concatStmt = "";
@@ -473,7 +475,7 @@ void ProcessEachToken(char *currentToken)
 					} //TODO THROW ERROR because variable doesn't exist
 					else
 					{
-						newSymbol->setResult(newSymbol->getIndex(currentToken));
+						newSymbol.setResult(newSymbol.getIndex(currentToken));
 					}
 				}
 			}break;
@@ -628,7 +630,7 @@ void Match (char *c)
 			{
 				++count;
 				// store each variable in the symbol table
-				newSymbol->setVar(pch,newSyntType);
+				newSymbol.setVar(pch,newSyntType);
 
 			}
 			pch = strtok_s (NULL, " ,",&end_token);
@@ -656,14 +658,15 @@ void Match (char *c)
 
 }
 
-QueryObject QueryParser::getQueryObject(std::string i){
+
+void readQuery(std::string i)
+{
 	const char* s = ";";
 	char *end_str;
 	char *token;
 
-	QueryObject qo;
 	rootTree = new QueryTree();
-	newSymbol = new Symbol();
+
 	expectingThat = false;
 	resultBool = false;
 	tupleError = false;
@@ -672,6 +675,7 @@ QueryObject QueryParser::getQueryObject(std::string i){
 	patternExist = false;
 	suchThatQueryPass = false;
 	patternPass = false;
+
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
 	memcpy(a,i.c_str(),i.size());
@@ -691,15 +695,90 @@ QueryObject QueryParser::getQueryObject(std::string i){
 	}
 	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
 	{
-		qo.symbol = NULL;
-		qo.tree = NULL;
-		return qo;
+		//Throw error for query part
+		cout << errorMsg;
 	}
 	else // means there were no errors
 	{
-		qo.symbol = newSymbol;
-		qo.tree = rootTree;
-		return qo;
+		printf("QUERY TREE DONE. NOW TO EVALUATE");
+		//QueryEvaluator evaluator (&newSymbol,rootTree);
+		system("pause");
+
 	}
-	
+
+}
+void readSourceFile(std::string sourceFile){
+
+	const char* s = ";";
+	char *end_str;
+	char *token;
+
+	string i ;
+
+	ifstream infile;
+	infile.open (sourceFile);
+
+	while(!infile.eof()) // To get you all the lines.
+	{
+		getline(infile,i); // Saves the line in STRING.
+		rootTree = new QueryTree();
+		expectingThat = false;
+		resultBool = false;
+		tupleError = false;
+		nonExistantSyn = false;
+		suchThatQueryExist = false;
+		patternExist = false;
+		suchThatQueryPass = false;
+		patternPass = false;
+		char *a=new char[i.size()+1];
+		a[i.size()]=0;
+		memcpy(a,i.c_str(),i.size());
+
+		token = strtok_s(a,s,&end_str);
+
+		/* walk through other tokens */
+
+		while( token != NULL ) 
+		{
+			Match(token);
+			token = strtok_s(NULL, s,&end_str);
+			if (tupleError)
+			{
+				break;
+			}
+		}
+		if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
+		{
+			//Throw error for query part
+			cout << errorMsg;
+		}
+		else // means there were no errors
+		{
+			printf("QUERY TREE DONE. NOW TO EVALUATE");
+			//QueryEvaluator evaluator (&newSymbol,rootTree);
+
+		}
+	}
+	infile.close();
+	system ("pause");
+}
+
+// Start here
+int main()
+{
+	string sourceFile;
+	getline(cin,sourceFile);
+	readQuery(sourceFile);
+
+	//cin >>  sourceFile;
+	//readSourceFile(sourceFile);
+
+	return 0;
+}
+
+void print( vector <string> & v )
+{
+	for (size_t n = 0; n < v.size(); n++)
+		cout << "\"" << v[ n ] << "\"\n";
+	cout << endl;
 }

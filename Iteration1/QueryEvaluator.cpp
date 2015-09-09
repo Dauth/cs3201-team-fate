@@ -6,18 +6,14 @@ QueryEvaluator::QueryEvaluator(PKB* p, DesignExtractor* de) {
 	dEx = de;
 }
 
-std::list<std::string> QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
+void QueryEvaluator::evaluate(Symbol* s, QueryTree* qt) {
 	sc = new SymbolConnection();
 	hasResult = true;
 	symbol = s;
 	tree = qt;
-	std::list<std::string> result;
-	if(s != NULL && qt != NULL) {
-		evaluatePattern();
-		evaluateQuery();
-		result = evaluateResult();
-	}
-	return result;
+	evaluatePattern();
+	evaluateQuery();
+	evaluateResult();
 }
 
 void QueryEvaluator::evaluatePattern() {
@@ -389,8 +385,8 @@ void QueryEvaluator::changePartners(ParamNode* pNode) {
 	}
 }
 
-std::list<std::string> QueryEvaluator::evaluateResult() {
-	std::list<std::string> result;
+void QueryEvaluator::evaluateResult() {
+	std::string result;
 	if(hasResult) {
 		std::vector<Data*> symData = symbol->getQuery();
 		for(std::vector<Data*>::iterator i = symData.begin(); i != symData.end(); i++) {
@@ -400,14 +396,14 @@ std::list<std::string> QueryEvaluator::evaluateResult() {
 			}
 		}
 		/*if(result.empty()) {
-			result.push_back("true");
+			result = "true";
 		}*/
 	}
-	return result;
+	std::cout<<result;
 }
 
-std::list<std::string> QueryEvaluator::getStringResult(Data* sData) {
-	std::list<std::string> sResult;
+std::string QueryEvaluator::getStringResult(Data* sData) {
+	std::string sResult;
 	std::vector<Node*> nResult;
 	if(sData->getPKBOutput().size() == 0) {
 		nResult = pkb->getNodes(sData->getVarType());
@@ -416,35 +412,44 @@ std::list<std::string> QueryEvaluator::getStringResult(Data* sData) {
 	}
 	if(sData->getVarType() == constant) {
 		std::set<std::string> sortedRes;
-		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++) {
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
 			sortedRes.insert((**i).getValue());
 		}
 		if(!sortedRes.empty()) {
-			for(std::set<std::string>::iterator i = sortedRes.begin(); i != sortedRes.end(); i++) {
-				sResult.push_back(*i);
+			std::set<std::string>::iterator i = sortedRes.begin();
+			sResult.append(*i);
+			for(i++; i != sortedRes.end(); i++){
+				sResult.append(", ");
+				sResult.append(*i);
 			}
 		}
 	} else if(sData->getVarType() == variable) {
 		std::set<std::string> sortedRes;
-		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++) {
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
 			sortedRes.insert((**i).getVariable()->getName());
 		}
 		if(!sortedRes.empty()) {
-			for(std::set<std::string>::iterator i = sortedRes.begin(); i != sortedRes.end(); i++) {
-				sResult.push_back(*i);
+			std::set<std::string>::iterator i = sortedRes.begin();
+			sResult.append(*i);
+			for(i++; i != sortedRes.end(); i++){
+				sResult.append(", ");
+				sResult.append(*i);
 			}
 		}
 	} else {
 		std::set<int> sortedRes;
-		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++) {
+		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++){
 			sortedRes.insert((**i).getLine());
 		}
 		if(!sortedRes.empty()) {
-			for(std::set<int>::iterator i = sortedRes.begin(); i != sortedRes.end(); i++){
-				std::ostringstream oss;
+			std::ostringstream oss;
+			std::set<int>::iterator i = sortedRes.begin();
+			oss << *i;
+			for(i++; i != sortedRes.end(); i++){
+				oss << ", ";
 				oss << *i;
-				sResult.push_back(oss.str());
 			}
+			sResult.append(oss.str());
 		}
 	}
 	return sResult;
