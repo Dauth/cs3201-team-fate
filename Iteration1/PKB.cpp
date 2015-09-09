@@ -15,6 +15,10 @@ std::vector<Node*> PKB::getNodes(synt_type st) {
 	return statementTable.getStatements(st);
 }
 
+Variable* PKB::getVariable(std::string varName) {
+	return variableTable.getOrCreateVariable(varName);
+}
+
 int PKB::getCount(synt_type st) {
 	if(st == variable) {
 		return variableTable.getVariableCount();
@@ -47,7 +51,6 @@ Node* PKB::createNode(synt_type st, int line, std::string value,
 		expressionTable.addExpression(node);
 		node->setExpParent(usedBy);
 	}
-
 	if (modifiedBy != nullptr && st == variable) {
 		handleModifiedBy(node, modifiedBy, procedure, parent);
 	}
@@ -121,8 +124,7 @@ std::vector<Node*> PKB::getModifies(synt_type st) {
 }
 
 std::vector<Node*> PKB::getModifiedBy(std::string varName) {
-	Variable* variable = variableTable.getOrCreateVariable(varName);
-	return variable->getModifiedBy();
+	return variableTable.getModifiedBy(varName);
 }
 
 std::vector<Node*> PKB::getModifiedBy(synt_type st) {

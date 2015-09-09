@@ -177,9 +177,10 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 				return result;
 			}
 			else{
-				std::vector<Node*> assignList  = pkb->getNodes(assignment);
+				Variable* var = pkb->getVariable(left);
+				std::vector<Node*> assignList  = var->getModifiedBy();
 				for(unsigned int i = 0 ; i < assignList.size() ; i++){
-					if(assignList.at(i)->getLeftChild()->getVariable()->getName() == left){
+					if(assignList.at(i)->getType() == assignment){
 						result.push_back(assignList.at(i));
 					}
 				}
