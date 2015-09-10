@@ -16,6 +16,7 @@ private:
 	int AST::getStatementType(std::string);
 	std::string AST::extractStatementPart(int, std::string);
 	int AST::getNumOfClosingbraces(std::string);
+	int AST::getNumOfOpenbraces(std::string);
 
 public:
 	AST(PKB*, ExpressionTree*);

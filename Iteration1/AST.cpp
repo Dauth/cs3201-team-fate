@@ -26,6 +26,7 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
+
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
@@ -37,10 +38,11 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string currentProcName;
 	std::vector<Node*> mainProg;
 	std::stack<std::string> bracesStack;	//this is to push "{" into the stack to keep track if the number of closing braces match
-	std::vector<Twin*> twinVector;//Twin store as   <stmNode, stmListNode>
-	unsigned int bracesNo = -1;
-	
+	std::vector<Twin*> twinVector;//Twin store as   <stmNode, stmListNode>, at any point of time, there can only be 1 proc in it
+
 	for(unsigned int i = 0; i < sourceVector.size(); i++){
+		unsigned int closeBracesNo = -1;
+		unsigned int openBracesNo = -1;
 		line = sourceVector[i];
 		//std::cout << lineNumber << "." << line << "\n";
 
@@ -52,7 +54,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			createProcNode(line, currentProcName, mainProg, bracesStack, twinVector, i);
 		}else{
 			if(statementType == WHILESTM){
-				bracesStack.push("{");
+				//bracesStack.push("{");
 				createWhileNode(line, lineNumber, twinVector);
 				lineNumber += 1;
 
@@ -64,12 +66,26 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				lineNumber += 1;
 			}
 		}
-		if(bracesNo = getNumOfClosingbraces(line) != -1){
-			catchUnequalBracesException(bracesStack, bracesNo, i);
-			while(bracesNo > 0){
-				popImmediateParent(bracesStack, twinVector, bracesNo);
+
+		openBracesNo = getNumOfOpenbraces(line);
+		closeBracesNo = getNumOfClosingbraces(line);
+
+		if(openBracesNo != -1){
+			while(openBracesNo > 0){
+				bracesStack.push("{");
+				openBracesNo--;
 			}
 		}
+
+		if(closeBracesNo != -1){
+			catchUnequalBracesException(bracesStack, closeBracesNo, i);
+			while(closeBracesNo > 0){
+				catchEmptyContainerException(twinVector, i);
+				popImmediateParent(bracesStack, twinVector, closeBracesNo);
+			}
+		}
+
+
 	}
 	return mainProg;
 }
@@ -141,12 +157,25 @@ Parameters: string
 Return:		int
 */
 int AST::getNumOfClosingbraces(std::string input){
-	std::regex closingBraces("\\s*\\t*(\\}*)$");
+	std::regex closingBraces("(\\}+)$");
 	std::smatch match;
 
 	int result = -1;
 
 	std::regex_search(input, match, closingBraces);
+	if(match.length() > 0){
+        result = match[1].length();
+    }
+	return result;
+}
+
+int AST::getNumOfOpenbraces(std::string input){
+	std::regex openBraces("(\\{+)");
+	std::smatch match;
+
+	int result = -1;
+
+	std::regex_search(input, match, openBraces);
 	if(match.length() > 0){
         result = match[1].length();
     }
@@ -200,6 +229,17 @@ void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsi
 		}
 	}catch(unsigned int e){
 		std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned i){
+	try{
+		int test = twinVector[twinVector.size() - 1]->getStmListNode()->getStmtLst().size();
+		if(test == 0){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"EMPTY STATEMENT IN CONTAINER AT LINE NO:"<<e<<std::endl;
 	}
 }
 
@@ -311,7 +351,7 @@ void AST::createProcNode(std::string line, std::string& currentProcName, std::ve
 
 	mainProg.push_back(procStm);
 
-	bracesStack.push("{");
+	//bracesStack.push("{");
 
 	Twin* tTwin = new Twin(procStm, stmLst);
 	twinVector.push_back(tTwin);
