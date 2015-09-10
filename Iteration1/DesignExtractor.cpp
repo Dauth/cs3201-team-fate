@@ -11,11 +11,10 @@ DesignExtractor::DesignExtractor(PKB* p,ExpressionTree* e){
 
 //Functions for Parent*
 std::vector<Node*> DesignExtractor::getChildrenStar(int statementLine){
-	std::vector<Node*> childList;
-	if (pkb->getChildren(statementLine).empty()){
+	std::vector<Node*> childList = pkb->getChildren(statementLine);
+	if (childList.empty()){
 		return childList;
 	}
-	childList = pkb->getChildren(statementLine);
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		if(tempList.at(i)->getType() == whileLoop){
@@ -30,11 +29,10 @@ std::vector<Node*> DesignExtractor::getChildrenStar(int statementLine){
 }
 
 std::vector<Node*> DesignExtractor::getChildrenStar(synt_type type){
-	std::vector<Node*> childList;
-	if (pkb->getChildren(type).empty()){
+	std::vector<Node*> childList = pkb->getChildren(type);
+	if (childList.empty()){
 		return childList;
 	}
-	childList = pkb->getChildren(type);
 	std::vector<Node*> tempList = childList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		if(tempList.at(i) -> getType() == whileLoop){
@@ -49,11 +47,10 @@ std::vector<Node*> DesignExtractor::getChildrenStar(synt_type type){
 }
 
 std::vector<Node*> DesignExtractor::getParentsStar(int statementLine){
-	std::vector<Node*> parentList;
-	if (pkb->getParent(statementLine).empty()){
+	std::vector<Node*> parentList = pkb->getParent(statementLine);
+	if (parentList.empty()){
 		return parentList;
 	}
-	parentList = pkb->getParent(statementLine);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getLine());
@@ -65,11 +62,10 @@ std::vector<Node*> DesignExtractor::getParentsStar(int statementLine){
 }
 
 std::vector<Node*> DesignExtractor::getParentsStar(synt_type type){
-	std::vector<Node*> parentList;
-	if (pkb->getParents(type).empty()){
+	std::vector<Node*> parentList = pkb->getParents(type);
+	if (parentList.empty()){
 		return parentList;
 	}
-	parentList = pkb->getParents(type);
 	std::vector<Node*> tempList = parentList;
 	for (unsigned int i=0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getParentsStar(tempList.at(i)->getLine());
@@ -83,11 +79,10 @@ std::vector<Node*> DesignExtractor::getParentsStar(synt_type type){
 
 //Functions for Follow*
 std::vector<Node*> DesignExtractor::getFollowingStar(int statementLine){
-	std::vector<Node*> followList;
-	if (pkb->getFollowing(statementLine).empty()){
+	std::vector<Node*> followList = pkb->getFollowing(statementLine);
+	if (followList.empty()){
 		return 	followList;
 	}
-	followList = pkb->getFollowing(statementLine);
 	std::vector<Node*> tempList = followList;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getLine());
@@ -99,11 +94,10 @@ std::vector<Node*> DesignExtractor::getFollowingStar(int statementLine){
 }
 
 std::vector<Node*> DesignExtractor::getFollowingStar(synt_type type){
-	std::vector<Node*> followList;
-	if (pkb->getFollowing(type).empty()){
+	std::vector<Node*> followList = pkb->getFollowing(type);
+	if (followList.empty()){
 		return 	followList;
 	}
-	followList = pkb->getFollowing(type);
 	std::vector<Node*> tempList = followList;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowingStar(tempList.at(i)->getLine());
@@ -115,11 +109,10 @@ std::vector<Node*> DesignExtractor::getFollowingStar(synt_type type){
 }
 
 std::vector<Node*> DesignExtractor::getFollowedByStar(int statementLine){
-	std::vector<Node*> followedBy;
-	if (pkb->getFollowedBy(statementLine).empty()){
+	std::vector<Node*> followedBy = pkb->getFollowedBy(statementLine);
+	if (followedBy.empty()){
 		return followedBy;
 	}
-	followedBy = pkb->getFollowedBy(statementLine);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
@@ -131,11 +124,10 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(int statementLine){
 }
 
 std::vector<Node*> DesignExtractor::getFollowedByStar(synt_type type){
-	std::vector<Node*> followedBy;
-	if (pkb->getFollowedBy(type).empty()){
+	std::vector<Node*> followedBy = pkb->getFollowedBy(type);
+	if (followedBy.empty()){
 		return followedBy;
 	}
-	followedBy = pkb->getFollowedBy(type);
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
