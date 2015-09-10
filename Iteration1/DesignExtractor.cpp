@@ -123,7 +123,7 @@ std::vector<Node*> DesignExtractor::getFollowedByStar(int statementLine){
 	std::vector<Node*> tempList = followedBy;
 	for (unsigned int i = 0 ; i<tempList.size() ; i++){
 		std::vector<Node*> tempList2 = getFollowedByStar(tempList.at(i)->getLine());
-		followedBy.insert(followedBy.end(),followedBy.begin(),followedBy.end());
+		followedBy.insert(followedBy.end(),tempList2.begin(),tempList2.end());
 	}
 	std::set<Node*> s(followedBy.begin(),followedBy.end());
 	followedBy.assign(s.begin(),s.end());
