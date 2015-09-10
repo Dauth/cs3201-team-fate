@@ -695,7 +695,7 @@ QueryObject QueryParser::getQueryObject(std::string i){
 			break;
 		}
 	}
-	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist))
+	if ((suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist)||(!suchThatQueryExist && !patternExist))
 	{
 		qo.symbol = NULL;
 		qo.tree = NULL;
