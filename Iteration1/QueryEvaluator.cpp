@@ -96,7 +96,15 @@ bool QueryEvaluator::evaluateLeft(ParamNode* lNode, query_type type, ParamNode* 
 	if(rNode->getType() == integer) {
 		result = evaluateLeftByType(type, std::stoi(rNode->getParam()));
 	} else if(rNode->getType() == expression) {
-		result = evaluateLeftByType(type, rNode->getParam());
+		if(rNode->getParam() == "_") {
+			if(type == modifies || type == uses) {
+				result = evaluateLeftByType(type, variable);
+			} else {
+				result = evaluateLeftByType(type, statement);
+			}
+		} else {
+			result = evaluateLeftByType(type, rNode->getParam());
+		}
 	} else {
 		int index = symbol->getIndex(rNode->getParam());
 		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
@@ -128,7 +136,11 @@ bool QueryEvaluator::evaluateRight(ParamNode* rNode, query_type type, ParamNode*
 	if(lNode->getType() == integer) {
 		result = evaluateRightByType(type, std::stoi(lNode->getParam()));
 	} else if(lNode->getType() == expression) {
-		result = evaluateRightByType(type, lNode->getParam());
+		if(lNode->getParam() == "_") {
+			result = evaluateRightByType(type, statement);
+		} else {
+			result = evaluateRightByType(type, lNode->getParam());
+		}
 	} else {
 		int index = symbol->getIndex(lNode->getParam());
 		std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
@@ -183,14 +195,6 @@ std::vector<Node*> QueryEvaluator::evaluateLeftByType(query_type type, std::stri
 			return pkb->getModifiedBy(expr);
 		case uses			:
 			return pkb->getUsedBy(expr);
-		case follows		:
-			return pkb->getFollowedBy(statement);
-		case followsStar	:
-			return dEx->getFollowedByStar(statement);
-		case parent			:
-			return pkb->getParent(statement);
-		case parentStar		:
-			return dEx->getParentsStar(statement);
 		/*case calls			:
 		case callsStar		:
 		case next			:
@@ -261,14 +265,6 @@ std::vector<Node*> QueryEvaluator::evaluateRightByType(query_type type, std::str
 			return pkb->getModifies(expr);
 		case uses			:
 			return pkb->getUses(expr);
-		case follows		:
-			return pkb->getFollowing(statement);
-		case followsStar	:
-			return dEx->getFollowingStar(statement);
-		case parent			:
-			return pkb->getChildren(statement);
-		case parentStar		:
-			return dEx->getChildrenStar(statement);
 		/*case calls			:
 		case callsStar		:
 		case next			:
@@ -346,7 +342,7 @@ bool QueryEvaluator::resultNotEmpty(ParamNode* pNode, std::vector<Node*> nVec) {
 			resultVec.push_back(*i);
 		} else if(pNode->getType() == integer && std::stoi(pNode->getParam()) == (**i).getLine()) {
 			return true;
-		} else if(pNode->getType() == expression && pNode->getParam() == (**i).getVariable()->getName()) {
+		} else if(pNode->getType() == expression && (pNode->getParam() == (**i).getVariable()->getName() || pNode->getParam() == "_")) {
 			return true;
 		}
 	}
