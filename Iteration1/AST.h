@@ -32,6 +32,7 @@ public:
 	void catchDupProcedureException(unsigned i, Node* procStm);
 	void catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName);
 	void catchUnbalancedInfixException(unsigned i, bool isInflixBalance);
+	void catchEmptyContainerException(std::vector<Twin*>&, unsigned);
 	std::vector<Node*> AST::buildAST(std::vector<std::string>);
 };
 
