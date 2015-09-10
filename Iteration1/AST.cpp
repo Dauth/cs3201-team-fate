@@ -26,7 +26,6 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
-
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
@@ -42,123 +41,35 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	unsigned int bracesNo = -1;
 	
 	for(unsigned int i = 0; i < sourceVector.size(); i++){
-			line = sourceVector[i];
-			//std::cout << lineNumber << "." << line << "\n";
-			int statementType = getStatementType(line);
+		line = sourceVector[i];
+		//std::cout << lineNumber << "." << line << "\n";
+
+		int statementType = getStatementType(line);
 
 		catchProcedureInceptionException(bracesStack, i, statementType);
 
 		if(statementType == PROCEDURESTM && bracesStack.empty()){
-				currentProcName = extractStatementPart(PROCEDURESTM, line);
-				Node* procStm = pkb->createProcedure(currentProcName);
-
-			catchDupProcedureException(i, procStm);
-
-			Node* stmLst = pkb->createNode(statementList, i + 1);
-				procStm->setLeftChild(stmLst);
-				mainProg.push_back(procStm);
-
+			createProcNode(line, currentProcName, mainProg, bracesStack, twinVector, i);
+		}else{
+			if(statementType == WHILESTM){
 				bracesStack.push("{");
+				createWhileNode(line, lineNumber, twinVector);
+				lineNumber += 1;
 
-				Twin* tTwin = new Twin(procStm, stmLst);
-				twinVector.push_back(tTwin);
-
-			}else{
-				if(statementType == WHILESTM){
-					bracesStack.push("{");
-
-					std::string varName = extractStatementPart(WHILESTM, line);
-
-					Node* whileStm = nullptr;
-					Node* whileVar = nullptr;
-
-					Node* parentNode = nullptr;
-					Node* procNode = procNode = twinVector.front()->getStmNode();
-
-					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
-						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
-						whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, parentNode, procNode);
-						whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, parentNode, procNode);//leftnode
-					}else if(twinVector.size() == 1){// only a procedure statementlist in it
-						whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, nullptr, procNode);
-						whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, nullptr, procNode);//leftnode
-					}
-							
-					whileStm->setLeftChild(whileVar);
-
-					Node* whileStmLst = pkb->createNode(statementList, lineNumber);	//rightnode
-					whileStm->setRightChild(whileStmLst);
-
-					Twin* tTwin = new Twin(whileStm, whileStmLst);
-
-					twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(whileStm);
-
-					twinVector.push_back(tTwin);
-					lineNumber += 1;
-
-				}else if(statementType == CALLSTM){
-					std::string callProcName = extractStatementPart(CALLSTM, line);
-
-					catchRecursiveCallException(currentProcName, i, callProcName);
-
-					Node* tCall = pkb->createNode(call,lineNumber, callProcName);
-
-					twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(tCall);
-					lineNumber += 1;
-				}else if(statementType == ASSIGNSTM){
-
-					std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
-
-					Node* parentNode = nullptr;
-					Node* procNode = twinVector.front()->getStmNode();
-					Node* assignStm = nullptr;
-					Node* assignVar = nullptr;
-
-					if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
-						parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
-						assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, parentNode, procNode);
-						assignVar = pkb->createNode(variable, lineNumber, varName, 
-							nullptr, assignStm, parentNode, procNode);
-					}else if(twinVector.size() == 1){// only a procedure statementlist in it
-						assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, nullptr, procNode);
-						assignVar = pkb->createNode(variable, lineNumber, varName, 
-							nullptr, assignStm, nullptr, procNode);
-					}
-					
-						assignStm->setLeftChild(assignVar);
-					
-						std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
-						bool isInflixBalance = expTree->isInflixBalanced(inflix);
-
-						catchUnbalancedInfixException(i, isInflixBalance);
-
-						std::vector<char> postflix = expTree->expressionConverter(inflix);
-						
-						Node* assignExp = expTree->exptreeSetup(postflix, lineNumber, assignStm, procNode, parentNode);
-
-						assignStm->setRightChild(assignExp);	
-
-						twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
-
-						lineNumber += 1;
-				}
-				
+			}else if(statementType == CALLSTM){
+				createCallNode(line, lineNumber, currentProcName, twinVector, i);
+				lineNumber += 1;
+			}else if(statementType == ASSIGNSTM){
+				createAssignNode(line, lineNumber, twinVector, i);
+				lineNumber += 1;
 			}
-
-			if(bracesNo = getNumOfClosingbraces(line) != -1){
-				try{
-					if(bracesNo > bracesStack.size()){
-						throw i + 1;
-					}
-				}catch(unsigned int e){
-					std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
-				}
-				while(bracesNo > 0){
-					bracesStack.pop();
-					twinVector.erase(twinVector.end() - 1);
-					bracesNo -= 1;
-				}
+		}
+		if(bracesNo = getNumOfClosingbraces(line) != -1){
+			catchUnequalBracesException(bracesStack, bracesNo, i);
+			while(bracesNo > 0){
+				popImmediateParent(bracesStack, twinVector, bracesNo);
 			}
+		}
 	}
 	return mainProg;
 }
@@ -169,10 +80,10 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	std::regex procedure("\\s*\\t*procedure\\s+[A-z]+\\s*\\{$");
-	std::regex callProc("\\s*\\t*call\\s+[A-z]+\\;\\s*\\}*$");
-	std::regex whileLoop("\\s*\\t*while\\s+[A-z]+\\s*\\{$");
-	std::regex assignStm("\\s*\\t*[A-z]+\\s*=[A-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
+	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z]+\\s*\\{$");
+	std::regex callProc("\\s*\\t*call\\s+[A-Za-z]+\\;\\s*\\}*$");
+	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z]+\\s*\\{$");
+	std::regex assignStm("\\s*\\t*[A-Za-z]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
 	
 	int result = -1;
 
@@ -195,11 +106,11 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("\\s*\\t*procedure\\s+([A-z]+)\\s*\\{$");
-	std::regex callProcName("\\s*\\t*call\\s+([A-z]+)\\;\\s*\\}*$");
-	std::regex whileLoopVar("\\s*\\t*while\\s+([A-z]+)\\s*\\{$");
-	std::regex assignStmLeftHand("\\s*\\t*([A-z]+)\\s*=[A-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
-	std::regex assignStmRightHand("\\s*\\t*[A-z]+\\s*=([A-z0-9\\*\\+\\-\\s\\(\\)]+)\\;\\s*\\}*$");
+	std::regex procedureName("\\s*\\t*procedure\\s+([A-Za-z]+)\\s*\\{$");
+	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z]+)\\;\\s*\\}*$");
+	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z]+)\\s*\\{$");
+	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
+	std::regex assignStmRightHand("\\s*\\t*[A-Za-z]+\\s*=([A-Za-z0-9\\*\\+\\-\\s\\(\\)]+)\\;\\s*\\}*$");
 	std::smatch match;
 	
 	std::string outcome = "";
@@ -242,8 +153,7 @@ int AST::getNumOfClosingbraces(std::string input){
 	return result;
 }
 
-void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack, unsigned i, int statementType)
-{
+void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack, unsigned i, int statementType){
 	try{
 		if(statementType == PROCEDURESTM && !bracesStack.empty()){
 			throw i + 1;
@@ -253,8 +163,7 @@ void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack,
 	}
 }
 
-void AST::catchDupProcedureException(unsigned i, Node* procStm)
-{
+void AST::catchDupProcedureException(unsigned i, Node* procStm){
 	try{
 		if(procStm == nullptr){
 			throw i + 1;
@@ -264,8 +173,7 @@ void AST::catchDupProcedureException(unsigned i, Node* procStm)
 	}
 }
 
-void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName)
-{
+void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName){
 	try{
 		if(callProcName.compare(currentProcName) == 0){
 			throw i + 1;
@@ -275,8 +183,7 @@ void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, 
 	}
 }
 
-void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance)
-{
+void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance){
 	try{
 		if(!isInflixBalance){
 			throw i + 1;
@@ -284,4 +191,128 @@ void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance)
 	}catch (unsigned int e){
 		std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
 	}
+}
+
+void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsigned bracesNo, unsigned i){
+	try{
+		if(bracesNo > bracesStack.size()){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::createWhileNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector){
+	std::string varName = extractStatementPart(WHILESTM, line);
+
+	Node* whileStm = nullptr;
+
+	Node* procNode = procNode = twinVector.front()->getStmNode();
+
+	Node* whileStmLst = nullptr;
+	setupWhileVarListNode(lineNumber, twinVector, varName, whileStm, procNode, whileStmLst);
+
+	Twin* tTwin = new Twin(whileStm, whileStmLst);
+
+	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(whileStm);
+
+	twinVector.push_back(tTwin);
+}
+
+void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst){
+	Node* whileVar = nullptr;
+	Node* parentNode = nullptr;
+	if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
+		parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
+		whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, parentNode, procNode);
+		whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, parentNode, procNode);//leftnode
+	}else if(twinVector.size() == 1){// only a procedure statementlist in it
+		whileStm = pkb->createNode(whileLoop, lineNumber, "", nullptr, nullptr, nullptr, procNode);
+		whileVar = pkb->createNode(variable, lineNumber, varName, whileStm, nullptr, nullptr, procNode);//leftnode
+	}
+							
+	whileStm->setLeftChild(whileVar);
+
+	whileStmLst = pkb->createNode(statementList, lineNumber);
+	//rightnode
+	whileStm->setRightChild(whileStmLst);
+}
+
+void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i){
+	std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
+
+	Node* procNode = twinVector.front()->getStmNode();
+	Node* assignStm = nullptr;
+
+	setupAssignVarListNode(line, lineNumber, twinVector, i, varName, procNode, assignStm);
+
+	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
+}
+
+void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm){
+
+	Node* parentNode = nullptr;
+	Node* assignVar = nullptr;
+
+	if(twinVector.size() > 1){// 1 proc statementlist and 1 or more while statementlist
+		parentNode = twinVector[twinVector.size() - 1]->getStmNode();						
+		assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, parentNode, procNode);
+		assignVar = pkb->createNode(variable, lineNumber, varName, 
+		                            nullptr, assignStm, parentNode, procNode);
+	}else if(twinVector.size() == 1){// only a procedure statementlist in it
+		assignStm = pkb->createNode(assignment, lineNumber, "", nullptr, nullptr, nullptr, procNode);
+		assignVar = pkb->createNode(variable, lineNumber, varName, 
+		                            nullptr, assignStm, nullptr, procNode);
+	}
+					
+	assignStm->setLeftChild(assignVar);
+					
+	std::string inflix = extractStatementPart(ASSIGNSTMEXP, line);
+	bool isInflixBalance = expTree->isInflixBalanced(inflix);
+
+	catchUnbalancedInfixException(i, isInflixBalance);
+
+	std::vector<char> postflix = expTree->expressionConverter(inflix);
+						
+	Node* assignExp = expTree->exptreeSetup(postflix, lineNumber, assignStm, procNode, parentNode);
+
+	assignStm->setRightChild(assignExp);
+}
+
+void AST::popImmediateParent(std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector, unsigned& bracesNo){
+	bracesStack.pop();
+	twinVector.erase(twinVector.end() - 1);
+	bracesNo -= 1;
+}
+
+void AST::createCallNode(std::string line, int lineNumber, std::string& currentProcName, std::vector<Twin*>& twinVector, unsigned i){
+	std::string callProcName = extractStatementPart(CALLSTM, line);
+
+	catchRecursiveCallException(currentProcName, i, callProcName);
+
+	Node* tCall = pkb->createNode(call,lineNumber, callProcName);
+
+	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(tCall);
+}
+
+void AST::createProcNode(std::string line, std::string& currentProcName, std::vector<Node*>& mainProg, std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector, unsigned i){
+	currentProcName = extractStatementPart(PROCEDURESTM, line);
+
+	Node* procStm = nullptr;
+	Node* stmLst = nullptr;
+	
+	procStm = pkb->createProcedure(currentProcName);
+
+	catchDupProcedureException(i, procStm);
+
+	stmLst = pkb->createNode(statementList, i + 1);
+	procStm->setLeftChild(stmLst);
+
+	mainProg.push_back(procStm);
+
+	bracesStack.push("{");
+
+	Twin* tTwin = new Twin(procStm, stmLst);
+	twinVector.push_back(tTwin);
 }
