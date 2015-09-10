@@ -20,6 +20,7 @@ private:
 
 public:
 	AST(PKB*, ExpressionTree*);
+	void catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned i);
 	void setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst);
 	void setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm);
 	void catchUnequalBracesException(std::stack<std::string>& bracesStack, unsigned bracesNo, unsigned i);
