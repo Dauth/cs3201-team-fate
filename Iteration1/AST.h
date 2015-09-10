@@ -20,6 +20,7 @@ private:
 
 public:
 	AST(PKB*, ExpressionTree*);
+	void catchMissingSemiColonException(std::string line, unsigned i);
 	void catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned i);
 	void setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst);
 	void setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm);
@@ -33,6 +34,7 @@ public:
 	void catchDupProcedureException(unsigned i, Node* procStm);
 	void catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName);
 	void catchUnbalancedInfixException(unsigned i, bool isInflixBalance);
+	bool AST::isSemiColonPresent(std::string input);
 	std::vector<Node*> AST::buildAST(std::vector<std::string>);
 };
 

@@ -27,6 +27,16 @@ AST::AST(PKB* p, ExpressionTree* e){
 }
 
 
+void AST::catchMissingSemiColonException(std::string line, unsigned i){
+	try{
+		if(!isSemiColonPresent(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"MISSING SEMICOLON FOR ASSIGN STMT AT LINE NO:"<<e<<std::endl;
+	}
+}
+
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
@@ -59,9 +69,11 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				lineNumber += 1;
 
 			}else if(statementType == CALLSTM){
+				//need to check for semicolon here in future
 				createCallNode(line, lineNumber, currentProcName, twinVector, i);
 				lineNumber += 1;
 			}else if(statementType == ASSIGNSTM){
+				catchMissingSemiColonException(line, i);
 				createAssignNode(line, lineNumber, twinVector, i);
 				lineNumber += 1;
 			}
@@ -99,19 +111,21 @@ int AST::getStatementType(std::string input){
 	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z]+\\s*\\{$");
 	std::regex callProc("\\s*\\t*call\\s+[A-Za-z]+\\;\\s*\\}*$");
 	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z]+\\s*\\{$");
-	std::regex assignStm("\\s*\\t*[A-Za-z]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
-	
+	std::regex assignStm("\\s*\\t*[A-Za-z]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$");
+	std::smatch match;
 	int result = -1;
 
-	if(regex_match(input, procedure)){
+	if (std::regex_search(input, match, procedure)){
 		result = PROCEDURESTM;
-	}else if(regex_match(input, callProc)){
+	}else if(std::regex_search(input, match, callProc)){
 		result = CALLSTM;
-	}else if(regex_match(input, whileLoop)){
+	}else if(std::regex_search(input, match, whileLoop)){
 		result = WHILESTM;	
-	}else if(regex_match(input, assignStm)){
-		result = ASSIGNSTM;	
+	}else if (std::regex_search(input, match, assignStm)){
+		result = ASSIGNSTM;
 	}
+
+
 	return result;
 }
 
@@ -125,8 +139,8 @@ std::string AST::extractStatementPart(int inputType, std::string input){
 	std::regex procedureName("\\s*\\t*procedure\\s+([A-Za-z]+)\\s*\\{$");
 	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z]+)\\;\\s*\\}*$");
 	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z]+)\\s*\\{$");
-	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
-	std::regex assignStmRightHand("\\s*\\t*[A-Za-z]+\\s*=([A-Za-z0-9\\*\\+\\-\\s\\(\\)]+)\\;\\s*\\}*$");
+	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$");
+	std::regex assignStmRightHand("\\s*\\t*[A-Za-z]+\\s*=([A-Za-z0-9\\*\\+\\-\\s\\(\\)]+)\\;?\\s*\\}*$");
 	std::smatch match;
 	
 	std::string outcome = "";
@@ -182,13 +196,26 @@ int AST::getNumOfOpenbraces(std::string input){
 	return result;
 }
 
+bool AST::isSemiColonPresent(std::string input){
+	std::regex openBraces("(\\;+)");
+	std::smatch match;
+
+	int result = false;
+
+	std::regex_search(input, match, openBraces);
+	if(match.length() > 0){
+        result = true;
+    }
+	return result;
+}
+
 void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack, unsigned i, int statementType){
 	try{
 		if(statementType == PROCEDURESTM && !bracesStack.empty()){
 			throw i + 1;
 		}
 	}catch(unsigned int e){
-		std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+			std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
 	}
 }
 
