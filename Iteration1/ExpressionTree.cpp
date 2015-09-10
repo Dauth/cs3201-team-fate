@@ -2,6 +2,11 @@
 #include "ExpressionTree.h"
 #include <stack>
 #include <cstdlib>
+#include <regex>
+using std::regex;
+using std::string;
+using std::sregex_token_iterator;
+#include <locale>
 
 const int LEFT = 1;
 const int RIGHT = 2;
@@ -22,41 +27,47 @@ This function converts an inflix expression to postflix.
 Parameters: String - a string that consists of operand and operator
 Return:		array
 */
-std::vector <char> ExpressionTree::expressionConverter(std::string inflixString){
-	std::stack <char> tStack;
-	std::vector <char> resultVector;
-	char cChar;
+std::vector <std::string> ExpressionTree::expressionConverter(std::string inflixString){
+	std::stack <std::string> tStack;
+	std::vector <std::string> resultVector;
+	std::vector<std::string> splittedString;
+	std::string sString;
 	
-	for(unsigned int i = 0; i < inflixString.length(); i++){
-		cChar = inflixString[i];
-		const char *bChar = &cChar;
-		char wChar;
+	std::regex re("[\\s]+");
+	std::sregex_token_iterator it(inflixString.begin(), inflixString.end(), re, -1);
+	std::sregex_token_iterator reg_end;
+	for (; it != reg_end; ++it) {
+		splittedString.push_back(it->str());
+	}
+
+	for(unsigned int i = 0; i < splittedString.size(); i++){
+		sString = splittedString[i];
+		std::string wString;
 		
-		if(cChar == '('){
-			tStack.push(cChar);
-		}else if (cChar == ')'){
-			while(!tStack.empty() && tStack.top() != '('){
-				wChar = tStack.top();
+		if(sString.compare("(") == 0){
+			tStack.push(sString);
+		}else if (sString.compare(")") == 0){
+			while(!tStack.empty() && (!(tStack.top().compare("(") == 0))){
+				wString = tStack.top();
 				tStack.pop();
-				const char *dChar = &wChar;
-				resultVector.push_back(wChar);	//push all operators which reside within the brackets					
+				resultVector.push_back(wString);	//push all operators which reside within the brackets					
 			}
 		tStack.pop();//to remove open brackets
 		}
 
-		if (isOperand(cChar)){
-			resultVector.push_back(cChar);
+		if (isOperand(sString)){
+			resultVector.push_back(sString);
 		}
 		
-		if(isOperator(cChar)){
+		if(isOperator(sString)){
 			if(tStack.empty()){
-				tStack.push(cChar);
+				tStack.push(sString);
 			}else{
-				while(!tStack.empty() && (getPrecedence(cChar) <= getPrecedence(tStack.top()))){
+				while(!tStack.empty() && (getPrecedence(sString) <= getPrecedence(tStack.top()))){
 					resultVector.push_back(tStack.top());
 					tStack.pop();
 				}
-				tStack.push(cChar);
+				tStack.push(sString);
 			}
 		}
 	}
@@ -80,26 +91,37 @@ This function checks if the given character is alphanumeric - A-z0-9.
 Parameters: char
 Return:		bool
 */
-bool ExpressionTree::isOperand(char cChar){
-	bool result = false;
-	if(isalnum(cChar) != 0){
-		result = true;
+bool ExpressionTree::isOperand(std::string sString){
+	bool result = true;
+	for(int i = 0; i < sString.length(); i++){
+		if(!isalnum(sString[i])){
+			result = false;
+			return result;
+		}
 	}
 	return result;
 }
 
-bool ExpressionTree::isAlpha(char cChar){
-	bool result = false;
-	if(isalpha(cChar) != 0){
-		result = true;
+bool ExpressionTree::isAlpha(std::string sString){
+	bool result = true;
+
+	for(int i = 0; i < sString.length(); i++){
+		if(!isalpha(sString[i])){
+			result = false;
+			return result;
+		}
 	}
 	return result;
 }
 
-bool ExpressionTree::isDigit(char cChar){
-	bool result = false;
-	if(isdigit(cChar) != 0){
-		result = true;
+bool ExpressionTree::isDigit(std::string sString){
+	bool result = true;
+	
+	for(int i = 0; i < sString.length(); i++){
+		if(!isdigit(sString[i])){
+			result = false;
+			return result;
+		}
 	}
 	return result;
 }
@@ -109,13 +131,16 @@ This function checks if the given character is an operator  + - *.
 Parameters: char
 Return:		bool
 */
-bool ExpressionTree::isOperator(char cChar){
+bool ExpressionTree::isOperator(std::string sString){
 	bool result = false;
-	const char *bChar = &cChar;
-	
-	if(strcmp(bChar, TIMES) == 0 || strcmp(bChar, PLUS) == 0 || strcmp(bChar, MINUS) == 0){
+
+	for(int i = 0; i < sString.length(); i ++){
+		const char* bChar = &sString[i];
+		if(strcmp(bChar, TIMES) == 0 || strcmp(bChar, PLUS) == 0 || strcmp(bChar, MINUS) == 0){
 		result = true;
+		}
 	}
+	
 	return result;
 }
 
@@ -126,9 +151,9 @@ This function gets the rank order of the operator.
 Parameters: char
 Return:		int
 */
-int ExpressionTree::getPrecedence(char oOperator){
+int ExpressionTree::getPrecedence(std::string oOperator){
 	int result = -1;
-	const char *bChar = &oOperator;
+	const char *bChar = &oOperator[0];
 	
 	if(strcmp(bChar, TIMES) == 0){
 		result = 2;
@@ -170,11 +195,11 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	return result;//if it is false here, there are more opening then closing brackets
 }
 
-synt_type ExpressionTree::getSyntType(char expressionChar){
+synt_type ExpressionTree::getSyntType(std::string expressionStr){
 	synt_type expressionCharType;
-	if(isAlpha(expressionChar)){
+	if(isAlpha(expressionStr)){
 			expressionCharType = variable;
-		}else if(isDigit(expressionChar)){
+		}else if(isDigit(expressionStr)){
 			expressionCharType = constant;
 		} else {
 			expressionCharType = expression;
@@ -182,12 +207,12 @@ synt_type ExpressionTree::getSyntType(char expressionChar){
 		return expressionCharType;
 }
 
-Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+Node* ExpressionTree::exptreeSetup(std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	synt_type expressionCharType;
 	std::stack<Node*> operandStack;
 
 	for(int i = 0; i < postflixExp.size(); i++){
-		std::string expressionChar(1, postflixExp[i]);
+		std::string expressionChar = postflixExp[i];
 		expressionCharType = getSyntType(postflixExp[i]);
 
 		if(isOperand(postflixExp[i])){
@@ -208,14 +233,14 @@ Node* ExpressionTree::exptreeSetup(std::vector<char> postflixExp, int lineNo, No
 	return operandStack.top();
 }
 
-Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
+Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 	synt_type expressionCharType;
 	std::stack<Node*> operandStack;
 
 	for(int i = 0; i < postflixExp.size(); i++){
-		std::string expressionChar(1, postflixExp[i]);
+		std::string expressionStr= postflixExp[i];
 		expressionCharType = getSyntType(postflixExp[i]);
-		Node* tNode = new Node(expressionCharType, 0, expressionChar);
+		Node* tNode = new Node(expressionCharType, 0, expressionStr);
 
 		if(isOperand(postflixExp[i])){
 			operandStack.push(tNode);
@@ -234,5 +259,4 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<char> postflixExp){
 
 	return operandStack.top();
 }
-
 

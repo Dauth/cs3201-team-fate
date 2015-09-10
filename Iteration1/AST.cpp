@@ -159,7 +159,7 @@ std::string AST::extractStatementPart(int inputType, std::string input){
   
   if(match.length() > 0){
     outcome = match[1];
-    outcome.erase(std::remove(outcome.begin(), outcome.end(), ' '),outcome.end());
+    //outcome.erase(std::remove(outcome.begin(), outcome.end(), ' '),outcome.end());
   }
   
 	return outcome;
@@ -340,7 +340,7 @@ void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<T
 
 	catchUnbalancedInfixException(i, isInflixBalance);
 
-	std::vector<char> postflix = expTree->expressionConverter(inflix);
+	std::vector<std::string> postflix = expTree->expressionConverter(inflix);
 						
 	Node* assignExp = expTree->exptreeSetup(postflix, lineNumber, assignStm, procNode, parentNode);
 

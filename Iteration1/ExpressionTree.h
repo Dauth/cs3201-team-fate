@@ -8,19 +8,21 @@ class ExpressionTree{
 	PKB* pkb;
 
 private:
-	bool ExpressionTree::isOperand(char);
-	bool ExpressionTree::isOperator(char);
-	bool ExpressionTree::isAlpha(char);
-	bool ExpressionTree::isDigit(char);
-	int ExpressionTree::getPrecedence(char);
-	synt_type ExpressionTree::getSyntType(char);
+	bool ExpressionTree::isOperand(std::string);
+	bool ExpressionTree::isOperator(std::string);
+	bool ExpressionTree::isAlpha(std::string);
+	bool ExpressionTree::isDigit(std::string);
+	int ExpressionTree::getPrecedence(std::string);
+	synt_type ExpressionTree::getSyntType(std::string);
 
 public:
 	ExpressionTree(PKB*);
 	bool ExpressionTree::isInflixBalanced(std::string);
-	std::vector <char> ExpressionTree::expressionConverter(std::string);
-	Node* ExpressionTree::exptreeSetup(std::vector<char>, int, Node*, Node*, Node*);
-	Node* ExpressionTree::exptreeSetupSON(std::vector<char>);
+	std::vector <std::string> ExpressionTree::expressionConverter(std::string);
+	Node* ExpressionTree::exptreeSetup(std::vector<std::string>, int, Node*, Node*, Node*);
+	Node* ExpressionTree::exptreeSetupSON(std::vector<std::string>);
+
+
 	
 };
 
