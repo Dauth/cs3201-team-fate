@@ -217,15 +217,18 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 
 		//if the right was not "_" and it is an expression
 		Node* tNode;
+		std::vector<Node*> exprList;
 		if (firstChar != "_"){
 			tNode = et->exptreeSetupSON(et->expressionConverter(right));
+			exprList = pkb->getRootExpressions(tNode->getValue());
+
 		}
 
 		else{
 			tNode = et->exptreeSetupSON(et->expressionConverter(right.substr(1,right.length()-2)));
+			exprList = pkb->getExpressions(tNode->getValue());
 		}
 
-		std::vector<Node*> exprList = pkb->getExpressions(tNode->getValue());
 		for (unsigned int i = 0 ; i < exprList.size() ; i++){
 			Node* tNode2 = exprList.at(i);
 			int compareResult = compare(tNode2,tNode);
@@ -268,7 +271,7 @@ int DesignExtractor::compare(Node* p,Node* q){
    else if(p == NULL || q == NULL){
 	   return 0;
    }
-   else if(p->getValue() == q->getValue())   {
+   else if(p->getValue() == q->getValue()){
 	   int s1=compare(p->getLeftChild(),q->getLeftChild());
 	   int s2=compare(p->getRightChild(),q->getRightChild());
 	   return s1*s2;
