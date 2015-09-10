@@ -66,7 +66,7 @@ std::vector<Node*> DesignExtractor::getParentsStar(int statementLine){
 
 std::vector<Node*> DesignExtractor::getParentsStar(synt_type type){
 	std::vector<Node*> parentList;
-	if (pkb->getParent(type).empty()){
+	if (pkb->getParents(type).empty()){
 		return parentList;
 	}
 	parentList = pkb->getParents(type);
