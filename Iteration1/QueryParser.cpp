@@ -542,6 +542,7 @@ void ProcessEachToken(char *currentToken)
 						synt_type secondSyn = getSynType(secondParameter);
 						if (firstSyn != synt_type::synError && secondSyn != synt_type::synError)
 						{
+							removeCharsFromString(secondParameter, "\"");
 							ParamNode* firstParamNode = new ParamNode(firstSyn,firstParameter);
 							ParamNode* secondParamNode = new ParamNode (secondSyn, secondParameter);
 							QueryNode* newQuery = new QueryNode(queryClause,firstParamNode, secondParamNode);
