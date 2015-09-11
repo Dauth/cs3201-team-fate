@@ -277,7 +277,7 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 }
 
 bool ExpressionTree::isNameStartWithLetter(std::string input){
-	std::regex assignStm("\\s*\\t*^[A-Za-z][A-Za-z0-9]+.*");
+	std::regex assignStm("\\s*\\t*^[A-Za-z]");
 	std::smatch match;
 
 	int result = false;
