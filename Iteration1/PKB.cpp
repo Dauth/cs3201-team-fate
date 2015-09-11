@@ -103,7 +103,6 @@ void PKB::handleParent(Node* child, Node* parent) {
 }
 
 std::vector<Node*> PKB::getModifies(std::string procName) {
-	std::cout << procName << "\n";
 	Node* procedure = procedureTable.getProcedure(procName);
 	return modifiesTable.getModified(procedure);
 }
