@@ -17,6 +17,7 @@ private:
 
 public:
 	ExpressionTree(PKB*);
+	void splitString(std::string inflixString, std::vector<std::string>& splittedString);
 	bool ExpressionTree::isInflixBalanced(std::string);
 	std::vector <std::string> ExpressionTree::expressionConverter(std::string);
 	Node* ExpressionTree::exptreeSetup(std::vector<std::string>, int, Node*, Node*, Node*);

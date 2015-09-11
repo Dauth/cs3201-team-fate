@@ -22,6 +22,25 @@ ExpressionTree::ExpressionTree(PKB* p) {
 	pkb = p;
 }
 
+void ExpressionTree::splitString(std::string inflixString, std::vector<std::string>& splittedString){
+	std::string tempStr = "";
+	for(int i = 0; i < inflixString.size(); i++){
+		std::string expStr(1, inflixString[i]);
+		if(isOperand(expStr)){
+			tempStr.append(expStr);
+		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
+			splittedString.push_back(tempStr);
+			tempStr.clear();
+			tempStr.append(expStr);
+			splittedString.push_back(tempStr);
+			tempStr.clear();
+		}
+	}
+	if(!tempStr.empty()){
+		splittedString.push_back(tempStr);
+	}
+}
+
 /*
 This function converts an inflix expression to postflix.
 Parameters: String - a string that consists of operand and operator
@@ -32,13 +51,9 @@ std::vector <std::string> ExpressionTree::expressionConverter(std::string inflix
 	std::vector <std::string> resultVector;
 	std::vector<std::string> splittedString;
 	std::string sString;
-	
-	std::regex re("[\\s]+");
-	std::sregex_token_iterator it(inflixString.begin(), inflixString.end(), re, -1);
-	std::sregex_token_iterator reg_end;
-	for (; it != reg_end; ++it) {
-		splittedString.push_back(it->str());
-	}
+
+
+	splitString(inflixString, splittedString);
 
 	for(unsigned int i = 0; i < splittedString.size(); i++){
 		sString = splittedString[i];
