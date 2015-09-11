@@ -26,12 +26,15 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 	std::string tempStr = "";
 	for(int i = 0; i < inflixString.size(); i++){
 		std::string expStr(1, inflixString[i]);
+
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
 		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
 			catchNameStartsLetterException(tempStr);
-			splittedString.push_back(tempStr);
-			tempStr.clear();
+			if(!tempStr.empty()){
+				splittedString.push_back(tempStr);
+				tempStr.clear();
+			}
 			tempStr.append(expStr);
 			splittedString.push_back(tempStr);
 			tempStr.clear();
