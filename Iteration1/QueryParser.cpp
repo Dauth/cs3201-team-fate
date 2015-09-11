@@ -297,6 +297,7 @@ void ProcessEachToken(char *currentToken)
 	{
 		currToken = TOKEN::SUCHTHAT_CL;
 				existClauses = true;
+				expectingThat = false;
 	}
 	else if (strcmp(currentToken,"with") == 0)
 	{
