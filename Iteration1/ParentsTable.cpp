@@ -7,7 +7,7 @@ ParentsTable::ParentsTable () {
 
 std::vector<Node*> ParentsTable::getParents() {
 	std::vector<Node*> parents;
-	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
+	for(std::unordered_map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
 		parents.push_back(it->first);
 	}
 	return parents;
@@ -22,7 +22,7 @@ std::vector<Node*> ParentsTable::getChild(Node* node) {
 
 std::vector<Node*> ParentsTable::getChildren(synt_type st) {
 	std::vector<Node*> allChildren;
-	for(std::map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
+	for(std::unordered_map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
 		std::vector<Node*> children = it->second;
 		for(int i=0; i<children.size(); i++) {
 		synt_type nt = children[i]->getType();
