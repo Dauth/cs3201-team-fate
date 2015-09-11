@@ -206,6 +206,7 @@ void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack,
 		}
 	}catch(unsigned int e){
 			std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+			std::terminate();
 	}
 }
 
@@ -216,6 +217,7 @@ void AST::catchDupProcedureException(unsigned i, Node* procStm){
 		}
 	}catch(unsigned int e){
 		std::cout<<"DUPLICATED PROCEDURE APPEARED IN PROGRAM AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -226,6 +228,7 @@ void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, 
 		}
 	}catch(unsigned int e){
 		std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -236,6 +239,7 @@ void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance){
 		}
 	}catch (unsigned int e){
 		std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -246,6 +250,7 @@ void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsi
 		}
 	}catch(unsigned int e){
 		std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -257,6 +262,7 @@ void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned 
 		}
 	}catch(unsigned int e){
 		std::cout<<"EMPTY STATEMENT IN CONTAINER AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -267,6 +273,7 @@ void AST::catchMissingSemiColonException(std::string line, unsigned i){
 		}
 	}catch(unsigned int e){
 		std::cout<<"MISSING SEMICOLON FOR ASSIGN STMT AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -289,6 +296,7 @@ void AST::catchUnknownOperatorException(std::string line, unsigned i){
 		}
 	}catch(unsigned int e){
 		std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
