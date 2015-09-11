@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <list>
 #include "synt_type.h"

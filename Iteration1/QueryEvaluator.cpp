@@ -29,35 +29,42 @@ void QueryEvaluator::evaluatePattern() {
 }
 
 void QueryEvaluator::evaluateSinglePattern(PatternNode* p) {
+	int index = symbol->getIndex(p->getLeftParam()->getParam());
+	std::vector<Node*> vec = symbol->getQuery().at(index)->getPKBOutput();
 	std::vector<Node*> tempResult;
-	if(p->getMiddleParam()->getType() == expression) {
-		tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), p->getMiddleParam()->getParam(), p->getRightParam()->getParam());
-	} else {
-		std::vector<Node*> var;
-		int index = symbol->getIndex(p->getMiddleParam()->getParam());
-		if(symbol->getQuery().at(index)->getPKBOutput().empty()) {
-			tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), "_", p->getRightParam()->getParam());
+	if(vec.empty()) {
+		if(p->getMiddleParam()->getType() == expression) {
+			tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), p->getMiddleParam()->getParam(), p->getRightParam()->getParam());
 		} else {
-			std::set<Node*> temp;
-			std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
-			for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
-				tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), (**i).getVariable()->getName(), p->getRightParam()->getParam());
-				for(std::vector<Node*>::iterator j = tempResult.begin(); j != tempResult.end(); j++){
-				temp.insert(*j);
+			std::vector<Node*> var;
+			int index = symbol->getIndex(p->getMiddleParam()->getParam());
+			if(symbol->getQuery().at(index)->getPKBOutput().empty()) {
+				tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), "_", p->getRightParam()->getParam());
+			} else {
+				std::set<Node*> temp;
+				std::vector<Node*> varVec = symbol->getQuery().at(index)->getPKBOutput();
+				for(std::vector<Node*>::iterator i = varVec.begin(); i != varVec.end(); i++) {
+					tempResult = dEx->searchWithPattern(p->getLeftParam()->getType(), (**i).getVariable()->getName(), p->getRightParam()->getParam());
+					for(std::vector<Node*>::iterator j = tempResult.begin(); j != tempResult.end(); j++){
+					temp.insert(*j);
+				}
+			}
+			tempResult.clear();
+			for(std::set<Node*>::iterator i = temp.begin(); i != temp.end(); i++) {
+				tempResult.push_back(*i);
+				}
+			}
+			var = getVarFromPattern(tempResult);
+			hasResult = resultNotEmpty(p->getMiddleParam(), var);
+			if(!tempResult.empty()) {
+				sc->addPattern(p);
 			}
 		}
-		tempResult.clear();
-		for(std::set<Node*>::iterator i = temp.begin(); i != temp.end(); i++) {
-			tempResult.push_back(*i);
-			}
-		}
-		var = getVarFromPattern(tempResult);
+		hasResult = resultNotEmpty(p->getLeftParam(), tempResult);
+	} else {
+		std::vector<Node*> var = getVarFromPattern(vec);
 		hasResult = resultNotEmpty(p->getMiddleParam(), var);
-		if(!tempResult.empty()) {
-			sc->addPattern(p);
-		}
 	}
-	hasResult = resultNotEmpty(p->getLeftParam(), tempResult);
 }
 
 void QueryEvaluator::evaluateQuery() {

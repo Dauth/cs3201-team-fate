@@ -26,6 +26,27 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
+void AST::catchParamProcException(std::string line, unsigned i){
+	try{
+		if(isParamProcedure(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"PARAM PROCEDURE DETECTED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
+	}
+}
+
+void AST::catchUnknownProcException(std::string line, unsigned i){
+	try{
+		if(!isValidProcedure(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"UNKNOWN PROCEDURE ERROR DETECTED:"<<e<<std::endl;
+		std::terminate();
+	}
+}
 
 /*
 This function processes a vector which contains the source file
@@ -51,6 +72,8 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 		catchProcedureInceptionException(bracesStack, i, statementType);
 
 		if(statementType == PROCEDURESTM && bracesStack.empty()){
+			catchParamProcException(line, i);
+			catchUnknownProcException(line, i);
 			createProcNode(line, currentProcName, mainProg, bracesStack, twinVector, i);
 		}else{
 			if(statementType == WHILESTM){
@@ -59,9 +82,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				lineNumber += 1;
 
 			}else if(statementType == CALLSTM){
+				//need to check for semicolon here in future
 				createCallNode(line, lineNumber, currentProcName, twinVector, i);
 				lineNumber += 1;
 			}else if(statementType == ASSIGNSTM){
+				catchMissingSemiColonException(line, i);
+				catchUnknownOperatorException(line, i);
 				createAssignNode(line, lineNumber, twinVector, i);
 				lineNumber += 1;
 			}
@@ -96,22 +122,24 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z]+\\s*\\{$");
-	std::regex callProc("\\s*\\t*call\\s+[A-Za-z]+\\;\\s*\\}*$");
-	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z]+\\s*\\{$");
-	std::regex assignStm("\\s*\\t*[A-Za-z]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
-	
+	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z0-9]+\\s*\\{?");
+	std::regex callProc("\\s*\\t*call\\s+[A-Za-z0-9]+\\;\\s*\\}*");
+	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z0-9]+\\s*\\{?");
+	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=");//\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$
+	std::smatch match;
 	int result = -1;
 
-	if(regex_match(input, procedure)){
+	if (std::regex_search(input, match, procedure)){
 		result = PROCEDURESTM;
-	}else if(regex_match(input, callProc)){
+	}else if(std::regex_search(input, match, callProc)){
 		result = CALLSTM;
-	}else if(regex_match(input, whileLoop)){
+	}else if(std::regex_search(input, match, whileLoop)){
 		result = WHILESTM;	
-	}else if(regex_match(input, assignStm)){
-		result = ASSIGNSTM;	
+	}else if (std::regex_search(input, match, assignStm)){
+		result = ASSIGNSTM;
 	}
+
+
 	return result;
 }
 
@@ -122,11 +150,11 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("\\s*\\t*procedure\\s+([A-Za-z]+)\\s*\\{$");
-	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z]+)\\;\\s*\\}*$");
-	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z]+)\\s*\\{$");
-	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;\\s*\\}*$");
-	std::regex assignStmRightHand("\\s*\\t*[A-Za-z]+\\s*=([A-Za-z0-9\\*\\+\\-\\s\\(\\)]+)\\;\\s*\\}*$");
+	std::regex procedureName("\\s*\\t*procedure\\s+\\.*\\{?");
+	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z0-9]+)\\;\\s*\\}*");
+	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z0-9]+)\\s*\\{?");
+	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z0-9]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*");
+	std::regex assignStmRightHand("\\s*\\t*[A-Za-z0-9]+\\s*=([A-Za-z0-9\\*\\+\\-\\s\\(\\)]+)\\;?\\s*\\}*");
 	std::smatch match;
 	
 	std::string outcome = "";
@@ -145,7 +173,7 @@ std::string AST::extractStatementPart(int inputType, std::string input){
   
   if(match.length() > 0){
     outcome = match[1];
-    outcome.erase(std::remove(outcome.begin(), outcome.end(), ' '),outcome.end());
+    //outcome.erase(std::remove(outcome.begin(), outcome.end(), ' '),outcome.end());
   }
   
 	return outcome;
@@ -182,13 +210,27 @@ int AST::getNumOfOpenbraces(std::string input){
 	return result;
 }
 
+bool AST::isSemiColonPresent(std::string input){
+	std::regex openBraces("(\\;+)");
+	std::smatch match;
+
+	bool result = false;
+
+	std::regex_search(input, match, openBraces);
+	if(match.length() > 0){
+        result = true;
+    }
+	return result;
+}
+
 void AST::catchProcedureInceptionException(std::stack<std::string>& bracesStack, unsigned i, int statementType){
 	try{
 		if(statementType == PROCEDURESTM && !bracesStack.empty()){
 			throw i + 1;
 		}
 	}catch(unsigned int e){
-		std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+			std::cout<<"PROCEDURE WITHIN A PROCEDURE (INCEPTION) AT LINE NO:"<<e<<std::endl;
+			std::terminate();
 	}
 }
 
@@ -199,6 +241,7 @@ void AST::catchDupProcedureException(unsigned i, Node* procStm){
 		}
 	}catch(unsigned int e){
 		std::cout<<"DUPLICATED PROCEDURE APPEARED IN PROGRAM AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -209,6 +252,7 @@ void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, 
 		}
 	}catch(unsigned int e){
 		std::cout<<"RECURSIVE CALL DETECTED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -219,6 +263,7 @@ void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance){
 		}
 	}catch (unsigned int e){
 		std::cout<<"INFLIX EXPRESION IS NOT BALANCED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -229,6 +274,7 @@ void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsi
 		}
 	}catch(unsigned int e){
 		std::cout<<"ERROR IN SOURCE CODE, TOO MANY CLOSING BRACES FROM LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
 }
 
@@ -240,7 +286,66 @@ void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned 
 		}
 	}catch(unsigned int e){
 		std::cout<<"EMPTY STATEMENT IN CONTAINER AT LINE NO:"<<e<<std::endl;
+		std::terminate();
 	}
+}
+
+void AST::catchMissingSemiColonException(std::string line, unsigned i){
+	try{
+		if(!isSemiColonPresent(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"MISSING SEMICOLON FOR ASSIGN STMT AT LINE NO:"<<e<<std::endl;
+		std::terminate();
+	}
+}
+
+bool AST::isUnknownOperatorPresent(std::string input){
+	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*");
+	std::smatch match;
+
+	bool result = true;
+
+	if (std::regex_search(input, match, assignStm)){
+		result = false;
+	}
+	return result;
+}
+
+void AST::catchUnknownOperatorException(std::string line, unsigned i){
+	try{
+		if(isUnknownOperatorPresent(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<e<<std::endl;
+		std::terminate();
+	}
+}
+
+bool AST::isValidProcedure(std::string input){
+	std::regex procStm("\\s*\\t*procedure\\s+([A-Za-z0-9]+)\\s*\\{?");
+	std::smatch match;
+
+	bool result = false;
+
+	if (std::regex_search(input, match, procStm)){
+		result = true;
+	}
+	return result;
+}
+
+bool AST::isParamProcedure(std::string input){
+	bool result = true;
+	std::string::size_type n = -1;
+	std::string::size_type m = -1;
+	n = input.find("(");
+	m = input.find(")");
+	if (n == std::string::npos || m == std::string::npos){
+		 result = false;
+    }
+	return result;
 }
 
 void AST::createWhileNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector){
@@ -281,6 +386,7 @@ void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, 
 
 void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i){
 	std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
+	expTree->catchNameStartsLetterException(varName);
 
 	Node* procNode = twinVector.front()->getStmNode();
 	Node* assignStm = nullptr;
@@ -313,7 +419,7 @@ void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<T
 
 	catchUnbalancedInfixException(i, isInflixBalance);
 
-	std::vector<char> postflix = expTree->expressionConverter(inflix);
+	std::vector<std::string> postflix = expTree->expressionConverter(inflix);
 						
 	Node* assignExp = expTree->exptreeSetup(postflix, lineNumber, assignStm, procNode, parentNode);
 

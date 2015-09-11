@@ -5,7 +5,7 @@
 #include "Node.h"
 
 class ModifiesTable {
-	std::map<Node*, std::vector<Node*>> table;
+	std::unordered_map<Node*, std::vector<Node*>> table;
 	
 public:
 	ModifiesTable();
