@@ -20,6 +20,8 @@ private:
 
 public:
 	AST(PKB*, ExpressionTree*);
+	void catchParamProcException(std::string line, unsigned i);
+	void catchUnknownProcException(std::string line, unsigned i);
 	bool AST::isUnknownOperatorPresent(std::string line);
 	void catchUnknownOperatorException(std::string line, unsigned i);
 	void catchMissingSemiColonException(std::string line, unsigned i);
@@ -38,6 +40,8 @@ public:
 	void catchUnbalancedInfixException(unsigned i, bool isInflixBalance);
 	bool AST::isSemiColonPresent(std::string input);
 	std::vector<Node*> AST::buildAST(std::vector<std::string>);
+	bool AST::isValidProcedure(std::string input);
+	bool AST::isParamProcedure(std::string input);
 };
 
 #endif

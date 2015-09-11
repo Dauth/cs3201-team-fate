@@ -26,6 +26,28 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
+void AST::catchParamProcException(std::string line, unsigned i){
+	try{
+		if(isParamProcedure(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"PARAM PROCEDURE DETECTED AT LINE NO:"<<e<<std::endl;
+		std::terminate();
+	}
+}
+
+void AST::catchUnknownProcException(std::string line, unsigned i){
+	try{
+		if(!isValidProcedure(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"UNKNOWN PROCEDURE ERROR DETECTED:"<<e<<std::endl;
+		std::terminate();
+	}
+}
+
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
@@ -50,6 +72,8 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 		catchProcedureInceptionException(bracesStack, i, statementType);
 
 		if(statementType == PROCEDURESTM && bracesStack.empty()){
+			catchParamProcException(line, i);
+			catchUnknownProcException(line, i);
 			createProcNode(line, currentProcName, mainProg, bracesStack, twinVector, i);
 		}else{
 			if(statementType == WHILESTM){
@@ -126,7 +150,7 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("\\s*\\t*procedure\\s+([A-Za-z0-9]+)\\s*\\{?");
+	std::regex procedureName("\\s*\\t*procedure\\s+\\.*\\{?");
 	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z0-9]+)\\;\\s*\\}*");
 	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z0-9]+)\\s*\\{?");
 	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z0-9]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*");
@@ -190,7 +214,7 @@ bool AST::isSemiColonPresent(std::string input){
 	std::regex openBraces("(\\;+)");
 	std::smatch match;
 
-	int result = false;
+	bool result = false;
 
 	std::regex_search(input, match, openBraces);
 	if(match.length() > 0){
@@ -281,7 +305,7 @@ bool AST::isUnknownOperatorPresent(std::string input){
 	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*");
 	std::smatch match;
 
-	int result = true;
+	bool result = true;
 
 	if (std::regex_search(input, match, assignStm)){
 		result = false;
@@ -298,6 +322,30 @@ void AST::catchUnknownOperatorException(std::string line, unsigned i){
 		std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<e<<std::endl;
 		std::terminate();
 	}
+}
+
+bool AST::isValidProcedure(std::string input){
+	std::regex procStm("\\s*\\t*procedure\\s+([A-Za-z0-9]+)\\s*\\{?");
+	std::smatch match;
+
+	bool result = false;
+
+	if (std::regex_search(input, match, procStm)){
+		result = true;
+	}
+	return result;
+}
+
+bool AST::isParamProcedure(std::string input){
+	bool result = true;
+	std::string::size_type n = -1;
+	std::string::size_type m = -1;
+	n = input.find("(");
+	m = input.find(")");
+	if (n == std::string::npos || m == std::string::npos){
+		 result = false;
+    }
+	return result;
 }
 
 void AST::createWhileNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector){
