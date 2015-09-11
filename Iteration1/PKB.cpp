@@ -8,9 +8,10 @@ PKB::PKB () {
 std::vector<Node*> PKB::getNodes(synt_type st) {
 	if(st == variable) {
 		return variableTable.getVariableNodes();
-	}
-	if(st == constant) {
+	} else if(st == constant) {
 		return constants;
+	}else if(st == procedure) {
+		return procedureTable.getAllProcedures();
 	}
 	return statementTable.getStatements(st);
 }
