@@ -5,7 +5,7 @@
 #include "Node.h"
 
 class ProcedureTable {
-	std::map<std::string, Node*> table;
+	std::unordered_map<std::string, Node*> table;
 	
 public:
 	ProcedureTable();

@@ -6,7 +6,7 @@
 
 class UsesTable {
 	// Statements mapped to Variables
-	std::map<Node*, std::vector<Node*>> table;
+	std::unordered_map<Node*, std::vector<Node*>> table;
 	
 public:
 	UsesTable();

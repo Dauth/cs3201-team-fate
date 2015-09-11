@@ -17,7 +17,7 @@ Variable* VariableTable::getOrCreateVariable(std::string varName) {
 
 std::vector<Node*> VariableTable::getVariableNodes() {
 	std::vector<Node*> nodes;
-	for(std::map<std::string, Variable*>::iterator it = table.begin(); it != table.end(); ++it) {
+	for(std::unordered_map<std::string, Variable*>::iterator it = table.begin(); it != table.end(); ++it) {
 		Variable* var = it->second;
 		std::vector<Node*> varNodes = var->getNodes();
 		nodes.insert(nodes.end(), varNodes.begin(), varNodes.end());
