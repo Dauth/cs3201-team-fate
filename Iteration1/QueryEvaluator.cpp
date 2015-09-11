@@ -417,7 +417,7 @@ std::list<std::string> QueryEvaluator::getStringResult(Data* sData) {
 	} else {
 		nResult = sData->getPKBOutput();
 	}
-	if(sData->getVarType() == constant) {
+	if(sData->getVarType() == constant || sData->getVarType() == procedure) {
 		std::set<std::string> sortedRes;
 		for(std::vector<Node*>::iterator i = nResult.begin(); i != nResult.end(); i++) {
 			sortedRes.insert((**i).getValue());
