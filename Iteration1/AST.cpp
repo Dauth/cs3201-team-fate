@@ -122,7 +122,7 @@ Parameters: string
 Return:		int
 */
 int AST::getStatementType(std::string input){
-	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z0-9]+\\s*\\{?");
+	std::regex procedure("\\s*\\t*procedure\\s+\\.*\\{?");
 	std::regex callProc("\\s*\\t*call\\s+[A-Za-z0-9]+\\;\\s*\\}*");
 	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z0-9]+\\s*\\{?");
 	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=");//\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$
@@ -150,7 +150,7 @@ Parameters: int, string
 Return:		string
 */
 std::string AST::extractStatementPart(int inputType, std::string input){
-	std::regex procedureName("\\s*\\t*procedure\\s+\\.*\\{?");
+	std::regex procedureName("\\s*\\t*procedure\\s+([A-Za-z0-9]+)\\s*\\{?");
 	std::regex callProcName("\\s*\\t*call\\s+([A-Za-z0-9]+)\\;\\s*\\}*");
 	std::regex whileLoopVar("\\s*\\t*while\\s+([A-Za-z0-9]+)\\s*\\{?");
 	std::regex assignStmLeftHand("\\s*\\t*([A-Za-z0-9]+)\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*");
