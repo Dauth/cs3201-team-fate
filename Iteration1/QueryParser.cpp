@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace TOKEN{
-	enum Value { SELECT, RESULT_CL, WITH_CL, SUCHTHAT_CL, PATTERN_CL };
+	enum Value { SELECT, RESULT_CL, WITH_CL, SUCHTHAT_CL, PATTERN_CL, AND_END };
 }
 
 TOKEN::Value currToken = TOKEN::SELECT;
@@ -20,6 +20,9 @@ bool suchThatQueryExist;
 bool patternExist;
 bool suchThatQueryPass;
 bool patternPass;
+bool nonQueryToken;
+bool invalidSuchThat;
+bool existClauses;
 
 QueryTree* rootTree;
 Symbol* newSymbol;
@@ -293,6 +296,7 @@ void ProcessEachToken(char *currentToken)
 	else if (expectingThat && strcmp(currentToken, "that") == 0)
 	{
 		currToken = TOKEN::SUCHTHAT_CL;
+				existClauses = true;
 	}
 	else if (strcmp(currentToken,"with") == 0)
 	{
@@ -305,17 +309,33 @@ void ProcessEachToken(char *currentToken)
 			concatStmt = "";
 		}
 		currToken = TOKEN::PATTERN_CL;
+		existClauses = true;
 	}
 	else if (strcmp(currentToken,"such") == 0)
 	{
 		expectingThat = true;
 	}
-
+	else if (expectingThat == true && strcmp(currentToken,"that") != 0)
+	{
+		invalidSuchThat = true;
+		existClauses = true;
+	}
 	else{
 
 		switch(currToken)
 		{
+		case TOKEN::AND_END:
+			{
+				if (strcmp(currentToken,"and") == 0)
+				{
+					// For future Iteration
+				}
+				else
+				{
+					nonQueryToken = true;
+				}
 
+			}break;
 		case TOKEN::PATTERN_CL: 
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
@@ -423,6 +443,7 @@ void ProcessEachToken(char *currentToken)
 						PatternNode* newPattern = new PatternNode(leftParamNode,middleParamNode, rightParamNode);
 						rootTree->addPattern(newPattern);
 						patternPass = true;
+						currToken = TOKEN::AND_END;
 					}
 				}
 				else
@@ -549,6 +570,7 @@ void ProcessEachToken(char *currentToken)
 							QueryNode* newQuery = new QueryNode(queryClause,firstParamNode, secondParamNode);
 							rootTree->addQuery(newQuery);
 							suchThatQueryPass = true;
+							currToken = TOKEN::AND_END;
 						}			
 
 					}
@@ -679,6 +701,11 @@ QueryObject QueryParser::getQueryObject(std::string i){
 	patternExist = false;
 	suchThatQueryPass = false;
 	patternPass = false;
+	patternPass = false;
+	nonQueryToken = false;
+	existClauses = false;
+
+
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
 	memcpy(a,i.c_str(),i.size());
@@ -696,7 +723,7 @@ QueryObject QueryParser::getQueryObject(std::string i){
 			break;
 		}
 	}
-	if (tupleError||nonExistantSyn||(suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist)||(!suchThatQueryExist && !patternExist))
+	if (nonQueryToken||tupleError||nonExistantSyn||(suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist)|| (existClauses && (!suchThatQueryExist && !patternExist)))
 	{
 		qo.symbol = NULL;
 		qo.tree = NULL;

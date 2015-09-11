@@ -11,6 +11,7 @@ public:
 	ProcedureTable();
 	Node* createProcedure(std::string);
 	Node* getProcedure(std::string);
+	std::vector<Node*> getAllProcedures();
 };
 
 #endif

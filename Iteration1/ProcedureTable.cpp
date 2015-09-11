@@ -21,3 +21,11 @@ Node* ProcedureTable::getProcedure(std::string procedureName) {
 	}
 	return table[procedureName];
 }
+
+std::vector<Node*> ProcedureTable::getAllProcedures() {
+	std::vector<Node*> procedures;
+	for(std::unordered_map<std::string, Node*>::iterator it = table.begin(); it != table.end(); ++it) {
+		procedures.push_back(it->second);
+	}
+	return procedures;
+}
