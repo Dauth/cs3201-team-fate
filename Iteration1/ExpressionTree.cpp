@@ -29,6 +29,7 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
 		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
+			catchNameStartsLetterException(tempStr);
 			splittedString.push_back(tempStr);
 			tempStr.clear();
 			tempStr.append(expStr);
@@ -37,6 +38,7 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 		}
 	}
 	if(!tempStr.empty()){
+		catchNameStartsLetterException(tempStr);
 		splittedString.push_back(tempStr);
 	}
 }
@@ -51,8 +53,7 @@ std::vector <std::string> ExpressionTree::expressionConverter(std::string inflix
 	std::vector <std::string> resultVector;
 	std::vector<std::string> splittedString;
 	std::string sString;
-
-
+	
 	splitString(inflixString, splittedString);
 
 	for(unsigned int i = 0; i < splittedString.size(); i++){
@@ -275,3 +276,25 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 	return operandStack.top();
 }
 
+bool ExpressionTree::isNameStartWithLetter(std::string input){
+	std::regex assignStm("\\s*\\t*^[A-Za-z][A-Za-z0-9]+.*");
+	std::smatch match;
+
+	int result = false;
+
+	if (std::regex_search(input, match, assignStm) || isDigit(input)){
+		result = true;
+	}
+	return result;
+}
+
+void ExpressionTree::catchNameStartsLetterException(std::string line){
+	try{
+		if(!isNameStartWithLetter(line)){
+			throw line;
+		}
+	}catch(std::string e){
+		std::cout<<"NAME DOES NOT START WITH A LETTER: "<<e<<std::endl;
+		std::terminate();
+	}
+}

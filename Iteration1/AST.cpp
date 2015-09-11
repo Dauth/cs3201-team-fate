@@ -338,6 +338,7 @@ void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, 
 
 void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i){
 	std::string varName = extractStatementPart(ASSIGNSTMVAR, line);
+	expTree->catchNameStartsLetterException(varName);
 
 	Node* procNode = twinVector.front()->getStmNode();
 	Node* assignStm = nullptr;

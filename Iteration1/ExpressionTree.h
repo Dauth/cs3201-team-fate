@@ -22,7 +22,8 @@ public:
 	std::vector <std::string> ExpressionTree::expressionConverter(std::string);
 	Node* ExpressionTree::exptreeSetup(std::vector<std::string>, int, Node*, Node*, Node*);
 	Node* ExpressionTree::exptreeSetupSON(std::vector<std::string>);
-
+	bool ExpressionTree::isNameStartWithLetter(std::string);
+	void ExpressionTree::catchNameStartsLetterException(std::string line);
 
 	
 };
