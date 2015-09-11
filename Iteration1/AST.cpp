@@ -26,17 +26,6 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
-
-void AST::catchMissingSemiColonException(std::string line, unsigned i){
-	try{
-		if(!isSemiColonPresent(line)){
-			throw i + 1;
-		}
-	}catch(unsigned int e){
-		std::cout<<"MISSING SEMICOLON FOR ASSIGN STMT AT LINE NO:"<<e<<std::endl;
-	}
-}
-
 /*
 This function processes a vector which contains the source file
 Parameters: vector<string>
@@ -74,6 +63,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				lineNumber += 1;
 			}else if(statementType == ASSIGNSTM){
 				catchMissingSemiColonException(line, i);
+				catchUnknownOperatorException(line, i);
 				createAssignNode(line, lineNumber, twinVector, i);
 				lineNumber += 1;
 			}
@@ -111,7 +101,7 @@ int AST::getStatementType(std::string input){
 	std::regex procedure("\\s*\\t*procedure\\s+[A-Za-z0-9]+\\s*\\{$");
 	std::regex callProc("\\s*\\t*call\\s+[A-Za-z0-9]+\\;\\s*\\}*$");
 	std::regex whileLoop("\\s*\\t*while\\s+[A-Za-z0-9]+\\s*\\{$");
-	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$");
+	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=");//\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$
 	std::smatch match;
 	int result = -1;
 
@@ -267,6 +257,38 @@ void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned 
 		}
 	}catch(unsigned int e){
 		std::cout<<"EMPTY STATEMENT IN CONTAINER AT LINE NO:"<<e<<std::endl;
+	}
+}
+
+void AST::catchMissingSemiColonException(std::string line, unsigned i){
+	try{
+		if(!isSemiColonPresent(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"MISSING SEMICOLON FOR ASSIGN STMT AT LINE NO:"<<e<<std::endl;
+	}
+}
+
+bool AST::isUnknownOperatorPresent(std::string input){
+	std::regex assignStm("\\s*\\t*[A-Za-z0-9]+\\s*=[A-Za-z0-9\\*\\+\\-\\s\\(\\)]+\\;?\\s*\\}*$");
+	std::smatch match;
+
+	int result = true;
+
+	if (std::regex_search(input, match, assignStm)){
+		result = false;
+	}
+	return result;
+}
+
+void AST::catchUnknownOperatorException(std::string line, unsigned i){
+	try{
+		if(isUnknownOperatorPresent(line)){
+			throw i + 1;
+		}
+	}catch(unsigned int e){
+		std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<e<<std::endl;
 	}
 }
 

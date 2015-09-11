@@ -20,6 +20,8 @@ private:
 
 public:
 	AST(PKB*, ExpressionTree*);
+	bool AST::isUnknownOperatorPresent(std::string line);
+	void catchUnknownOperatorException(std::string line, unsigned i);
 	void catchMissingSemiColonException(std::string line, unsigned i);
 	void catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned i);
 	void setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst);
