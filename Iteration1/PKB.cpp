@@ -2,7 +2,7 @@
 #include "PKB.h"
 #include <iostream>
 PKB::PKB () {
-
+	LIST_INDEX_OFFSET = 1;
 }
 
 std::vector<Node*> PKB::getNodes(synt_type st) {
@@ -102,6 +102,7 @@ void PKB::handleParent(Node* child, Node* parent) {
 }
 
 std::vector<Node*> PKB::getModifies(std::string procName) {
+	std::cout << procName << "\n";
 	Node* procedure = procedureTable.getProcedure(procName);
 	return modifiesTable.getModified(procedure);
 }
@@ -224,7 +225,7 @@ Node* PKB::getFollowing(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
 	if(index < (stmtLstNode->getIndexLst().size())) {
-		return stmtLstNode->getStmtLst()[index + 1]; // magic number!!!
+		return stmtLstNode->getStmtLst()[index + LIST_INDEX_OFFSET];
 	}
 	return nullptr;
 }
@@ -258,7 +259,7 @@ Node* PKB::getFollowedBy(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
 	if(index > 0) {
-		return stmtLstNode->getStmtLst()[index - 1]; // magic number!!!
+		return stmtLstNode->getStmtLst()[index - LIST_INDEX_OFFSET];
 	}
 	return nullptr;
 }

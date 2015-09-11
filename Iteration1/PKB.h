@@ -23,6 +23,8 @@ class PKB {
 	StatementTable statementTable;
 	std::vector<Node*> constants;
 
+	int LIST_INDEX_OFFSET;
+
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
 	void handleParent(Node*, Node*);
