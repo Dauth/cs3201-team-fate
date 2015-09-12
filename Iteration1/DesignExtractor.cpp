@@ -221,7 +221,6 @@ std::vector<Node*> DesignExtractor::searchWithPattern(synt_type type,std::string
 		if (firstChar != "_"){
 			tNode = et->exptreeSetupSON(et->expressionConverter(right));
 			exprList = pkb->getRootExpressions(tNode->getValue());
-
 		}
 
 		else{
@@ -280,7 +279,7 @@ int DesignExtractor::compare(Node* p,Node* q){
 		return 0;
 }
 bool DesignExtractor::isExpression(std::string s){
-	if(s.find("+") != std::string::npos || s.find("*") != std::string::npos){
+	if(s.find("+") != std::string::npos || s.find("*") != std::string::npos || s.find("-") != std::string::npos){
 		return true;
 	}
 
