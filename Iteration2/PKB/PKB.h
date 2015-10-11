@@ -11,6 +11,7 @@
 #include "ExpressionTable.h"
 #include "ProcedureTable.h"
 #include "StatementTable.h"
+#include "CallsTable.h"
 #include "ExpressionTree.h"
 
 using namespace std;
@@ -27,6 +28,7 @@ class PKB {
 	ExpressionTable expressionTable;
 	ProcedureTable procedureTable;
 	StatementTable statementTable;
+	CallsTable callsTable;
 	vector<Node*> constants;
 
 	int LIST_INDEX_OFFSET;
@@ -86,6 +88,16 @@ public:
 	vector<pair<string, string>> getFollowsStar(synt_type, string);
 	vector<pair<string, string>> getFollowsStar(string, synt_type);
 	vector<pair<string, string>> getFollowsStar(string, string);
+
+	vector<pair<string, string>> getCalls(synt_type, synt_type);
+	vector<pair<string, string>> getCalls(synt_type, string);
+	vector<pair<string, string>> getCalls(string, synt_type);
+	vector<pair<string, string>> getCalls(string, string);
+
+	vector<pair<string, string>> getCallsStar(synt_type, synt_type);
+	vector<pair<string, string>> getCallsStar(synt_type, string);
+	vector<pair<string, string>> getCallsStar(string, synt_type);
+	vector<pair<string, string>> getCallsStar(string, string);
 	
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);
