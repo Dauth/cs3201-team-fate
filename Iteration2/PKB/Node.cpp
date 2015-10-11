@@ -35,6 +35,13 @@ bool Node::isStatement() {
 	return false;
 }
 
+bool Node::isContainer() {
+	if ( SYNT_TYPE == whileLoop || SYNT_TYPE == ifelse ) {
+		return true;
+	}
+	return false;
+}
+
 std::string Node::getValue() {
 	return value;
 }

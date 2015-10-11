@@ -11,11 +11,15 @@
 #include "ExpressionTable.h"
 #include "ProcedureTable.h"
 #include "StatementTable.h"
+#include "ExpressionTree.h"
 
 using namespace std;
 
+class ExpressionTree;
+
 class PKB {
 
+	ExpressionTree *et;
 	VariableTable variableTable;
 	ModifiesTable modifiesTable;
 	UsesTable usesTable;
@@ -27,6 +31,8 @@ class PKB {
 
 	int LIST_INDEX_OFFSET;
 	void is_digit(string);
+	int compare(Node*, Node*);
+	bool isExpression(std::string);
 
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
@@ -37,7 +43,7 @@ class PKB {
 	Node* getFollowedBy(Node*);
 
 public:
-	PKB();
+	PKB(ExpressionTree*);
 
 	Node* createProcedure(string);
 	//type, statement/prog num, constant/procname/expr, UsedBy, ModifiedBy
@@ -66,13 +72,24 @@ public:
 	vector<pair<string, string>> getParents(string, synt_type);
 	vector<pair<string, string>> getParents(string, string);
 
+	vector<pair<string, string>> getParentsStar(synt_type, synt_type);
+	vector<pair<string, string>> getParentsStar(synt_type, string);
+	vector<pair<string, string>> getParentsStar(string, synt_type);
+	vector<pair<string, string>> getParentsStar(string, string);
+
 	vector<pair<string, string>> getFollows(synt_type, synt_type);
 	vector<pair<string, string>> getFollows(synt_type, string);
 	vector<pair<string, string>> getFollows(string, synt_type);
 	vector<pair<string, string>> getFollows(string, string);
+
+	vector<pair<string, string>> getFollowsStar(synt_type, synt_type);
+	vector<pair<string, string>> getFollowsStar(synt_type, string);
+	vector<pair<string, string>> getFollowsStar(string, synt_type);
+	vector<pair<string, string>> getFollowsStar(string, string);
 	
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);
+	vector<pair<string, string>> searchWithPattern(synt_type,std::string,std::string);
 };
 
 #endif

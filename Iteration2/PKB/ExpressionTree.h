@@ -4,8 +4,9 @@
 #include "stdafx.h"
 #include "PKB.h"
 
+class PKB;
+
 class ExpressionTree{
-	PKB* pkb;
 
 private:
 	bool ExpressionTree::isOperand(std::string);
@@ -16,11 +17,11 @@ private:
 	synt_type ExpressionTree::getSyntType(std::string);
 
 public:
-	ExpressionTree(PKB*);
+	ExpressionTree();
 	void splitString(std::string inflixString, std::vector<std::string>& splittedString);
 	bool ExpressionTree::isInflixBalanced(std::string);
 	std::vector <std::string> ExpressionTree::expressionConverter(std::string);
-	Node* ExpressionTree::exptreeSetup(std::vector<std::string>, int, Node*, Node*, Node*);
+	Node* ExpressionTree::exptreeSetup(PKB*, std::vector<std::string>, int, Node*, Node*, Node*);
 	Node* ExpressionTree::exptreeSetupSON(std::vector<std::string>);
 	bool ExpressionTree::isNameStartWithLetter(std::string);
 	void ExpressionTree::catchNameStartsLetterException(std::string line);

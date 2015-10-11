@@ -25,6 +25,7 @@ public:
 	synt_type getType();
 	std::string getLine();
 	bool isStatement();
+	bool isContainer();
 	std::string getValue();
 	Node* getRoot();
 	Node* getExpParent();

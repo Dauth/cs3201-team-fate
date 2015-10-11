@@ -7,6 +7,7 @@ using std::regex;
 using std::string;
 using std::sregex_token_iterator;
 #include <locale>
+#include "PKB.h"
 
 const int LEFT = 1;
 const int RIGHT = 2;
@@ -18,8 +19,8 @@ const char* CLOSEDBRACKETS = ")";
 const char* OPENBRACES = "{";
 const char* CLOSEDBRACES = "}";
 
-ExpressionTree::ExpressionTree(PKB* p) {
-	pkb = p;
+ExpressionTree::ExpressionTree() {
+
 }
 
 void ExpressionTree::splitString(std::string inflixString, std::vector<std::string>& splittedString){
@@ -226,7 +227,7 @@ synt_type ExpressionTree::getSyntType(std::string expressionStr){
 		return expressionCharType;
 }
 
-Node* ExpressionTree::exptreeSetup(std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
 	synt_type expressionCharType;
 	std::stack<Node*> operandStack;
 

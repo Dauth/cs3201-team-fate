@@ -7,7 +7,8 @@
 using namespace std;
 
 PKB_test::PKB_test() {
-	pkb = new PKB();
+	ExpressionTree* et = new ExpressionTree();
+	pkb = new PKB(et);
 }
 
 
