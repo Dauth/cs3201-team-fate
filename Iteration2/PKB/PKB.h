@@ -33,7 +33,7 @@ class PKB {
 	void handleParent(Node*, Node*);
 
 	synt_type getStatementType(Node&);
-	Node* getFollowing(Node*);
+	Node* getFollowee(Node*);
 	Node* getFollowedBy(Node*);
 
 public:
@@ -66,21 +66,10 @@ public:
 	vector<pair<string, string>> getParents(string, synt_type);
 	vector<pair<string, string>> getParents(string, string);
 
-	//argument is the _ in parent ( _ , s )
-	vector<Node*> getChildren(string);
-	vector<Node*> getChildren(synt_type);
-
-	//argument is the _ in parent ( s , _ )
-	vector<Node*> getParent(string);
-	vector<Node*> getParents(synt_type);
-
-	//argument is the _ in follows ( _ , s )
-	vector<Node*> getFollowing(string);
-	vector<Node*> getFollowing(synt_type);
-
-	//argument is the _ in follows ( s , _ )
-	vector<Node*> getFollowedBy(string);
-	vector<Node*> getFollowedBy(synt_type);
+	vector<pair<string, string>> getFollows(synt_type, synt_type);
+	vector<pair<string, string>> getFollows(synt_type, string);
+	vector<pair<string, string>> getFollows(string, synt_type);
+	vector<pair<string, string>> getFollows(string, string);
 	
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);

@@ -241,88 +241,188 @@ vector<pair<string, string>> PKB::getUses(string ident, string varName) {
 	return results;
 }
 
-vector<Node*> PKB::getChildren(string statementLine) {
-	Node* parent = statementTable.getStatement(statementLine);
-	return parentsTable.getChild(parent);
-}
-
-vector<Node*> PKB::getChildren(synt_type st) {
-	vector<Node*> parents = statementTable.getStatements(st);
-	set<Node*> children;
-	for(int i=0; i<parents.size(); i++) {
-		vector<Node*> temp = parentsTable.getChild(parents[i]);
-		for(int j=0; j<temp.size(); j++) {
-			children.insert(temp[j]);
+vector<pair<string, string>> PKB::getParents(synt_type st1, synt_type st2) {
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st1);
+	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st2);
+	
+	if (temp1.size() == 0 || temp2.size() == 0) {
+		return results;
+	} else if (temp1.size() < temp2.size()) {
+		for(int i=0; i<temp1.size(); i++) {
+			string right = temp1[i].second;
+			Node* stmtNode = statementTable.getStatement(right);
+			if ((stmtNode->isStatement() && st2 == statement) || st2 == stmtNode->getType()) {
+				results.push_back(temp1[i]);
+			}
+		}
+	} else {
+		for(int i=0; i<temp2.size(); i++) {
+			string left = temp2[i].first;
+			Node* stmtNode = statementTable.getStatement(left);
+			if ((stmtNode->isStatement() && st1 == statement) || st1 == stmtNode->getType()) {
+				results.push_back(temp2[i]);
+			}
 		}
 	}
-	return vector<Node*> (children.begin(), children.end());
+	return results;
 }
 
-vector<Node*> PKB::getParent(string statementLine) {
-	vector<Node*> parents;
-	Node* child = statementTable.getStatement(statementLine);
-	if (child != nullptr) {
-		Node* parent = child->getParent()->getParent();
-		if(parent != nullptr && (parent->getType() == whileLoop || parent->getType() == ifelse)) {
-			parents.push_back(parent);
+vector<pair<string, string>> PKB::getParents(synt_type st, string stmtNum) {
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st);
+	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(stmtNum);
+	
+	if (temp1.size() == 0 || temp2.size() == 0) {
+		return results;
+	} else if (temp1.size() < temp2.size()) {
+		for(int i=0; i<temp1.size(); i++) {
+			string right = temp1[i].second;
+			if (right.compare(stmtNum) == 0) {
+				results.push_back(temp1[i]);
+			}
+		}
+	} else {
+		for(int i=0; i<temp2.size(); i++) {
+			string left = temp2[i].first;
+			Node* stmtNode = statementTable.getStatement(left);
+			if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
+				results.push_back(temp2[i]);
+			}
 		}
 	}
-	return parents;
+	return results;
 }
 
-vector<Node*> PKB::getParents(synt_type st) {
-	vector<Node*> children = parentsTable.getChildren(st);
-	set<Node*> parents;
-	for(vector<Node*>::iterator it = children.begin(); it != children.end(); ++it) {
-		parents.insert((*it)->getParent()->getParent());
-	}
-	return vector<Node*> (parents.begin(), parents.end());
-}
-
-vector<Node*> PKB::getFollowing(string statementLine) {
-	Node* statement = statementTable.getStatement(statementLine);
-	vector<Node*> following;
-	if (statement != nullptr) {
-		Node* node = getFollowing(statement);
-		if(node != nullptr) {
-			following.push_back(node);
+vector<pair<string, string>> PKB::getParents(string stmtNum, synt_type st) {
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(stmtNum);
+	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st);
+	
+	if (temp1.size() == 0 || temp2.size() == 0) {
+		return results;
+	} else if (temp1.size() < temp2.size()) {
+		for(int i=0; i<temp1.size(); i++) {
+			string right = temp1[i].second;
+			Node* stmtNode = statementTable.getStatement(right);
+			if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
+				results.push_back(temp1[i]);
+			}
+		}
+	} else {
+		for(int i=0; i<temp2.size(); i++) {
+			string left = temp2[i].first;
+			if (left.compare(stmtNum) == 0) {
+				results.push_back(temp2[i]);
+			}
 		}
 	}
-	return following;
+	return results;
+}
+
+vector<pair<string, string>> PKB::getParents(string stmtNum1, string stmtNum2) {
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(stmtNum1);
+	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(stmtNum2);
+
+	if (temp1.size() == 0 || temp2.size() == 0) {
+		return results;
+	} else if (temp1.size() < temp2.size()) {
+		for(int i=0; i<temp1.size(); i++) {
+			string right = temp1[i].second;
+			if (right.compare(stmtNum2) == 0) {
+				results.push_back(temp1[i]);
+			}
+		}
+	} else {
+		for(int i=0; i<temp2.size(); i++) {
+			string left = temp2[i].first;
+			if (left.compare(stmtNum1) == 0) {
+				results.push_back(temp2[i]);
+			}
+		}
+	}
+	return results;
+}
+
+vector<pair<string, string>> PKB::getFollows(synt_type st1, synt_type st2) {
+	vector<pair<string, string>> results;
+	vector<Node*> temp1 = statementTable.getStatements(st1);
+	vector<Node*> temp2 = statementTable.getStatements(st2);
+
+	if (temp1.size() == 0 || temp2.size() == 0) {
+		return results;
+	} else if (temp1.size() < temp2.size()) {
+		for(int i=0; i<temp1.size(); i++) {
+			string left = temp1[i]->getLine();
+			Node* stmtNode = statementTable.getStatement(left);
+			Node* rightNode = getFollowee(stmtNode);
+			if (rightNode != nullptr && (((rightNode->isStatement() && st2 == statement)) || st2 == rightNode->getType())) {
+				pair<string, string> follows ( left, rightNode->getLine() );
+				results.push_back(follows);
+			}
+		}
+	} else {
+		for(int i=0; i<temp2.size(); i++) {
+			string right = temp2[i]->getLine();
+			Node* stmtNode = statementTable.getStatement(right);
+			Node* leftNode = getFollowedBy(stmtNode);
+			if (leftNode != nullptr && (((leftNode->isStatement() && st1 == statement)) || st1 == leftNode->getType())) {
+				pair<string, string> follows ( leftNode->getLine(), right );
+				results.push_back(follows);
+			}
+		}
+	}
+	return results;
+}
+
+vector<pair<string, string>> PKB::getFollows(synt_type st, string stmtNum) {
+	vector<pair<string, string>> results;
+	Node* rightNode = statementTable.getStatement(stmtNum);
+	if (rightNode != nullptr) {
+		Node* leftNode = getFollowedBy(rightNode);
+		if (leftNode != nullptr && (((leftNode->isStatement() && st == statement)) || st == leftNode->getType())) {
+			pair<string, string> follows ( leftNode->getLine(), rightNode->getLine() );
+			results.push_back(follows);
+		}
+	}
+	return results;
+}
+
+vector<pair<string, string>> PKB::getFollows(string stmtNum, synt_type st) {
+	vector<pair<string, string>> results;
+	Node* leftNode = statementTable.getStatement(stmtNum);
+	if (leftNode != nullptr) {
+		Node* rightNode = getFollowee(leftNode);
+if (rightNode != nullptr && (((rightNode->isStatement() && st == statement)) || st == rightNode->getType())) {
+			pair<string, string> follows ( leftNode->getLine(), rightNode->getLine() );
+			results.push_back(follows);
+		}
+	}
+	return results;
+}
+
+vector<pair<string, string>> PKB::getFollows(string stmtNum1, string stmtNum2) {
+	vector<pair<string, string>> results;
+	Node* leftNode = statementTable.getStatement(stmtNum1);
+	if (leftNode != nullptr) {
+		Node* rightNode = getFollowee(leftNode);
+		if (rightNode->getLine().compare(stmtNum2) == 0) {
+			pair<string, string> follows ( leftNode->getLine(), rightNode->getLine() );
+			results.push_back(follows);
+		}
+	}
+	return results;
 }
 
 //private
-Node* PKB::getFollowing(Node* statement) {
+Node* PKB::getFollowee(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
 	if(index < (stmtLstNode->getIndexLst().size())) {
 		return stmtLstNode->getStmtLst()[index + LIST_INDEX_OFFSET];
 	}
 	return nullptr;
-}
-
-vector<Node*> PKB::getFollowing(synt_type st) {
-	vector<Node*> statements = statementTable.getStatements(st);
-	vector<Node*> following;
-	for(vector<Node*>::iterator it = statements.begin(); it != statements.end(); ++it) {
-		Node* followee = getFollowing(*it);
-		if (followee != nullptr) {
-			following.push_back(followee);
-		}
-	}
-	return following;
-}
-
-vector<Node*> PKB::getFollowedBy(string statementLine) {
-	Node* statement = statementTable.getStatement(statementLine);
-	vector<Node*> followedBy;
-	if (statement != nullptr) {
-		Node* node = getFollowedBy(statement);
-		if(node != nullptr) {
-			followedBy.push_back(node);
-		}
-	}
-	return followedBy;
 }
 
 //private
@@ -333,18 +433,6 @@ Node* PKB::getFollowedBy(Node* statement) {
 		return stmtLstNode->getStmtLst()[index - LIST_INDEX_OFFSET];
 	}
 	return nullptr;
-}
-
-vector<Node*> PKB::getFollowedBy(synt_type st) {
-	vector<Node*> statements = statementTable.getStatements(st);
-	vector<Node*> followers;
-	for(vector<Node*>::iterator it = statements.begin(); it != statements.end(); ++it) {
-		Node* follower = getFollowedBy(*it);
-		if (follower != nullptr) {
-			followers.push_back(follower);
-		}
-	}
-	return followers;
 }
 
 vector<Node*> PKB::getExpressions(string expr) {

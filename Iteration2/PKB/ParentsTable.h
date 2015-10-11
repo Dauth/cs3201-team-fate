@@ -4,14 +4,22 @@
 #include "stdafx.h"
 #include "Node.h"
 
+using namespace std;
+
 class ParentsTable {
-	std::unordered_map<Node*, std::vector<Node*>> table;
-	
+	unordered_map<string, set<pair<string, string>>> leftKeyTable;
+	unordered_map<string, set<pair<string, string>>> rightKeyTable;
+	unordered_map<synt_type, set<pair<string, string>>> leftTypeKeyTable;
+	unordered_map<synt_type, set<pair<string, string>>> rightTypeKeyTable;
+
 public:
 	ParentsTable();
-	std::vector<Node*> getParents();
-	std::vector<Node*> getChild(Node*);
-	std::vector<Node*> getChildren(synt_type);
+
+	vector<pair<string, string>> getByLeftKey(string);
+	vector<pair<string, string>> getByLeftKey(synt_type);
+	vector<pair<string, string>> getByRightKey(string);
+	vector<pair<string, string>> getByRightKey(synt_type);
+
 	void addChild(Node*, Node*);
 };
 

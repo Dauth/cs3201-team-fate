@@ -1,43 +1,80 @@
 #include "stdafx.h"
 #include "ParentsTable.h"
 
+using namespace std;
+
 ParentsTable::ParentsTable () {
+	leftTypeKeyTable[whileLoop] = set<pair<string, string>>();
+	leftTypeKeyTable[ifelse] = set<pair<string, string>>();
+	leftTypeKeyTable[statement] = set<pair<string, string>>();
 
+	rightTypeKeyTable[whileLoop] = set<pair<string, string>>();
+	rightTypeKeyTable[ifelse] = set<pair<string, string>>();
+	rightTypeKeyTable[assignment] = set<pair<string, string>>();
+	//rightTypeKeyTable[call] = set<pair<string, string>>();
+	rightTypeKeyTable[statement] = set<pair<string, string>>();
 }
 
-std::vector<Node*> ParentsTable::getParents() {
-	std::vector<Node*> parents;
-	for(std::unordered_map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
-		parents.push_back(it->first);
+vector<pair<string, string>> ParentsTable::getByLeftKey(string ident) {
+	if (leftKeyTable.find(ident) == leftKeyTable.end()) {
+		return vector<pair<string, string>>();
 	}
-	return parents;
+	set<pair<string, string>> results = leftKeyTable[ident];
+	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-std::vector<Node*> ParentsTable::getChild(Node* node) {
-	if ( table.find(node) == table.end() ) {
-		return std::vector<Node*>();
+vector<pair<string, string>> ParentsTable::getByLeftKey(synt_type st) {
+	if (leftTypeKeyTable.find(st) == leftTypeKeyTable.end()) {
+		return vector<pair<string, string>>();
 	}
-	return table[node];
+	set<pair<string, string>> results = leftTypeKeyTable[st];
+	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-std::vector<Node*> ParentsTable::getChildren(synt_type st) {
-	std::vector<Node*> allChildren;
-	for(std::unordered_map<Node*, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); it++) {
-		std::vector<Node*> children = it->second;
-		for(int i=0; i<children.size(); i++) {
-		synt_type nt = children[i]->getType();
-		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
-				allChildren.push_back(children[i]);
-			}
-		}
+vector<pair<string, string>> ParentsTable::getByRightKey(string ident) {
+	if (rightKeyTable.find(ident) == rightKeyTable.end()) {
+		return vector<pair<string, string>>();
 	}
-	return allChildren;
+	set<pair<string, string>> results = rightKeyTable[ident];
+	return vector<pair<string, string>> (results.begin(), results.end());
 }
+
+vector<pair<string, string>> ParentsTable::getByRightKey(synt_type st) {
+	if (rightTypeKeyTable.find(st) == rightTypeKeyTable.end()) {
+		return vector<pair<string, string>>();
+	}
+	set<pair<string, string>> results = rightTypeKeyTable[st];
+	return vector<pair<string, string>> (results.begin(), results.end());
+}
+
 
 void ParentsTable::addChild(Node* nodeLeft, Node* nodeRight) {
-	if ( table.find(nodeLeft) == table.end() ) {
-		std::vector<Node*> nodes;
-		table[nodeLeft] = nodes;
+	string left = nodeLeft->getLine();
+	string right = nodeRight->getLine();
+	pair<string, string> modifies ( left, right );
+
+	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {
+		 set<pair<string, string>> nodes;
+		leftKeyTable[left] = nodes;
 	}
-	table[nodeLeft].push_back(nodeRight);
+	if ( rightKeyTable.find(right) == rightKeyTable.end() ) {
+		 set<pair<string, string>> nodes;
+		rightKeyTable[right] = nodes;
+	}
+
+	leftKeyTable[left].insert(modifies);
+	rightKeyTable[right].insert(modifies);
+
+
+	synt_type st1 = nodeLeft->getType();
+	leftTypeKeyTable[st1].insert(modifies);
+	if ( nodeLeft->isStatement() ) {
+		leftTypeKeyTable[statement].insert(modifies);
+	}
+
+	synt_type st2 = nodeRight->getType();
+	rightTypeKeyTable[st2].insert(modifies);
+	if ( nodeRight->isStatement() ) {
+		rightTypeKeyTable[statement].insert(modifies);
+	}
 }

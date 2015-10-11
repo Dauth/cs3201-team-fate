@@ -282,96 +282,95 @@ void PKB_test::testUsedByVarType() {
 		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
-/*
 
 	// Parent (4, s)
 void PKB_test::testParentStatement() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Parent(4, s) \n"; 
-	result = pkb->getChildren(4);
+	result = pkb->getParents("4", statement);
 	cout << "Obtained " << result.size() << " results\n"; // 4
 	for(int i=0; i<result.size(); i++) {
-		cout << "( 4, " << result[i]->getLine() << " ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// Parent (whileLoop, s)
 void PKB_test::testParentWhile() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Parent(whileLoop, s) \n"; 
-	result = pkb->getChildren(whileLoop);
+	result = pkb->getParents(whileLoop, statement);
 	cout << "Obtained " << result.size() << " results\n"; // 5
 	for(int i=0; i<result.size(); i++) {
-		cout << "( whileLoop, " << result[i]->getLine() << " ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// Parent (s, 6)
 void PKB_test::testChildStatement() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Parent(s, 6) \n"; 
-	result = pkb->getParent(6);
+	result = pkb->getParents(statement, "6");
 	cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
-		cout << "( " << result[i]->getLine() << ", 6 ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// Parent (s, assignment)
 void PKB_test::testChildAssign() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Parent(s, assignment) \n"; 
-	result = pkb->getParents(assignment);
+	result = pkb->getParents(statement, assignment);
 	cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
-		cout << "( " << result[i]->getLine() << ", a ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// follows (2, s)
 void PKB_test::testFollowsStatement() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Follows(2, s) \n"; 
-	result = pkb->getFollowing(2);
+	result = pkb->getFollows("2", statement);
 	cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
-		cout << "( 2, " << result[i]->getLine() << " ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// follows (whileLoop, s)
 void PKB_test::testFollowsWhile() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is Follows(whileLoop, s) \n"; 
-	result = pkb->getFollowing(whileLoop);
+	result = pkb->getFollows(whileLoop, statement);
 	cout << "Obtained " << result.size() << " results\n"; // 2
 	for(int i=0; i<result.size(); i++) {
-		cout << "( whileLoop, " << result[i]->getLine() << " ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	}
 }
 
 	// follows (s, 6)
 void PKB_test::testFollowedByStatement() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is follows(s, 6) \n"; 
-	result = pkb->getFollowedBy(6);
+	result = pkb->getFollows(statement, "6");
 	cout << "Obtained " << result.size() << " results\n"; // 1
 	for(int i=0; i<result.size(); i++) {
-		cout << "( " << result[i]->getLine() << ", 6 ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
 
 	// follows (s, assignment)
 void PKB_test::testFollowedByAssignment() {
-	vector<Node*> result;
+	vector<pair<string, string>> result;
 	cout << "\n\nQuery is follows(s, assignment) \n"; 
-	result = pkb->getFollowedBy(assignment);
+	result = pkb->getFollows(statement, assignment);
 	cout << "Obtained " << result.size() << " results\n"; // 6
 	for(int i=0; i<result.size(); i++) {
-		cout << "( " << result[i]->getLine() << ", a ) ";
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
 	} 
 }
-*/
+
 
 void PKB_test::runTests() {
 
@@ -417,7 +416,7 @@ void PKB_test::runTests() {
 	testUsedBySpecificVar();
 	// Uses (s, variable)
 	testUsedByVarType();
-	/*
+
 	// Parent (4, s)
 	testParentStatement();
 	// Parent (whileLoop, s)
@@ -434,7 +433,7 @@ void PKB_test::runTests() {
 	testFollowedByStatement();
 	// follows (s, assignment)
 	testFollowedByAssignment();
-	*/
+
 	cin.get();
 }
 
