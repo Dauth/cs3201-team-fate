@@ -36,12 +36,12 @@ vector<pair<string, string>> UsesTable::getByRightKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-void UsesTable::addUses(Node* nodeLeft, Node* nodeRight) {
+void UsesTable::addUses(Node* nodeLeft, string varName) {
 	string left = nodeLeft->getLine();
 	if (nodeLeft->getType() == procedure) {
 		left = nodeLeft->getValue();
 	}
-	string right = nodeRight->getValue();
+	string right = varName;
 	pair<string, string> modifies ( left, right );
 
 	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {

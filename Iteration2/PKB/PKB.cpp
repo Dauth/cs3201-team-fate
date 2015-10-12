@@ -70,18 +70,55 @@ Node* PKB::createNode(synt_type st, int line, string value,
 		handleParent(node, parent);
 	}
 	if (st == call) {
-		callsTable.addCalls(procedure, node);
+		handleCalls(procedure, node);
 	}
+	handleInheritance(procedure, node, modifiedBy, usedBy);
 	return node;
 }
 
+void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* usedBy) {
+	if (procNode != nullptr && callsTable.isCalled(procNode->getValue())) {
+		vector<pair<string, string>> calls = getCallsStar(procedure, procNode->getValue());
+		for (int i=0; i<calls.size(); i++) {
+			Node* callingProc = procedureTable.getProcedure(calls[i].first);
+			if (modifiedBy != nullptr) {
+				modifiesTable.addModifies(callingProc, node->getValue());
+			} else if (usedBy != nullptr) {
+				usesTable.addUses(callingProc, node->getValue());
+			}
+		}
+	}
+}
+
+void PKB::handleCalls(Node* callingProc, Node* node) {
+	callsTable.addCalls(callingProc, node->getValue());
+	Node* targetProc = procedureTable.getProcedure(node->getValue());
+	if (targetProc != nullptr ) {
+		vector<pair<string, string>> calls = getCallsStar(targetProc->getValue(), procedure);
+		calls.push_back(make_pair(callingProc->getValue(), targetProc->getValue()));
+		for (int i=0; i<calls.size(); i++) {
+			string calledProc = calls[i].second;
+			vector<pair<string, string>> modifies = getModifies(calledProc, variable);
+			vector<pair<string, string>> uses = getUses(calledProc, variable);
+			for(int j=0; j<modifies.size(); j++) {
+				Node* proc = procedureTable.getProcedure(modifies[i].first);
+				modifiesTable.addModifies(proc, modifies[i].second);
+			}
+			for(int j=0; j<uses.size(); j++) {
+				Node* proc = procedureTable.getProcedure(uses[i].first);
+				usesTable.addUses(proc, uses[i].second);
+			}
+		}
+	}
+}
+
 void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
-	modifiesTable.addModifies(modifiedBy, node);
-	modifiesTable.addModifies(procedure, node);
+	modifiesTable.addModifies(modifiedBy, node->getValue());
+	modifiesTable.addModifies(procedure, node->getValue());
 	variableTable.addModifiedBy(node->getVariable()->getName(), modifiedBy);
 	variableTable.addModifiedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
-		modifiesTable.addModifies(parent, node);
+		modifiesTable.addModifies(parent, node->getValue());
 		variableTable.addModifiedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
@@ -93,12 +130,12 @@ void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* 
 }
 
 void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
-	usesTable.addUses(usedBy, node);
-	usesTable.addUses(procedure, node);
+	usesTable.addUses(usedBy, node->getValue());
+	usesTable.addUses(procedure, node->getValue());
 	variableTable.addUsedBy(node->getVariable()->getName(), usedBy);
 	variableTable.addUsedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
-		usesTable.addUses(parent, node);
+		usesTable.addUses(parent, node->getValue());
 		variableTable.addUsedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {

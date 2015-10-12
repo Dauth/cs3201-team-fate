@@ -17,8 +17,9 @@ public:
 	vector<pair<string, string>> getByLeftKey(string);
 	vector<pair<string, string>> getByRightKey(string);
 	vector<pair<string, string>> getAll();
+	bool isCalled(string);
 
-	void addCalls(Node*, Node*);
+	void addCalls(Node*, string);
 };
 
 #endif

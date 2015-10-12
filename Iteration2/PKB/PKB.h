@@ -36,6 +36,8 @@ class PKB {
 	int compare(Node*, Node*);
 	bool isExpression(std::string);
 
+	void handleInheritance(Node*, Node*, Node*, Node*);
+	void handleCalls(Node*, Node*);
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
 	void handleParent(Node*, Node*);
