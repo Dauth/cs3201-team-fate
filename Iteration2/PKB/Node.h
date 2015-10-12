@@ -6,7 +6,7 @@
 class Variable;
 
 class Node {
-	synt_type SYNT_TYPE; // type of node
+	SyntType syntType; // type of node
 	std::string line; // prog/statement line
 	std::string value; // constant value, procedure name, call target, expr
 	Node* root; // pointer to procedure node
@@ -20,9 +20,9 @@ class Node {
 	Variable* var;
 	
 public:
-	Node (synt_type, std::string, std::string);
-	Node (synt_type, std::string);
-	synt_type getType();
+	Node (SyntType, std::string, std::string);
+	Node (SyntType, std::string);
+	SyntType getType();
 	std::string getLine();
 	bool isStatement();
 	bool isContainer();

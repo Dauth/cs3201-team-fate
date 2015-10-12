@@ -20,18 +20,18 @@ std::vector<Node*> StatementTable::getStatements() {
 	return nodes;
 }
 
-int StatementTable::getStatementCount(synt_type st) {
+int StatementTable::getStatementCount(SyntType st) {
 	if ( count.find(st) == count.end() ) {
 		return 0;
 	}
 	return count[st];
 }
 
-std::vector<Node*> StatementTable::getStatements(synt_type st) {
+std::vector<Node*> StatementTable::getStatements(SyntType st) {
 	std::vector<Node*> nodes;
     for(std::map<std::string, Node*>::iterator it = table.begin(); it != table.end(); ++it) {
 		Node* node = it->second;
-		synt_type nt = node->getType();
+		SyntType nt = node->getType();
 		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
 			nodes.push_back(node);
 		}

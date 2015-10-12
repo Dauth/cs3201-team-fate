@@ -215,8 +215,8 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	return result;//if it is false here, there are more opening then closing brackets
 }
 
-synt_type ExpressionTree::getSyntType(std::string expressionStr){
-	synt_type expressionCharType;
+SyntType ExpressionTree::getSyntType(std::string expressionStr){
+	SyntType expressionCharType;
 	if(isAlpha(expressionStr)){
 			expressionCharType = variable;
 		}else if(isDigit(expressionStr)){
@@ -228,7 +228,7 @@ synt_type ExpressionTree::getSyntType(std::string expressionStr){
 }
 
 Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
-	synt_type expressionCharType;
+	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
 
 	for(int i = 0; i < postflixExp.size(); i++){
@@ -254,7 +254,7 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 }
 
 Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
-	synt_type expressionCharType;
+	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
 
 	for(int i = 0; i < postflixExp.size(); i++){

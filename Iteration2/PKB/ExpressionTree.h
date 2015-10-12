@@ -14,7 +14,7 @@ private:
 	bool ExpressionTree::isAlpha(std::string);
 	bool ExpressionTree::isDigit(std::string);
 	int ExpressionTree::getPrecedence(std::string);
-	synt_type ExpressionTree::getSyntType(std::string);
+	SyntType ExpressionTree::getSyntType(std::string);
 
 public:
 	ExpressionTree();

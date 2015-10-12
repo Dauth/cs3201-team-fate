@@ -20,7 +20,7 @@ vector<pair<string, string>> ModifiesTable::getByLeftKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> ModifiesTable::getByLeftKey(synt_type st) {
+vector<pair<string, string>> ModifiesTable::getByLeftKey(SyntType st) {
 	if (leftTypeKeyTable.find(st) == leftTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
 	}
@@ -37,12 +37,12 @@ vector<pair<string, string>> ModifiesTable::getByRightKey(string ident) {
 }
 
 
-void ModifiesTable::addModifies(Node* nodeLeft, string varname) {
+void ModifiesTable::addModifies(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getLine();
 	if (nodeLeft->getType() == procedure) {
 		left = nodeLeft->getValue();
 	}
-	string right = varname;
+	string right = nodeRight->getValue();
 	pair<string, string> modifies ( left, right );
 
 	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {
@@ -57,10 +57,9 @@ void ModifiesTable::addModifies(Node* nodeLeft, string varname) {
 	leftKeyTable[left].insert(modifies);
 	rightKeyTable[right].insert(modifies);
 
-	synt_type st = nodeLeft->getType();
+	SyntType st = nodeLeft->getType();
 	leftTypeKeyTable[st].insert(modifies);
 	if ( nodeLeft->isStatement() ) {
 		leftTypeKeyTable[statement].insert(modifies);
 	}
 }
-

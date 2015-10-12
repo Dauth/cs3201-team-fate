@@ -23,7 +23,7 @@ vector<pair<string, string>> ParentsTable::getByLeftKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> ParentsTable::getByLeftKey(synt_type st) {
+vector<pair<string, string>> ParentsTable::getByLeftKey(SyntType st) {
 	if (leftTypeKeyTable.find(st) == leftTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
 	}
@@ -39,7 +39,7 @@ vector<pair<string, string>> ParentsTable::getByRightKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> ParentsTable::getByRightKey(synt_type st) {
+vector<pair<string, string>> ParentsTable::getByRightKey(SyntType st) {
 	if (rightTypeKeyTable.find(st) == rightTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
 	}
@@ -66,13 +66,13 @@ void ParentsTable::addChild(Node* nodeLeft, Node* nodeRight) {
 	rightKeyTable[right].insert(modifies);
 
 
-	synt_type st1 = nodeLeft->getType();
+	SyntType st1 = nodeLeft->getType();
 	leftTypeKeyTable[st1].insert(modifies);
 	if ( nodeLeft->isStatement() ) {
 		leftTypeKeyTable[statement].insert(modifies);
 	}
 
-	synt_type st2 = nodeRight->getType();
+	SyntType st2 = nodeRight->getType();
 	rightTypeKeyTable[st2].insert(modifies);
 	if ( nodeRight->isStatement() ) {
 		rightTypeKeyTable[statement].insert(modifies);

@@ -2,8 +2,8 @@
 #include "Node.h"
 #include "Variable.h"
 
-Node::Node (synt_type st, std::string l, std::string v) {
-	SYNT_TYPE = st;
+Node::Node (SyntType st, std::string l, std::string v) {
+	syntType = st;
 	value = v;
 	line = l;
 	leftChild = nullptr;
@@ -15,13 +15,13 @@ Node::Node (synt_type st, std::string l, std::string v) {
 	var = nullptr;
 }
 
-Node::Node (synt_type st, std::string v) {
-	SYNT_TYPE = st;
+Node::Node (SyntType st, std::string v) {
+	syntType = st;
 	value = v;
 }
 
-synt_type Node::getType() {
-	return SYNT_TYPE;
+SyntType Node::getType() {
+	return syntType;
 }
 
 std::string Node::getLine() {
@@ -29,14 +29,14 @@ std::string Node::getLine() {
 }
 
 bool Node::isStatement() {
-	if ( SYNT_TYPE == whileLoop || SYNT_TYPE == ifelse || SYNT_TYPE == assignment || SYNT_TYPE == call) {
+	if ( syntType == whileLoop || syntType == ifelse || syntType == assignment || syntType == call) {
 		return true;
 	}
 	return false;
 }
 
 bool Node::isContainer() {
-	if ( SYNT_TYPE == whileLoop || SYNT_TYPE == ifelse ) {
+	if ( syntType == whileLoop || syntType == ifelse ) {
 		return true;
 	}
 	return false;
@@ -121,5 +121,5 @@ void Node::setVar(Variable* v) {
 }
 
 void Node::debug() {
-	std::cout << "Node Type: " << SYNT_TYPE << ", line: " << line << "\n";
+	std::cout << "Node Type: " << syntType << ", line: " << line << "\n";
 }

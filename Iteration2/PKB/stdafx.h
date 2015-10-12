@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <set>
 #include <list>
-#include "synt_type.h"
+#include "SyntType.h"
 #include <utility>
 #include <ctype.h>
 

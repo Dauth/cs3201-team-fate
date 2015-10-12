@@ -1,4 +1,4 @@
-enum synt_type {
+enum SyntType {
 	whileLoop,
 	ifelse,
 	assignment,

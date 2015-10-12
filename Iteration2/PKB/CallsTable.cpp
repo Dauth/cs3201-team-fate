@@ -26,16 +26,9 @@ vector<pair<string, string>> CallsTable::getAll() {
 	return vector<pair<string, string>> (allCalls.begin(), allCalls.end());
 }
 
-bool CallsTable::isCalled(string procName) {
-	if (rightKeyTable.find(procName) == rightKeyTable.end()) {
-		return false;
-	}
-	return true;
-}
-
-void CallsTable::addCalls(Node* nodeLeft, string procName) {
+void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getValue();
-	string right = procName;
+	string right = nodeRight->getValue();
 	pair<string, string> calls ( left, right );
 
 	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {
