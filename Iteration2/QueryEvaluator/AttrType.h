@@ -1,0 +1,4 @@
+enum AttrType {
+	integerType,
+	stringType
+};
