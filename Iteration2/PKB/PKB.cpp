@@ -548,7 +548,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st1, SyntType st2) {
 		Node* stmtNode = statementTable.getStatement(right);
 		vector<pair<string, string>> indirectFollows = getFollowsStar(stmtNode->getLine(), statement);
 		for (int j=0; j<indirectFollows.size(); j++) {
-			string indirectRight = indirectFollows[i].second;
+			string indirectRight = indirectFollows[j].second;
 			Node* indirectStmtNode = statementTable.getStatement(indirectRight);
 			if ((indirectStmtNode->isStatement() && st2 == statement) || st2 == indirectStmtNode->getType()) {
 				pair<string, string> followsStar ( left, indirectRight );
@@ -575,7 +575,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
 		Node* stmtNode = statementTable.getStatement(left);
 		vector<pair<string, string>> indirectFollows = getFollowsStar(st, left);
 		for (int j=0; j<indirectFollows.size(); j++) {
-			string indirectLeft = indirectFollows[i].second;
+			string indirectLeft = indirectFollows[j].second;
 			Node* indirectStmtNode = statementTable.getStatement(indirectLeft);
 			if ((indirectStmtNode->isStatement() && st == statement) || st == indirectStmtNode->getType()) {
 				pair<string, string> followsStar ( indirectLeft, right );
@@ -602,11 +602,11 @@ vector<pair<string, string>> PKB::getFollowsStar(string stmtNum, SyntType st) {
 		Node* stmtNode = statementTable.getStatement(right);
 		vector<pair<string, string>> indirectFollows = getFollowsStar(stmtNode->getLine(), statement);
 		for (int j=0; j<indirectFollows.size(); j++) {
-			string indirectRight = indirectFollows[i].second;
+			string indirectRight = indirectFollows[j].second;
 			Node* indirectStmtNode = statementTable.getStatement(indirectRight);
 			if ((indirectStmtNode->isStatement() && st == statement) || st == indirectStmtNode->getType()) {
 				pair<string, string> followsStar ( left, indirectRight );
-				results.push_back(indirectFollows[i]);
+				results.push_back(followsStar);
 			}
 		}
 		if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
@@ -632,7 +632,7 @@ vector<pair<string, string>> PKB::getFollowsStar(string stmtNum1, string stmtNum
 		} else {
 			vector<pair<string, string>> indirectFollows = getFollowsStar(stmtNode->getLine(), statement);
 			for (int j=0; j<indirectFollows.size(); j++) {
-				string indirectRight = indirectFollows[i].second;
+				string indirectRight = indirectFollows[j].second;
 				if (indirectRight.compare(stmtNum2) == 0){
 					pair<string, string> followsStar ( left, indirectRight );
 					results.push_back(followsStar);
