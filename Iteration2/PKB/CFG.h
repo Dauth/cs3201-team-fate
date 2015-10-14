@@ -21,7 +21,7 @@ class CFG{
 public:
 	void buildCFG(Node*);
 	vector<pair<string, string>> getAllPairs();
-	//CFGNode* getCFG(std::string);
+	CFGNode* getCFG(std::string);
 }
 
 
