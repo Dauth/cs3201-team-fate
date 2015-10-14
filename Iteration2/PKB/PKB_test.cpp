@@ -389,8 +389,10 @@ void PKB_test::runTests() {
 	// 9.	c = z + x }
 	// 10. x = x + z
 	// 11. a = 3 + y
-
+	
 	setupTestData();
+
+	/*
 	// Modifies ("test", v)
 	testModifiesProc();
 	// Modifies (5, v)
@@ -434,6 +436,15 @@ void PKB_test::runTests() {
 	testFollowedByStatement();
 	// follows (s, assignment)
 	testFollowedByAssignment();
+	*/
+
+	vector<pair<string, string>> result;
+	cout << "\n\nQuery is follows(s, assignment) \n"; 
+	result = pkb->getFollowsStar(statement, assignment);
+	cout << "Obtained " << result.size() << " results\n"; // 6
+	for(int i=0; i<result.size(); i++) {
+		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
+	} 
 
 	cin.get();
 }
