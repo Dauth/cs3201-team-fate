@@ -2,6 +2,8 @@
 #include "CFGNode.h"
 #include "Node.h"
 
+
+
 CFGNode::CFGNode (Node* node){
 	statement = node;
 }
@@ -26,12 +28,20 @@ CFGNode* CFGNode::getEndRight(){
 	return endRight;
 }
 
+std::vector<CFGNode*> CFGNode::getPrevNode(){
+	return prevNode;
+}
+
 void CFGNode::setExNextNode(CFGNode* exNext){
 	exNextNode = exNext;
 }
 
 void CFGNode::setNextNode(CFGNode* next){
 	nextNode = next;
+}
+
+void CFGNode::setPrevNode(CFGNode* prev){
+	prevNode.push_back(prev);
 }
 
 void CFGNode::setEndLeft(CFGNode* end){

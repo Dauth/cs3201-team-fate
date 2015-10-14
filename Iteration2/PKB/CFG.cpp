@@ -2,6 +2,8 @@
 #include "CFG.h"
 #include "PKB.h"
 
+using namespace std;
+
 CFG::CFG(){
 }
 
@@ -20,18 +22,15 @@ void CFG::buildCFG(Node* node){
 	for(unsigned i = 1; i <= temp.size();i++){
 		CFGNode* nextNode = createNext(temp.at(i));
 
-		if(currentNode->getStatement()->getType() == ifelse){ //if the currentNode is ifelse, we set next to the left and right end instead
-				currentNode->getEndLeft()->setNextNode(nextNode);
-				currentNode->getEndRight()->setNextNode(nextNode);
+		if(i == 1){
+			currentNode->setNextNode(nextNode);
 		}
 		else{
-			currentNode->setNextNode(nextNode);
+			linkNode(currentNode,nextNode);
 		}
 		
 		currentNode = nextNode;
 	}
-	CFGNode* endNode;
-	currentNode->setNextNode(endNode);
 	cfgs.push_back(startNode);
 }
 
@@ -50,20 +49,18 @@ CFGNode* CFG::createWhile(Node* node){
 		//set next Node. If it is the first iteration,setExNext since it is the node after while Node
 		if(i == 1){
 			currentNode->setExNextNode(nextNode);
+			nextNode->setPrevNode(currentNode);
+			createAndAddPair(currentNode,nextNode);
 		}
 		else{ 
-			if(currentNode->getStatement()->getType() == ifelse){ 
-				currentNode->getEndLeft()->setNextNode(nextNode);
-				currentNode->getEndRight()->setNextNode(nextNode);
-			}
-			else{
-				currentNode->setNextNode(nextNode);
-			}
+			linkNode(currentNode,nextNode);
 		}
 
 		currentNode = nextNode;
 	}
 	currentNode->setNextNode(whileNode);
+	whileNode->setPrevNode(currentNode);
+	createAndAddPair(currentNode,whileNode);
 	return whileNode;
 }
 
@@ -76,15 +73,11 @@ CFGNode* CFG::createIfLeft(CFGNode* node){
 		//set next Node. If it is the first iteration,setNext since it is the node after if Node
 		if(i == 1){
 			currentNode->setNextNode(nextNode);
+			nextNode->setPrevNode(currentNode);
+			createAndAddPair(currentNode,nextNode);
 		}
 		else{
-			if(currentNode->getStatement()->getType() == ifelse){
-				currentNode->getEndLeft()->setNextNode(nextNode);
-				currentNode->getEndRight()->setNextNode(nextNode);
-			}
-			else{
-				currentNode->setNextNode(nextNode);
-			}
+			linkNode(currentNode,nextNode);
 		}
 		
 		currentNode = nextNode;
@@ -101,15 +94,11 @@ CFGNode* CFG::createIfRight(CFGNode* node){
 		//set next Node. If it is the first iteration,setExNext since it is the node after else Node
 		if(i == 1){
 			currentNode->setExNextNode(nextNode);
+			nextNode->setPrevNode(currentNode);
+			createAndAddPair(currentNode,nextNode);
 		}
 		else{
-			if(currentNode->getStatement()->getType() == ifelse){
-				currentNode->getEndLeft()->setNextNode(nextNode);
-				currentNode->getEndRight()->setNextNode(nextNode);
-			}
-			else{
-				currentNode->setNextNode(nextNode);
-			}
+			linkNode(currentNode,nextNode);
 		}
 		currentNode = nextNode;
 	}
@@ -129,6 +118,33 @@ CFGNode* CFG::createNext(Node* node){
 	else{
 		nextNode = createNorm(node);
 	}
-	
+	node->setCfgNode(nextNode);
 	return nextNode;
+}
+
+void CFG::linkNode(CFGNode* currentNode,CFGNode* nextNode){
+	if(currentNode->getStatement()->getType() == ifelse){ //if the currentNode is ifelse, we set next to the left and right end instead
+		currentNode->getEndLeft()->setNextNode(nextNode);
+		currentNode->getEndRight()->setNextNode(nextNode);
+		nextNode->setPrevNode(currentNode->getEndLeft());
+		nextNode->setPrevNode(currentNode->getEndRight());
+		createAndAddPair(currentNode->getEndLeft(),nextNode);
+		createAndAddPair(currentNode->getEndRight(),nextNode);
+	}
+	else{
+		currentNode->setNextNode(nextNode);
+		nextNode->setPrevNode(currentNode);
+		createAndAddPair(currentNode,nextNode);
+	}
+}
+
+void CFG::createAndAddPair(CFGNode* currentNode,CFGNode* nextNode){
+	Node* current = currentNode->getStatement();
+	Node* next = nextNode->getStatement();
+	pair<string, string> p (current->getLine(),next->getLine());
+	pairs.push_back(p);
+}
+
+vector<pair<string, string>> CFG::getAllPairs(){
+	return pairs;
 }

@@ -7,6 +7,7 @@
 class CFGNode{
 	Node* statement;
 	CFGNode* nextNode;
+	std::vector<CFGNode*> prevNode;
 	CFGNode* exNextNode;
 	CFGNode* endLeft;
 	CFGNode* endRight;
@@ -18,9 +19,11 @@ public:
 	CFGNode* getExNextNode();
 	CFGNode* getEndLeft();
 	CFGNode* getEndRight();
+	std::vector<CFGNode*> getPrevNode();
 
 	void setNextNode(CFGNode*);
 	void setExNextNode(CFGNode*);
+	void setPrevNode(CFGNode*);
 
 	void setEndLeft(CFGNode*);
 	void setEndRight(CFGNode*);
