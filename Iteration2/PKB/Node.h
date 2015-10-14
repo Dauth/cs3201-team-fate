@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include "stdafx.h"
+#include "CFGNode.h"
 
 class Variable;
 
@@ -18,6 +19,8 @@ class Node {
 	std::map<int, Node*> stmtLst;
 	std::map<Node*, int> indexLst;
 	Variable* var;
+	CFGNode* cfgNode;
+
 	
 public:
 	Node (SyntType, std::string, std::string);
@@ -33,6 +36,7 @@ public:
 	Node* getLeftChild();
 	Node* getRightChild();
 	Node* getThirdChild();
+	CFGNode* getCfgNode();
 	std::map<int, Node*> getStmtLst();
 	std::map<Node*, int> getIndexLst();
 	Variable* getVariable();
@@ -45,6 +49,7 @@ public:
 	void setThirdChild(Node*);
 	void addStmt(Node*);
 	void setVar(Variable*);
+	void setCfgNode(CFGNode*);
 
 	void debug();
 };

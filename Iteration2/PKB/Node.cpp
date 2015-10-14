@@ -83,6 +83,10 @@ Variable* Node::getVariable() {
 	return var;
 }
 
+CFGNode* Node::getCfgNode(){
+	return cfgNode;
+}
+
 void Node::setRoot(Node* node) {
 	root = node;
 }
@@ -118,6 +122,10 @@ void Node::addStmt(Node* node) {
 
 void Node::setVar(Variable* v) {
 	var = v;
+}
+
+void Node::setCfgNode(CFGNode* cfg){
+	cfgNode = cfg;
 }
 
 void Node::debug() {
