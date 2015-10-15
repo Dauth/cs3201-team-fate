@@ -72,18 +72,59 @@ Node* PKB::createNode(SyntType st, int line, string value,
 		handleParent(node, parent);
 	}
 	if (st == call) {
-		callsTable.addCalls(procedure, node);
+		handleCalls(procedure, node);
+	}
+	if (st == variable) {
+		handleInheritance(procedure, node, modifiedBy, usedBy);
 	}
 	return node;
 }
 
+void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* usedBy) {
+	if (procNode != nullptr && callsTable.isCalled(procNode->getValue())) {
+		vector<pair<string, string>> calls = getCallsStar(procedure, procNode->getValue());
+		for (int i=0; i<calls.size(); i++) {
+			Node* callingProc = procedureTable.getProcedure(calls[i].first);
+			if (modifiedBy != nullptr) {
+				modifiesTable.addModifies(callingProc, node->getValue());
+			} else if (usedBy != nullptr) {
+				usesTable.addUses(callingProc, node->getValue());
+			}
+		}
+	}
+}
+
+void PKB::handleCalls(Node* callingProc, Node* node) {
+	callsTable.addCalls(callingProc, node->getValue());
+	Node* targetProc = procedureTable.getProcedure(node->getValue());
+	if (targetProc != nullptr ) {
+		vector<pair<string, string>> calls = getCallsStar(targetProc->getValue(), procedure);;
+		vector<pair<string, string>> callsInherit = getCallsStar(procedure, targetProc->getValue());
+		calls.insert(calls.end(), callsInherit.begin(), callsInherit.end());
+
+		for (int i=0; i<calls.size(); i++) {
+			string calledProc = calls[i].second;
+			vector<pair<string, string>> modifies = getModifies(calledProc, variable);
+			vector<pair<string, string>> uses = getUses(calledProc, variable);
+			for(int j=0; j<modifies.size(); j++) {
+				Node* proc = procedureTable.getProcedure(calls[i].first);
+				modifiesTable.addModifies(proc, modifies[j].second);
+			}
+			for(int j=0; j<uses.size(); j++) {
+				Node* proc = procedureTable.getProcedure(calls[i].first);
+				usesTable.addUses(proc, uses[j].second);
+			}
+		}
+	}
+}
+
 void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
-	modifiesTable.addModifies(modifiedBy, node);
-	modifiesTable.addModifies(procedure, node);
+	modifiesTable.addModifies(modifiedBy, node->getValue());
+	modifiesTable.addModifies(procedure, node->getValue());
 	variableTable.addModifiedBy(node->getVariable()->getName(), modifiedBy);
 	variableTable.addModifiedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
-		modifiesTable.addModifies(parent, node);
+		modifiesTable.addModifies(parent, node->getValue());
 		variableTable.addModifiedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
@@ -95,12 +136,12 @@ void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* 
 }
 
 void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
-	usesTable.addUses(usedBy, node);
-	usesTable.addUses(procedure, node);
+	usesTable.addUses(usedBy, node->getValue());
+	usesTable.addUses(procedure, node->getValue());
 	variableTable.addUsedBy(node->getVariable()->getName(), usedBy);
 	variableTable.addUsedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
-		usesTable.addUses(parent, node);
+		usesTable.addUses(parent, node->getValue());
 		variableTable.addUsedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
@@ -210,7 +251,7 @@ vector<pair<string, string>> PKB::getUses(SyntType st, string varName) {
 				}
 			} else {
 				Node* stmtNode = statementTable.getStatement(left);
-				if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
+				if (stmtNode != nullptr && ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType())) {
 					results.push_back(temp2[i]);
 				}
 			}
@@ -366,7 +407,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st1, SyntType st2) {
 		if (stmtNode->isContainer()) {
 			vector<pair<string, string>> indirectParents = getParentsStar(stmtNode->getLine(), statement);
 			for (int j=0; j<indirectParents.size(); j++) {
-				string indirectRight = indirectParents[i].second;
+				string indirectRight = indirectParents[j].second;
 				Node* indirectStmtNode = statementTable.getStatement(indirectRight);
 				if ((indirectStmtNode->isStatement() && st2 == statement) || st2 == indirectStmtNode->getType()) {
 					pair<string, string> parentsStar ( left, indirectRight );
@@ -394,7 +435,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
 		Node* stmtNode = statementTable.getStatement(left);
 		vector<pair<string, string>> indirectParents = getParentsStar(st, left);
 		for (int j=0; j<indirectParents.size(); j++) {
-			string indirectLeft = indirectParents[i].second;
+			string indirectLeft = indirectParents[j].first;
 			Node* indirectStmtNode = statementTable.getStatement(indirectLeft);
 			if ((indirectStmtNode->isStatement() && st == statement) || st == indirectStmtNode->getType()) {
 				pair<string, string> parentsStar ( indirectLeft, right );
@@ -422,7 +463,7 @@ vector<pair<string, string>> PKB::getParentsStar(string stmtNum, SyntType st) {
 		if (stmtNode->isContainer()) {
 			vector<pair<string, string>> indirectParents = getParentsStar(stmtNode->getLine(), statement);
 			for (int j=0; j<indirectParents.size(); j++) {
-				string indirectRight = indirectParents[i].second;
+				string indirectRight = indirectParents[j].second;
 				Node* indirectStmtNode = statementTable.getStatement(indirectRight);
 				if ((indirectStmtNode->isStatement() && st == statement) || st == indirectStmtNode->getType()) {
 					pair<string, string> parentsStar ( left, indirectRight );
@@ -453,7 +494,7 @@ vector<pair<string, string>> PKB::getParentsStar(string stmtNum1, string stmtNum
 		} else if (stmtNode->isContainer()) {
 			vector<pair<string, string>> indirectParents = getParentsStar(stmtNode->getLine(), statement);
 			for (int j=0; j<indirectParents.size(); j++) {
-				string indirectRight = indirectParents[i].second;
+				string indirectRight = indirectParents[j].second;
 				if (indirectRight.compare(stmtNum2) == 0){
 					pair<string, string> parentsStar ( left, indirectRight );
 					results.push_back(parentsStar);
@@ -575,7 +616,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
 		Node* stmtNode = statementTable.getStatement(left);
 		vector<pair<string, string>> indirectFollows = getFollowsStar(st, left);
 		for (int j=0; j<indirectFollows.size(); j++) {
-			string indirectLeft = indirectFollows[j].second;
+			string indirectLeft = indirectFollows[j].first;
 			Node* indirectStmtNode = statementTable.getStatement(indirectLeft);
 			if ((indirectStmtNode->isStatement() && st == statement) || st == indirectStmtNode->getType()) {
 				pair<string, string> followsStar ( indirectLeft, right );
@@ -672,7 +713,7 @@ vector<pair<string, string>> PKB::getCalls(string stmtNum1, string stmtNum2) {
 	} else {
 		for(int i=0; i<temp2.size(); i++) {
 			string left = temp2[i].first;
-			if (left.compare(stmtNum2) == 0) {
+			if (left.compare(stmtNum1) == 0) {
 				results.push_back(temp2[i]);
 			}
 		}
@@ -745,7 +786,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName, SyntType st) {
 
 vector<pair<string, string>> PKB::getCallsStar(string procName1, string procName2) {
 	vector<pair<string, string>> results;
-	vector<pair<string, string>> calls = getFollows(procName1, procedure);
+	vector<pair<string, string>> calls = getCalls(procName1, procedure);
 	if (calls.empty()){
 		return calls;
 	}
@@ -756,7 +797,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName1, string procName
 		if (right.compare(procName2) == 0) {
 			results.push_back(calls[i]);
 		} else {
-			vector<pair<string, string>> indirectCalls = getFollowsStar(right, procedure);
+			vector<pair<string, string>> indirectCalls = getCallsStar(right, procedure);
 			for (int j=0; j<indirectCalls.size(); j++) {
 				string indirectRight = indirectCalls[i].second;
 				if (indirectRight.compare(procName2) == 0){

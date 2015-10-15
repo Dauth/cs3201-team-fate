@@ -37,12 +37,12 @@ vector<pair<string, string>> ModifiesTable::getByRightKey(string ident) {
 }
 
 
-void ModifiesTable::addModifies(Node* nodeLeft, Node* nodeRight) {
+void ModifiesTable::addModifies(Node* nodeLeft, string varname) {
 	string left = nodeLeft->getLine();
 	if (nodeLeft->getType() == procedure) {
 		left = nodeLeft->getValue();
 	}
-	string right = nodeRight->getValue();
+	string right = varname;
 	pair<string, string> modifies ( left, right );
 
 	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {

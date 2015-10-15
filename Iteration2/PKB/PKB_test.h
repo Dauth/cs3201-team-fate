@@ -31,6 +31,7 @@ public:
 	void testFollowsWhile();
 	void testFollowedByStatement();
 	void testFollowedByAssignment();
+	void printResults(vector<pair<string, string>>);
 
 };
 

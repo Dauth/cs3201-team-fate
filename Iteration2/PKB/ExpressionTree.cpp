@@ -260,7 +260,7 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 	for(int i = 0; i < postflixExp.size(); i++){
 		std::string expressionStr= postflixExp[i];
 		expressionCharType = getSyntType(postflixExp[i]);
-		Node* tNode = new Node(expressionCharType, 0, expressionStr);
+		Node* tNode = new Node(expressionCharType, "0", expressionStr);
 
 		if(isOperand(postflixExp[i])){
 			operandStack.push(tNode);

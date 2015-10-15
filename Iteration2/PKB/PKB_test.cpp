@@ -138,240 +138,56 @@ void PKB_test::setupTestData() {
 	s11e_plus->setLeftChild(s11c_3);
 	s11e_plus->setRightChild(s11v_z);
 	testStmtLst1->addStmt(s11);
+
+	// 12. call test2 }
+	Node* s12 = pkb->createNode(call, 12, "test2", nullptr, nullptr, nullptr, proc);
+	testStmtLst1->addStmt(s12);
+
+	// procedure test3 {
+	Node* proc3 = pkb->createProcedure("test3");
+	Node* test3StmtLst = pkb->createNode(statementList, 0);
+	proc->setLeftChild(test3StmtLst);
+
+	// 13. f = g + h }
+	Node* s13 = pkb->createNode(assignment, 13, "", nullptr, nullptr, nullptr, proc3);
+	Node* s13a = pkb->createNode(variable, 13, "f", nullptr, s13, nullptr, proc3);
+	Node* s13v_g = pkb->createNode(variable, 13, "g", s13, nullptr, nullptr, proc3);
+	Node* s13e_plus = pkb->createNode(expression, 13, "+", s13, nullptr, nullptr, proc3);
+	Node* s13v_h = pkb->createNode(variable, 13, "h", s13, nullptr, nullptr, proc3);
+	s13->setLeftChild(s13a);
+	s13->setRightChild(s13e_plus);
+	s13e_plus->setLeftChild(s13v_g);
+	s13e_plus->setRightChild(s13v_h);
+	test3StmtLst->addStmt(s13);
+
+	// procedure test2 {
+	Node* proc2 = pkb->createProcedure("test2");
+	Node* test2StmtLst = pkb->createNode(statementList, 0);
+	proc->setLeftChild(test2StmtLst);
+
+	// 14. i = j + k 
+	Node* s14 = pkb->createNode(assignment, 14, "", nullptr, nullptr, nullptr, proc2);
+	Node* s14a = pkb->createNode(variable, 14, "i", nullptr, s14, nullptr, proc2);
+	Node* s14v_x = pkb->createNode(variable, 14, "j", s14, nullptr, nullptr, proc2);
+	Node* s14e_plus = pkb->createNode(expression, 14, "+", s14, nullptr, nullptr, proc2);
+	Node* s14v_y = pkb->createNode(variable, 14, "k", s14, nullptr, nullptr, proc2);
+	s14->setLeftChild(s14a);
+	s14->setRightChild(s14e_plus);
+	s14e_plus->setLeftChild(s14v_x);
+	s14e_plus->setRightChild(s14v_y);
+	test2StmtLst->addStmt(s14);
+
+	// 15. call test3 }
+	Node* s15 = pkb->createNode(call, 15, "test3", nullptr, nullptr, nullptr, proc2);
+	test2StmtLst->addStmt(s15);
 }
 
-// Modifies ("test", v)
-void PKB_test::testModifiesProc() {
-	vector<pair<string, string>> result;
-	cout << "Query is Modifies(\"test\", v) \n"; 
-	result = pkb->getModifies("test", variable);
-	cout << "Obtained " << result.size() << " results\n"; // 9
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-// Modifies (5, v)
-void PKB_test::testModifiesStmt() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Modifies(5, v) \n"; 
-	result = pkb->getModifies("5", variable);
-	cout << "Obtained " << result.size() << " results\n"; // 1
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Modifies (assignment, v)
-void PKB_test::testModifiesAssign() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Modifies(assignment, v) \n"; 
-	result = pkb->getModifies(assignment, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 9
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Modifies (whileLoop, v)
-void PKB_test::testModifiesWhile() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Modifies(whileLoop, v) \n"; 
-	result = pkb->getModifies(whileLoop, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 4
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Modifies (s/p, "y")
-void PKB_test::testModifiedBySpecifiedVar() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Modifies(s, \"y\") \n"; 
-	result = pkb->getModifies(statement, "y");
-	cout << "Obtained " << result.size() << " results\n"; // 2
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Modifies (s/p, variable)
-void PKB_test::testModifiedByVarType() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQeury is Modifies(p, variable) \n"; 
-	result = pkb->getModifies(procedure, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 12
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	}
-
-}
-
-	// Modifies (s/p, "t")
-void PKB_test::testModifiedByNested() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Modifies(p, \"t\") \n"; 
-	result = pkb->getModifies(procedure, "t");
-	cout << "Obtained " << result.size() << " results\n"; // 4
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Uses ("test", v)
-void PKB_test::testUsesProc() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Uses(\"test\", v) \n"; 
-	result = pkb->getUses("test", variable);
-	cout << "Obtained " << result.size() << " results\n"; // 16
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Uses (5, v)
-void PKB_test::testUsesStmt() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Uses(5, v) \n"; 
-	result = pkb->getUses("5", variable);
-	cout << "Obtained " << result.size() << " results\n"; // 3
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
+void PKB_test::printResults(vector<pair<string, string>> results) {
+	cout << "Obtained " << results.size() << " results\n";
+	for(int i=0; i<results.size(); i++) {
+		cout << "( " + results[i].first + ", " + results[i].second + " ) ";
 	}
 }
-
-	// Uses (assignment, v)
-void PKB_test::testUsesAssign() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Uses(assignment, v) \n"; 
-	result = pkb->getUses(assignment, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 14
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Uses (whileLoop, v)
-void PKB_test::testUsesWhile() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Uses(whileLoop, v) \n"; 
-	result = pkb->getUses(whileLoop, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 11
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Uses (s, "y")
-void PKB_test::testUsedBySpecificVar() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Uses(p, \"y\") \n"; 
-	result = pkb->getUses(procedure, "y");
-	cout << "Obtained " << result.size() << " results\n"; // 6
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Uses (s, variable)
-void PKB_test::testUsedByVarType() {
-	vector<pair<string, string>> result;
-	cout << "\n\n\Query is Uses(p, variable) \n"; 
-	result = pkb->getUses(procedure, variable);
-	cout << "Obtained " << result.size() << " results\n"; // 10
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Parent (4, s)
-void PKB_test::testParentStatement() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Parent(4, s) \n"; 
-	result = pkb->getParents("4", statement);
-	cout << "Obtained " << result.size() << " results\n"; // 4
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Parent (whileLoop, s)
-void PKB_test::testParentWhile() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Parent(whileLoop, s) \n"; 
-	result = pkb->getParents(whileLoop, statement);
-	cout << "Obtained " << result.size() << " results\n"; // 5
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Parent (s, 6)
-void PKB_test::testChildStatement() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Parent(s, 6) \n"; 
-	result = pkb->getParents(statement, "6");
-	cout << "Obtained " << result.size() << " results\n"; // 1
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// Parent (s, assignment)
-void PKB_test::testChildAssign() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Parent(s, assignment) \n"; 
-	result = pkb->getParents(statement, assignment);
-	cout << "Obtained " << result.size() << " results\n"; // 2
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// follows (2, s)
-void PKB_test::testFollowsStatement() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Follows(2, s) \n"; 
-	result = pkb->getFollows("2", statement);
-	cout << "Obtained " << result.size() << " results\n"; // 1
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// follows (whileLoop, s)
-void PKB_test::testFollowsWhile() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is Follows(whileLoop, s) \n"; 
-	result = pkb->getFollows(whileLoop, statement);
-	cout << "Obtained " << result.size() << " results\n"; // 2
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	}
-}
-
-	// follows (s, 6)
-void PKB_test::testFollowedByStatement() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is follows(s, 6) \n"; 
-	result = pkb->getFollows(statement, "6");
-	cout << "Obtained " << result.size() << " results\n"; // 1
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
-	// follows (s, assignment)
-void PKB_test::testFollowedByAssignment() {
-	vector<pair<string, string>> result;
-	cout << "\n\nQuery is follows(s, assignment) \n"; 
-	result = pkb->getFollows(statement, assignment);
-	cout << "Obtained " << result.size() << " results\n"; // 6
-	for(int i=0; i<result.size(); i++) {
-		cout << "( " + result[i].first + ", " + result[i].second + " ) ";
-	} 
-}
-
 
 void PKB_test::runTests() {
 
@@ -389,51 +205,140 @@ void PKB_test::runTests() {
 	// 9.	c = z + x }
 	// 10. x = x + z
 	// 11. a = 3 + y
-
+	// 12. call test2 }
+	// procedure test3 {
+	// 13. f = g + h }
+	// procedure test2 {
+	// 14. i = j + k
+	// 14. call test3 }
+	
 	setupTestData();
-	// Modifies ("test", v)
-	testModifiesProc();
-	// Modifies (5, v)
-	testModifiesStmt();
-	// Modifies (assignment, v)
-	testModifiesAssign();
-	// Modifies (whileLoop, v)
-	testModifiesWhile();
-	// Modifies (s/p, "y")
-	testModifiedBySpecifiedVar();
-	// Modifies (s/p, variable)
-	testModifiedByVarType();
-	// Modifies (s/p, "t")
-	testModifiedByNested();
-	// Uses ("test", v)
-	testUsesProc();
-	// Uses (5, v)
-	testUsesStmt();
-	// Uses (assignment, v)
-	testUsesAssign();
-	// Uses (whileLoop, v)
-	testUsesWhile();
-	// Uses (s, "y")
-	testUsedBySpecificVar();
-	// Uses (s, variable)
-	testUsedByVarType();
 
-	// Parent (4, s)
-	testParentStatement();
-	// Parent (whileLoop, s)
-	testParentWhile();
-	// Parent (s, 6)
-	testChildStatement();
-	// Parent (s, assignment)
-	testChildAssign();
-	// follows (2, s)
-	testFollowsStatement();
-	// follows (whileLoop, s)
-	testFollowsWhile();
-	// follows (s, 6)
-	testFollowedByStatement();
-	// follows (s, assignment)
-	testFollowedByAssignment();
+	cout << "\n\nQuery is Modifies(\"test\", variable) \n"; 
+	printResults(pkb->getModifies("test", variable));
+
+	cout << "\n\nQuery is Modifies(\"5\", variable) \n"; 
+	printResults(pkb->getModifies("5", variable));
+
+	cout << "\n\nQuery is Modifies(assignment, variable) \n"; 
+	printResults(pkb->getModifies(assignment, variable));
+
+	cout << "\n\nQuery is Modifies(while, variable) \n"; 
+	printResults(pkb->getModifies(whileLoop, variable));
+
+	cout << "\n\nQuery is Modifies(statement, \"y\") \n"; 
+	printResults(pkb->getModifies(statement, "y"));
+
+	cout << "\n\nQuery is Modifies(\"test\", v) \n"; 
+	printResults(pkb->getModifies("test", variable));
+
+	cout << "\n\nQuery is Modifies(procedure, v) \n"; 
+	printResults(pkb->getModifies(procedure, variable));
+
+	cout << "\n\nQuery is Uses(\"test\", variable) \n"; 
+	printResults(pkb->getUses("test", variable));
+
+	cout << "\n\nQuery is Uses(\"5\", variable) \n"; 
+	printResults(pkb->getUses("5", variable));
+
+	cout << "\n\nQuery is Uses(assignment, variable) \n"; 
+	printResults(pkb->getUses(assignment, variable));
+
+	cout << "\n\nQuery is Uses(whileLoop, variable) \n"; 
+	printResults(pkb->getUses(whileLoop, variable));
+
+	cout << "\n\nQuery is Uses(statement, \"y\") \n"; 
+	printResults(pkb->getUses(statement, "y"));
+
+	cout << "\n\nQuery is Uses(statement, variable) \n"; 
+	printResults(pkb->getUses(statement, variable));
+
+	cout << "\n\nQuery is follows(\"2\", statement) \n"; 
+	printResults(pkb->getFollows("2", statement));
+
+	cout << "\n\nQuery is follows(whileLoop, statement) \n"; 
+	printResults(pkb->getFollows(whileLoop, statement));
+
+	cout << "\n\nQuery is follows(statement, \"6\") \n"; 
+	printResults(pkb->getFollows(statement, "6"));
+
+	cout << "\n\nQuery is Follows*(statement, assignment) \n"; 
+	printResults(pkb->getFollowsStar(statement, assignment));
+
+	cout << "\n\nQuery is Follows*(\"1\", assignment) \n"; 
+	printResults(pkb->getFollowsStar("1", assignment));
+
+	cout << "\n\nQuery is Follows*(assignment, \"4\") \n"; 
+	printResults(pkb->getFollowsStar(assignment, "4"));
+
+	cout << "\n\nQuery is Follows*(\"1\", \"3\") \n"; 
+	printResults(pkb->getFollowsStar("1", "3"));
+
+	cout << "\n\nQuery is follows(statement, assignment) \n"; 
+	printResults(pkb->getFollows(statement, assignment));
+
+	cout << "\n\nQuery is Parents(\"4\", statement) \n"; 
+	printResults(pkb->getParents("4", statement));
+
+	cout << "\n\nQuery is Parents(whileLoop, statement) \n"; 
+	printResults(pkb->getParents(whileLoop, statement));
+
+	cout << "\n\nQuery is Parents(statement, \"6\") \n"; 
+	printResults(pkb->getParents(statement, "6"));
+
+	cout << "\n\nQuery is Parents(statement, assignment) \n"; 
+	printResults(pkb->getParents(statement, assignment));
+
+	cout << "\n\nQuery is Parents*(statement, assignment) \n"; 
+	printResults(pkb->getParentsStar(statement, assignment));
+
+	cout << "\n\nQuery is Parents*(\"4\", assignment) \n"; 
+	printResults(pkb->getParentsStar("4", assignment));
+
+	cout << "\n\nQuery is Parents*(whileLoop, \"8\") \n"; 
+	printResults(pkb->getParentsStar(whileLoop, "8"));
+
+	cout << "\n\nQuery is Parents*(\"4\", \"8\") \n"; 
+	printResults(pkb->getParentsStar("4", "8"));
+
+	cout << "\n\nQuery is Calls(\"test\", procedure) \n"; 
+	printResults(pkb->getCalls("test", procedure));
+
+	cout << "\n\nQuery is Calls(procedure, procedure) \n"; 
+	printResults(pkb->getCalls(procedure, procedure));
+
+	cout << "\n\nQuery is Calls(procedure, \"test3\") \n"; 
+	printResults(pkb->getCalls(procedure, "test3"));
+
+	cout << "\n\nQuery is Calls(\"test\", \"test2\") \n"; 
+	printResults(pkb->getCalls("test", "test2"));
+
+	cout << "\n\nQuery is Calls*(\"test\", procedure) \n"; 
+	printResults(pkb->getCallsStar("test", procedure));
+
+	cout << "\n\nQuery is Calls*(procedure, procedure) \n"; 
+	printResults(pkb->getCallsStar(procedure, procedure));
+
+	cout << "\n\nQuery is Calls*(procedure, \"test3\") \n"; 
+	printResults(pkb->getCallsStar(procedure, "test3"));
+
+	cout << "\n\nQuery is Calls*(\"test\", \"test3\") \n"; 
+	printResults(pkb->getCallsStar("test", "test3"));
+
+	cout << "\n\nQuery is Pattern assignment(variable, _\"z + y\"_) \n"; 
+	printResults(pkb->searchWithPattern(assignment, "_", "_z + y_"));
+
+	cout << "\n\nQuery is Pattern assignment(variable, \"g + h\") \n"; 
+	printResults(pkb->searchWithPattern(assignment, "_", "g + h"));
+
+	cout << "\n\nQuery is Pattern whileLoop(variable, \"_\") \n"; 
+	printResults(pkb->searchWithPattern(whileLoop, "_", "_"));
+
+	cout << "\n\nQuery is Pattern assignment(variable, \"_x_\") \n"; 
+	printResults(pkb->searchWithPattern(assignment, "_", "_x_"));
+
+	cout << "\n\nQuery is Pattern assignment(\"f\", \"_\") \n"; 
+	printResults(pkb->searchWithPattern(assignment, "f", "_"));
 
 	cin.get();
 }

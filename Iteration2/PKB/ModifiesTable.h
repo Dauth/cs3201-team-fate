@@ -18,7 +18,7 @@ public:
 	vector<pair<string, string>> getByLeftKey(SyntType);
 	vector<pair<string, string>> getByRightKey(string);
 
-	void addModifies(Node*, Node*);
+	void addModifies(Node*, string);
 };
 
 #endif
