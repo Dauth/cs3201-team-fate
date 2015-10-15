@@ -1,18 +1,18 @@
 #include "stdafx.h"
 #include "SynonymValues.h"
 
-SynonymValues::SynonymValues(std::string s) {
+SynonymValues::SynonymValues(string s) {
 	name = s;
 }
 
-std::string SynonymValues::getName() {
+string SynonymValues::getName() {
 	return name;
 }
 
-std::set<std::string> SynonymValues::getValues() {
+set<string> SynonymValues::getValues() {
 	return values;
 }
 
-void SynonymValues::setValues(std::set<std::string> set) {
+void SynonymValues::setValues(set<string> set) {
 	values = set;
 }

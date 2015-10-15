@@ -3,16 +3,18 @@
 
 #include "stdafx.h"
 
+using namespace std;
+
 class SynonymValues {
-	std::string name;
-	std::set<std::string> values;
+	string name;
+	set<string> values;
 
 public:
-	SynonymValues(std::string);
-	std::string getName();
-	std::set<std::string> getValues();
+	SynonymValues(string);
+	string getName();
+	set<string> getValues();
 
-	void setValues(std::set<std::string>);
+	void setValues(set<string>);
 };
 
 #endif

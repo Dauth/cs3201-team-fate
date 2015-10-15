@@ -6,39 +6,41 @@
 #include "SynonymValues.h"
 #include "PKB.h"
 
+using namespace std;
+
 class QueryEvaluator {
 	PKB* pkb;
 	bool hasResult;
-	std::vector<ParamNode*> resultSynonyms;
-	std::vector<QueryPart*> queryParts;
-	std::vector<QueryPart*> queryWithNoResult;
-	std::vector<QueryPart*> queryWithOneResult;
-	std::vector<QueryPart*> queryWithTwoResults;
-	std::vector<SynonymValues*> synonymVec;
-	std::vector<std::vector<std::pair<std::string, std::string>>*> resultTuples;
-	std::list<std::string> finalResult;
+	vector<ParamNode*> resultSynonyms;
+	vector<QueryPart*> queryParts;
+	vector<QueryPart*> queryWithNoResult;
+	vector<QueryPart*> queryWithOneResult;
+	vector<QueryPart*> queryWithTwoResults;
+	vector<SynonymValues*> synonymVec;
+	vector<vector<pair<string, string>>*> resultTuples;
+	list<string> finalResult;
 
 	void optimise();
 	void sortQueryParts();
 	void evalQueryWithNoResult();
 	void evalQueryWithOneResult();
 	void evalQueryWithTwoResults();
-	std::vector<std::pair<std::string, std::string>> evalWithQuery(QueryPart*);
-	std::vector<std::pair<std::string, std::string>> getResult(QueryPart*);
-	std::vector<std::pair<std::string, std::string>> getResultFromPKB(QueryType, std::string, std::string);
-	std::vector<std::pair<std::string, std::string>> getResultFromPKB(QueryType, std::string, SyntType);
-	std::vector<std::pair<std::string, std::string>> getResultFromPKB(QueryType, SyntType, std::string);
-	std::vector<std::pair<std::string, std::string>> getResultFromPKB(QueryType, SyntType, SyntType);
-	void updateSynVal(ParamNode*, ParamNode*, std::vector<std::pair<std::string, std::string>>);
+	vector<pair<string, string>> evalWithQuery(QueryPart*);
+	vector<pair<string, string>> getResult(QueryPart*);
+	vector<pair<string, string>> getResultFromPKB(QueryType, string, string);
+	vector<pair<string, string>> getResultFromPKB(QueryType, string, SyntType);
+	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, string);
+	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, SyntType);
+	void updateSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void updateRelatedSynVal(SynonymValues*);
 	void evalFinalResult();
-	void formFinalResult(std::string, int);
-	bool existsInSynVec(std::string);
-	SynonymValues* getSynVal(std::string);
+	void formFinalResult(string, unsigned int);
+	bool existsInSynVec(string);
+	SynonymValues* getSynVal(string);
 
 public:
 	QueryEvaluator(PKB*);
-	std::list<std::string> evaluate(std::vector<ParamNode*>, std::vector<QueryPart*>);
+	list<string> evaluate(vector<ParamNode*>, vector<QueryPart*>);
 };
 
 #endif

@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "QueryPart.h"
 
+using namespace std;
+
 struct Query_Object {
-	std::vector<ParamNode*> resultVec;
-	std::vector<QueryPart*> queryVec;
+	vector<ParamNode*> resultVec;
+	vector<QueryPart*> queryVec;
 };

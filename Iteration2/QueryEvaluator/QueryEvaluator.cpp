@@ -5,7 +5,7 @@ QueryEvaluator::QueryEvaluator(PKB* p) {
 	pkb = p;
 }
 
-std::list<std::string> QueryEvaluator::evaluate(std::vector<ParamNode*> rVec, std::vector<QueryPart*> qVec) {
+list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*> qVec) {
 	resultSynonyms = rVec;
 	queryParts = qVec;
 	hasResult = true;
@@ -40,7 +40,7 @@ std::list<std::string> QueryEvaluator::evaluate(std::vector<ParamNode*> rVec, st
 
 void QueryEvaluator::optimise() {
 	if(!resultSynonyms.empty()) {
-		for(std::vector<ParamNode*>::iterator i = resultSynonyms.begin(); i != resultSynonyms.end(); i++) {
+		for(vector<ParamNode*>::iterator i = resultSynonyms.begin(); i != resultSynonyms.end(); i++) {
 			synonymVec.push_back(new SynonymValues((**i).getParam()));
 		}
 
@@ -51,7 +51,7 @@ void QueryEvaluator::optimise() {
 		}
 	}
 	
-	for(std::vector<QueryPart*>::iterator i = queryParts.begin(); i != queryParts.end(); i++) {
+	for(vector<QueryPart*>::iterator i = queryParts.begin(); i != queryParts.end(); i++) {
 		QueryType queryType = (**i).getType();
 		ParamNode* left = (**i).getLeftParam();
 		ParamNode* right = (**i).getRightParam();
@@ -86,7 +86,7 @@ void QueryEvaluator::sortQueryParts() {
 	int currSize = 0;
 
 	while(currSize < initSize) {
-		for(std::vector<QueryPart*>::iterator i = queryParts.begin(); i != queryParts.end(); i++) {
+		for(vector<QueryPart*>::iterator i = queryParts.begin(); i != queryParts.end(); i++) {
 			initSize = queryParts.size();
 			QueryType queryType = (**i).getType();
 			ParamNode* left = (**i).getLeftParam();
@@ -120,7 +120,7 @@ void QueryEvaluator::sortQueryParts() {
 					i--;
 				}
 				else if(existsInSynVec(right->getParam())) {
-					if(queryType == follows || queryType == parent || queryType == calls || queryType == next || queryType == with) {
+					if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
 						queryWithOneResult.insert(queryWithOneResult.begin(), *i);
 					}
 					else {
@@ -132,7 +132,7 @@ void QueryEvaluator::sortQueryParts() {
 				}
 			}
 			else if((right->getType() == integer || right->getType() == expression) && existsInSynVec(left->getParam())) {
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == next || queryType == with) {
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
 					queryWithOneResult.insert(queryWithOneResult.begin(), *i);
 				}
 				else {
@@ -147,7 +147,7 @@ void QueryEvaluator::sortQueryParts() {
 					synonymVec.push_back(new SynonymValues(right->getParam()));
 				}
 
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == next || queryType == with) {
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
 					queryWithTwoResults.insert(queryWithTwoResults.begin(), *i);
 				}
 				else {
@@ -160,7 +160,7 @@ void QueryEvaluator::sortQueryParts() {
 			else if(existsInSynVec(right->getParam())) {
 				synonymVec.push_back(new SynonymValues(left->getParam()));
 
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == next || queryType == with) {
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
 					queryWithTwoResults.insert(queryWithTwoResults.begin(), *i);
 				}
 				else {
@@ -176,8 +176,8 @@ void QueryEvaluator::sortQueryParts() {
 	}
 }
 
-bool QueryEvaluator::existsInSynVec(std::string name) {
-	for(std::vector<SynonymValues*>::iterator i = synonymVec.begin(); i != synonymVec.end(); i++) {
+bool QueryEvaluator::existsInSynVec(string name) {
+	for(vector<SynonymValues*>::iterator i = synonymVec.begin(); i != synonymVec.end(); i++) {
 		if(name == (**i).getName()) {
 			return true;
 		}
@@ -186,8 +186,8 @@ bool QueryEvaluator::existsInSynVec(std::string name) {
 }
 
 void QueryEvaluator::evalQueryWithNoResult() {
-	for(std::vector<QueryPart*>::iterator i = queryWithNoResult.begin(); i != queryWithNoResult.end(); i++) {
-		std::vector<std::pair<std::string, std::string>> result = getResult(*i);
+	for(vector<QueryPart*>::iterator i = queryWithNoResult.begin(); i != queryWithNoResult.end(); i++) {
+		vector<pair<string, string>> result = getResult(*i);
 
 		if(result.empty()) {
 			hasResult = false;
@@ -197,8 +197,8 @@ void QueryEvaluator::evalQueryWithNoResult() {
 }
 
 void QueryEvaluator::evalQueryWithOneResult() {
-	for(std::vector<QueryPart*>::iterator i = queryWithOneResult.begin(); i != queryWithOneResult.end(); i++) {
-		std::vector<std::pair<std::string, std::string>> result = getResult(*i);
+	for(vector<QueryPart*>::iterator i = queryWithOneResult.begin(); i != queryWithOneResult.end(); i++) {
+		vector<pair<string, string>> result = getResult(*i);
 
 		if(result.empty()) {
 			hasResult = false;
@@ -215,8 +215,8 @@ void QueryEvaluator::evalQueryWithOneResult() {
 }
 
 void QueryEvaluator::evalQueryWithTwoResults() {
-	for(std::vector<QueryPart*>::iterator i = queryWithTwoResults.begin(); i != queryWithTwoResults.end(); i++) {
-		std::vector<std::pair<std::string, std::string>> result = getResult(*i);
+	for(vector<QueryPart*>::iterator i = queryWithTwoResults.begin(); i != queryWithTwoResults.end(); i++) {
+		vector<pair<string, string>> result = getResult(*i);
 		
 		if(result.empty()) {
 			hasResult = false;
@@ -227,7 +227,7 @@ void QueryEvaluator::evalQueryWithTwoResults() {
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResult(QueryPart* qp) {
+vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	if(qp->getType() == with) {
 		return evalWithQuery(qp);
 	}
@@ -261,116 +261,116 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResult(Query
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
+vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
-	std::vector<std::pair<std::string, std::string>> result;
+	vector<pair<string, string>> result;
 
 	if(left->getType() == integer) {
-		std::vector<Node*> nodes = pkb->getNodes(right->getParam());
+		vector<Node*> nodes = pkb->getNodes(right->getType());
 
-		for(std::vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+		for(vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
 			if((**i).getLine() == left->getParam()) {
-				std::pair<std::string, std::string> pair;
-				pair.first = "";
-				pair.second = left->getParam();
-				result.push_back(pair);
+				pair<string, string> p;
+				p.first = "";
+				p.second = left->getParam();
+				result.push_back(p);
 				break;
 			}
 		}
 	}
 	else if(left->getType() == expression) {
-		std::vector<Node*> nodes = pkb->getNodes(right->getParam());
+		vector<Node*> nodes = pkb->getNodes(right->getType());
 
-		for(std::vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-			std::string string;
+		for(vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+			string value;
 
-			string = (**i).getValue();
+			value = (**i).getValue();
 
-			if(string == left->getParam()) {
+			if(value == left->getParam()) {
 				if(right->getType() == call) {
-					string = (**i).getLine();
+					value = (**i).getLine();
 				}
 
-				std::pair<std::string, std::string> pair;
-				pair.first = "";
-				pair.second = string;
-				result.push_back(pair);
+				pair<string, string> p;
+				p.first = "";
+				p.second = value;
+				result.push_back(p);
 				break;
 			}
 		}
 	}
 	else if(right->getType() == integer) {
-		std::vector<Node*> nodes = pkb->getNodes(left->getParam());
+		vector<Node*> nodes = pkb->getNodes(left->getType());
 
-		for(std::vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+		for(vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
 			if((**i).getLine() == right->getParam()) {
-				std::pair<std::string, std::string> pair;
-				pair.first = right->getParam();
-				pair.second = "";
-				result.push_back(pair);
+				pair<string, string> p;
+				p.first = right->getParam();
+				p.second = "";
+				result.push_back(p);
 				break;
 			}
 		}
 	}
 	else if(right->getType() == expression) {
-		std::vector<Node*> nodes = pkb->getNodes(left->getParam());
+		vector<Node*> nodes = pkb->getNodes(left->getType());
 
-		for(std::vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-			std::string string;
+		for(vector<Node*>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+			string value;
 
-			string = (**i).getValue();
+			value = (**i).getValue();
 
-			if(string == right->getParam()) {
+			if(value == right->getParam()) {
 				if(left->getType() == call) {
-					string = (**i).getLine();
+					value = (**i).getLine();
 				}
 
-				std::pair<std::string, std::string> pair;
-				pair.first = string;
-				pair.second = "";
-				result.push_back(pair);
+				pair<string, string> p;
+				p.first = value;
+				p.second = "";
+				result.push_back(p);
 				break;
 			}
 		}
 	}
 	else{
-		std::vector<Node*> leftNodes = pkb->getNodes(left->getType());
-		std::vector<Node*> rightNodes = pkb->getNodes(right->getType());
+		vector<Node*> leftNodes = pkb->getNodes(left->getType());
+		vector<Node*> rightNodes = pkb->getNodes(right->getType());
 
 		if(left->getAttrType() == stringType) {
-			for(std::vector<Node*>::iterator i = leftNodes.begin(); i != leftNodes.end(); i++) {
-				for(std::vector<Node*>::iterator j = rightNodes.begin(); j != rightNodes.end(); j++) {
+			for(vector<Node*>::iterator i = leftNodes.begin(); i != leftNodes.end(); i++) {
+				for(vector<Node*>::iterator j = rightNodes.begin(); j != rightNodes.end(); j++) {
 					if((**i).getValue() == (**j).getValue()) {
-						std::pair<std::string, std::string> pair;
+						pair<string, string> p;
 
 						if(left->getType() == call) {
-							pair.first = (**i).getLine();
+							p.first = (**i).getLine();
 						}
 						else {
-							pair.first = (**i).getValue();
+							p.first = (**i).getValue();
 						}
 
 						if(right->getType() == call) {
-							pair.second = (**i).getLine();
+							p.second = (**i).getLine();
 						}
 						else {
-							pair.second = (**i).getValue();
+							p.second = (**i).getValue();
 						}
 
-						result.push_back(pair);
+						result.push_back(p);
 					}
 				}
 			}
 		}
 		else {
-			for(std::vector<Node*>::iterator i = leftNodes.begin(); i != leftNodes.end(); i++) {
-				for(std::vector<Node*>::iterator j = rightNodes.begin(); j != rightNodes.end(); j++) {
+			for(vector<Node*>::iterator i = leftNodes.begin(); i != leftNodes.end(); i++) {
+				for(vector<Node*>::iterator j = rightNodes.begin(); j != rightNodes.end(); j++) {
 					if((**i).getLine() == (**j).getLine()) {
-						std::pair<std::string, std::string> pair;
-						pair.first = (**i).getLine();
-						pair.second = (**i).getLine();
-						result.push_back(pair);
+						pair<string, string> p;
+						p.first = (**i).getLine();
+						p.second = (**i).getLine();
+						result.push_back(p);
 					}
 				}
 			}
@@ -380,7 +380,7 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::evalWithQuery(Q
 	return result;
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPKB(QueryType type, std::string left, std::string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -398,21 +398,21 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPK
 			return pkb->getCalls(left, right);
 		case callsStar	:
 			return pkb->getCallsStar(left, right);
-/*		case next		:
+/*		case nxt		:
 			return pkb->getNext(left, right);
-		case nextStar	:
+		case nxtStar	:
 			return pkb->getNextStar(left, right);
 		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
 			return pkb->getAffectsStar(left, right);*/
 		default			:
-			std::vector<std::pair<std::string, std::string>> empty;
+			vector<pair<string, string>> empty;
 			return empty;
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPKB(QueryType type, std::string left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -430,21 +430,21 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPK
 			return pkb->getCalls(left, right);
 		case callsStar	:
 			return pkb->getCallsStar(left, right);
-/*		case next		:
+/*		case nxt		:
 			return pkb->getNext(left, right);
-		case nextStar	:
+		case nxtStar	:
 			return pkb->getNextStar(left, right);
 		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
 			return pkb->getAffectsStar(left, right);*/
 		default			:
-			std::vector<std::pair<std::string, std::string>> empty;
+			vector<pair<string, string>> empty;
 			return empty;
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, std::string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -462,21 +462,21 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPK
 			return pkb->getCalls(left, right);
 		case callsStar	:
 			return pkb->getCallsStar(left, right);
-/*		case next		:
+/*		case nxt		:
 			return pkb->getNext(left, right);
-		case nextStar	:
+		case nxtStar	:
 			return pkb->getNextStar(left, right);
 		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
 			return pkb->getAffectsStar(left, right);*/
 		default			:
-			std::vector<std::pair<std::string, std::string>> empty;
+			vector<pair<string, string>> empty;
 			return empty;
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -494,29 +494,29 @@ std::vector<std::pair<std::string, std::string>> QueryEvaluator::getResultFromPK
 			return pkb->getCalls(left, right);
 		case callsStar	:
 			return pkb->getCallsStar(left, right);
-/*		case next		:
+/*		case nxt		:
 			return pkb->getNext(left, right);
-		case nextStar	:
+		case nxtStar	:
 			return pkb->getNextStar(left, right);
 		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
 			return pkb->getAffectsStar(left, right);*/
 		default			:
-			std::vector<std::pair<std::string, std::string>> empty;
+			vector<pair<string, string>> empty;
 			return empty;
 	}
 }
 
-void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vector<std::pair<std::string, std::string>> vec) {
+void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	if(lNode != NULL && rNode != NULL) {
 		SynonymValues* leftSyn = getSynVal(lNode->getParam());
 		SynonymValues* rightSyn = getSynVal(rNode->getParam());
-		std::set<std::string> leftVal = leftSyn->getValues();
-		std::set<std::string> rightVal = rightSyn->getValues();
+		set<string> leftVal = leftSyn->getValues();
+		set<string> rightVal = rightSyn->getValues();
 
 		if(!leftVal.empty()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+			for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 				if(leftVal.find(i->first) == leftVal.end()) {
 					vec.erase(i);
 					i--;
@@ -525,7 +525,7 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 		}
 
 		if(!rightVal.empty()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+			for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 				if(rightVal.find(i->second) == rightVal.end()) {
 					vec.erase(i);
 					i--;
@@ -538,10 +538,10 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 			return;
 		}
 
-		std::set<std::string> newLeftVal;
-		std::set<std::string> newRightVal;
+		set<string> newLeftVal;
+		set<string> newRightVal;
 
-		for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+		for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 			newLeftVal.insert(i->first);
 			newRightVal.insert(i->second);
 		}
@@ -566,13 +566,13 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 			return;
 		}
 		
-		std::vector<std::pair<std::string, std::string>> tuples;
-		std::pair<std::string, std::string> pair;
-		pair.first = leftSyn->getName();
-		pair.second = rightSyn->getName();
-		tuples.push_back(pair);
+		vector<pair<string, string>> tuples;
+		pair<string, string> p;
+		p.first = leftSyn->getName();
+		p.second = rightSyn->getName();
+		tuples.push_back(p);
 
-		for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+		for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 			tuples.push_back(*i);
 		}
 
@@ -580,10 +580,10 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 	}
 	else if(lNode != NULL) {
 		SynonymValues* leftSyn = getSynVal(lNode->getParam());
-		std::set<std::string> leftVal = leftSyn->getValues();
+		set<string> leftVal = leftSyn->getValues();
 
 		if(!leftVal.empty()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+			for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 				if(leftVal.find(i->first) == leftVal.end()) {
 					vec.erase(i);
 					i--;
@@ -596,9 +596,9 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 			return;
 		}
 
-		std::set<std::string> newLeftVal;
+		set<string> newLeftVal;
 
-		for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+		for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 			newLeftVal.insert(i->first);
 		}
 
@@ -612,10 +612,10 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 	}
 	else {
 		SynonymValues* rightSyn = getSynVal(rNode->getParam());
-		std::set<std::string> rightVal = rightSyn->getValues();
+		set<string> rightVal = rightSyn->getValues();
 
 		if(!rightVal.empty()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+			for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 				if(rightVal.find(i->second) == rightVal.end()) {
 					vec.erase(i);
 					i--;
@@ -628,9 +628,9 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 			return;
 		}
 
-		std::set<std::string> newRightVal;
+		set<string> newRightVal;
 
-		for(std::vector<std::pair<std::string, std::string>>::iterator i = vec.begin(); i != vec.end(); i++) {
+		for(vector<pair<string, string>>::iterator i = vec.begin(); i != vec.end(); i++) {
 			newRightVal.insert(i->second);
 		}
 
@@ -645,13 +645,13 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, std::vecto
 }
 
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
-	std::set<std::string> valSet = synVal->getValues();
+	set<string> valSet = synVal->getValues();
 
-	for(std::vector<std::vector<std::pair<std::string, std::string>>*>::iterator i = resultTuples.begin(); i != resultTuples.end(); i++) {
-		int initSize = (**i).size();
+	for(vector<vector<pair<string, string>>*>::iterator i = resultTuples.begin(); i != resultTuples.end(); i++) {
+		unsigned int initSize = (**i).size();
 
 		if((**i).begin()->first == synVal->getName()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
+			for(vector<pair<string, string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
 				if(valSet.find(j->first) == valSet.end()) {
 					(**i).erase(j);
 					j--;
@@ -664,9 +664,9 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 			}
 
 			if((**i).size() < initSize) {
-				std::set<std::string> rightVal;
+				set<string> rightVal;
 
-				for(std::vector<std::pair<std::string, std::string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
+				for(vector<pair<string, string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
 					rightVal.insert(j->second);
 				}
 
@@ -676,7 +676,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 			}
 		}
 		else if((**i).begin()->second == synVal->getName()) {
-			for(std::vector<std::pair<std::string, std::string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
+			for(vector<pair<string, string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
 				if(valSet.find(j->second) == valSet.end()) {
 					(**i).erase(j);
 					j--;
@@ -689,9 +689,9 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 			}
 
 			if((**i).size() < initSize) {
-				std::set<std::string> leftVal;
+				set<string> leftVal;
 
-				for(std::vector<std::pair<std::string, std::string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
+				for(vector<pair<string, string>>::iterator j = (**i).begin() + 1; j != (**i).end(); j++) {
 					leftVal.insert(j->first);
 				}
 
@@ -721,33 +721,33 @@ void QueryEvaluator::evalFinalResult() {
 	}
 }
 
-void QueryEvaluator::formFinalResult(std::string s, int index) {
+void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	ParamNode* node = resultSynonyms[index];
 	SynonymValues* synVal = getSynVal(node->getParam());
-	std::set<std::string> valSet = synVal->getValues();
+	set<string> valSet = synVal->getValues();
 	index++;
 
 	if(valSet.empty()) {
-		std::vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
+		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
 
-		for(std::vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
+		for(vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
 			if((node->getType() == call && node->getAttrType() == stringType) || node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
-				for(std::vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
+				for(vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
 					valSet.insert((**i).getValue());
 				}
 			}
 			else {
-				for(std::vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
+				for(vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
 					valSet.insert((**i).getLine());
 				}
 			}
 		}
 	}
 	else if(resultSynonyms[index]->getType() == call && resultSynonyms[index]->getAttrType() == stringType) {
-		std::vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
+		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
 
-		for(std::vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
-			std::string stmtLine = (**i).getLine();
+		for(vector<Node*>::iterator i = result.begin(); i != result.end(); i++) {
+			string stmtLine = (**i).getLine();
 
 			if(valSet.find(stmtLine) != valSet.end()) {
 				valSet.insert((**i).getValue());
@@ -756,8 +756,8 @@ void QueryEvaluator::formFinalResult(std::string s, int index) {
 		}
 	}
 
-	for(std::set<std::string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
-		std::string singleResult = s;
+	for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+		string singleResult = s;
 		singleResult.append(*i);
 		singleResult.append(" ");
 
@@ -770,9 +770,9 @@ void QueryEvaluator::formFinalResult(std::string s, int index) {
 	}
 }
 
-SynonymValues* QueryEvaluator::getSynVal(std::string name) {
+SynonymValues* QueryEvaluator::getSynVal(string name) {
 
-	for(std::vector<SynonymValues*>::iterator i = synonymVec.begin(); i != synonymVec.end(); i++) {
+	for(vector<SynonymValues*>::iterator i = synonymVec.begin(); i != synonymVec.end(); i++) {
 		if(name == (**i).getName()) {
 			return *i;
 		}

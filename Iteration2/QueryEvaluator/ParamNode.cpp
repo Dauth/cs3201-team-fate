@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ParamNode.h"
 
-ParamNode::ParamNode(SyntType type, AttrType aType, std::string p) {
+ParamNode::ParamNode(SyntType type, AttrType aType, string p) {
 	syntType = type;
 	attrType = aType;
 	param = p;
@@ -15,6 +15,6 @@ AttrType ParamNode::getAttrType() {
 	return attrType;
 }
 
-std::string ParamNode::getParam() {
+string ParamNode::getParam() {
 	return param;
 }

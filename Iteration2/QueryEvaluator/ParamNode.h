@@ -4,16 +4,18 @@
 #include "stdafx.h"
 #include "AttrType.h"
 
+using namespace std;
+
 class ParamNode {
 	SyntType syntType;
 	AttrType attrType;
-	std::string param;
+	string param;
 
 public:
-	ParamNode(SyntType, AttrType, std::string);
+	ParamNode(SyntType, AttrType, string);
 	SyntType getType();
 	AttrType getAttrType();
-	std::string getParam();
+	string getParam();
 };
 
 #endif
