@@ -99,6 +99,16 @@ public:
 	vector<pair<string, string>> getCallsStar(SyntType, string);
 	vector<pair<string, string>> getCallsStar(string, SyntType);
 	vector<pair<string, string>> getCallsStar(string, string);
+
+	vector<pair<string, string>> getNext(SyntType, SyntType);
+	vector<pair<string, string>> getNext(SyntType, string);
+	vector<pair<string, string>> getNext(string, SyntType);
+	vector<pair<string, string>> getNext(string, string);
+
+	vector<pair<string, string>> getNextStar(SyntType, SyntType);
+	vector<pair<string, string>> getNextStar(SyntType, string);
+	vector<pair<string, string>> getNextStar(string, SyntType);
+	vector<pair<string, string>> getNextStar(string, string);
 	
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);

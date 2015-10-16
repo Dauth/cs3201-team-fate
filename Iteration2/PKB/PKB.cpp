@@ -968,6 +968,158 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 	return results;
 }
 
+vector<pair<string, string>> PKB::getNext(SyntType s1, SyntType s2){
+	return cfg.getAllPairs();
+}
+
+vector<pair<string, string>> PKB::getNext(SyntType s1, string sNum2){
+	vector<pair<string, string>> nextList;
+	vector<CFGNode*> prevList = statementTable.getStatement(sNum2)->getCfgNode()->getPrevNode();
+	for(unsigned i = 0; i < prevList.size(); i++){
+		Node* temp = prevList.at(i)->getStatement();
+		pair<string, string> nextPair (temp->getLine(),sNum2);
+		nextList.push_back(nextPair);
+	}
+
+	return nextList;
+}
+
+vector<pair<string, string>> PKB::getNext(string sNum1, SyntType s2){
+	vector<pair<string, string>> nextList;
+	Node* temp = statementTable.getStatement(sNum1);
+	if(temp->getType() == whileLoop || temp->getType() == ifelse){
+		CFGNode* nextCFG1 = temp->getCfgNode()->getNextNode();
+		CFGNode* nextCFG2 = temp->getCfgNode()->getExNextNode();
+		if(nextCFG1){
+			Node* next = nextCFG1->getStatement();
+			pair<string, string> pair1 (sNum1, next->getLine());
+			nextList.push_back(pair1);
+		}
+
+		if(nextCFG2){
+			Node* next = nextCFG2->getStatement();
+			pair<string, string> pair2 (sNum1, next->getLine());
+			nextList.push_back(pair2);
+		}
+	}
+	else{
+		CFGNode* nextCFG = temp->getCfgNode()->getNextNode();
+		if(nextCFG){
+			Node* next = nextCFG->getStatement();
+			pair<string, string> pair (sNum1, next->getLine());
+			nextList.push_back(pair);
+		}
+	}
+	
+	return nextList;
+}
+
+vector<pair<string, string>> PKB::getNext(string sNum1, string sNum2){
+	vector<pair<string, string>> nextList;
+	Node* temp = statementTable.getStatement(sNum1);
+	if(temp->getType() == whileLoop || temp->getType() == ifelse){
+		Node* next1 = temp->getCfgNode()->getNextNode()->getStatement();
+		Node* next2 = temp->getCfgNode()->getExNextNode()->getStatement();
+		if ( next1->getLine() == sNum2){
+			pair<string, string> pair1 (sNum1, next1->getLine());
+			nextList.push_back(pair1);
+		}
+		if( next2->getLine() == sNum2){
+			pair<string, string> pair2 (sNum1, next2->getLine());
+			nextList.push_back(pair2);
+		}
+	}
+	else{
+		Node* next = temp->getCfgNode()->getNextNode()->getStatement();
+		if ( next->getLine() == sNum2){
+			pair<string, string> pair (sNum1, next->getLine());
+			nextList.push_back(pair);
+		}
+	}
+	
+	return nextList;
+}
+
+vector<pair<string, string>> PKB::getNextStar(SyntType s1, SyntType s2){
+	vector<pair<string, string>> results;
+	for(int i = 1; i <= statementTable.getStatementCount(statement);i++){
+		ostringstream oss ;
+		oss << i;
+		string lineNum = oss.str();
+		vector<pair<string, string>> temp = getNextStar(lineNum,statement);
+		results.insert(results.end(),temp.begin(),temp.end());
+	}
+
+	return results;
+}
+vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> temp = getNextStar(statement,statement);
+	for(int i = 0; i < temp.size(); i++){
+		if(temp[i].second == num2 ) {
+			results.push_back(temp[i]);
+		}
+	}
+
+	return results;
+}
+vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> parents = getParentsStar(statement,num1);
+	
+	for(int i = parents.size()-1; i >= 0; i-- ){
+		Node* parent = statementTable.getStatement(parents[i].first);
+		if( parent->getType() == whileLoop){
+			pair<string, string> nextPair (num1,parent->getLine());
+			results.push_back(nextPair);
+			vector<pair<string, string>> childrens = getParentsStar(parent->getLine(),statement);
+
+			for( int j = 0; j < childrens.size(); j++){
+				pair<string, string> nextPair (num1,childrens[j].second);
+				results.push_back(nextPair);
+			}
+			break; //after the first whileLoop parent found, no need to proceed further
+		}
+	}
+
+	vector<pair<string, string>> follows = getFollowsStar(num1,statement);
+	vector<pair<string, string>> temp;
+
+	for(int i = 0 ; i < parents.size(); i++){
+		vector<pair<string, string>> tempFollows = getFollowsStar(parents[i].first,statement);
+		vector<pair<string, string>> tempWhile = getFollowsStar(parents[i].first,whileLoop);
+		vector<pair<string, string>> tempIf = getFollowsStar(parents[i].first,ifelse);
+		follows.insert(follows.end(),tempFollows.begin(),tempFollows.end());
+		temp.insert(temp.end(),tempWhile.begin(),tempWhile.end());
+		temp.insert(temp.end(),tempIf.begin(),tempIf.end());
+	}
+
+	for(int i = 0; i < temp.size(); i++){
+		vector<pair<string,string>> childrens = getParentsStar(temp[i].second,statement);
+		follows.insert(follows.end(),childrens.begin(),childrens.end());
+	}
+	
+	for(int i = 0; i < follows.size(); i++){
+		pair<string, string> nextPair (num1, follows[i].second);
+		results.push_back(nextPair);
+	}
+
+	return results;
+}
+vector<pair<string, string>> PKB::getNextStar(string num1, string num2){
+	vector<pair<string, string>> results;
+	vector<pair<string, string>> nextStar = getNextStar(num1,statement);
+	for( int i = 0; i < nextStar.size(); i++){
+		if(nextStar[i].second == num2){
+			pair<string, string> nextPair (num1,num2);
+			results.push_back(nextPair);
+			break;
+		}
+	}
+
+	return results;
+}
+
 int PKB::compare(Node* p,Node* q){
    if(p == NULL && q == NULL){
 	   return 1;
