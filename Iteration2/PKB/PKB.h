@@ -12,6 +12,7 @@
 #include "StatementTable.h"
 #include "CallsTable.h"
 #include "ExpressionTree.h"
+#include "CFG.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ class PKB {
 	StatementTable statementTable;
 	CallsTable callsTable;
 	vector<Node*> constants;
+	CFG cfg;
 
 	int LIST_INDEX_OFFSET;
 	void is_digit(string);

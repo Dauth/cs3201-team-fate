@@ -2,7 +2,8 @@
 #include "PKB.h"
 #include <iostream>
 #include <sstream>
-#include "ExpressionTree.h";
+#include "ExpressionTree.h"
+#include "CFGNode.h"
 
 using namespace std;
 
