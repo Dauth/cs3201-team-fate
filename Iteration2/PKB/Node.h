@@ -2,9 +2,8 @@
 #define NODE_H
 
 #include "stdafx.h"
-#include "CFGNode.h"
 
-class Variable;
+class CFGNode;
 
 class Node {
 	SyntType syntType; // type of node
@@ -18,7 +17,6 @@ class Node {
 	Node* thirdChild;
 	std::map<int, Node*> stmtLst;
 	std::map<Node*, int> indexLst;
-	Variable* var;
 	CFGNode* cfgNode;
 
 	
@@ -39,7 +37,6 @@ public:
 	CFGNode* getCfgNode();
 	std::map<int, Node*> getStmtLst();
 	std::map<Node*, int> getIndexLst();
-	Variable* getVariable();
 	
 	void setRoot(Node*);
 	void setExpParent(Node*);
@@ -48,7 +45,6 @@ public:
 	void setRightChild(Node*);
 	void setThirdChild(Node*);
 	void addStmt(Node*);
-	void setVar(Variable*);
 	void setCfgNode(CFGNode*);
 
 	void debug();

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Node.h"
-#include "Variable.h"
+#include "CFGNode.h"
 
 Node::Node (SyntType st, std::string l, std::string v) {
 	syntType = st;
@@ -12,7 +12,6 @@ Node::Node (SyntType st, std::string l, std::string v) {
 	root = nullptr;
 	parent = nullptr;
 	expParent = nullptr;
-	var = nullptr;
 }
 
 Node::Node (SyntType st, std::string v) {
@@ -78,11 +77,6 @@ std::map<Node*, int> Node::getIndexLst() {
 	return indexLst;
 }
 
-
-Variable* Node::getVariable() {
-	return var;
-}
-
 CFGNode* Node::getCfgNode(){
 	return cfgNode;
 }
@@ -118,10 +112,6 @@ void Node::addStmt(Node* node) {
 	indexLst[node] = stmtLst.size() + 1;
 	stmtLst[stmtLst.size() + 1] = node; //magic number!!
 	node->setParent(this);
-}
-
-void Node::setVar(Variable* v) {
-	var = v;
 }
 
 void Node::setCfgNode(CFGNode* cfg){

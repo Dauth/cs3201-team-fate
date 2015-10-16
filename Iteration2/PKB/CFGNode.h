@@ -2,7 +2,8 @@
 #define CFGNODE_H
 
 #include "stdafx.h"
-#include "Node.h"
+
+class Node;
  
 class CFGNode{
 	Node* statement;

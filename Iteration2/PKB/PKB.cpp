@@ -13,7 +13,7 @@ PKB::PKB(ExpressionTree* _et) {
 
 vector<Node*> PKB::getNodes(SyntType st) {
 	if(st == variable) {
-		return variableTable.getVariableNodes();
+		return variableTable.getNodes();
 	} else if(st == constant) {
 		return constants;
 	}else if(st == procedure) {
@@ -22,10 +22,6 @@ vector<Node*> PKB::getNodes(SyntType st) {
 		statementTable.getStatements(statement);
 	}
 	return statementTable.getStatements(st);
-}
-
-Variable* PKB::getVariable(string varName) {
-	return variableTable.getOrCreateVariable(varName);
 }
 
 int PKB::getCount(SyntType st) {
@@ -45,11 +41,7 @@ Node* PKB::createNode(SyntType st, int line, string value,
 	ostringstream oss;
 	oss << line;
 	Node* node = new Node(st, oss.str(), value);
-	if (st == variable) {
-		Variable* var = variableTable.getOrCreateVariable(value);
-		variableTable.addNode(value, node);
-		node->setVar(var);
-	} else if (st == constant) {
+	if (st == constant) {
 		constants.push_back(node);
 	}
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {
@@ -75,6 +67,7 @@ Node* PKB::createNode(SyntType st, int line, string value,
 		handleCalls(procedure, node);
 	}
 	if (st == variable) {
+		variableTable.addNode(node);
 		handleInheritance(procedure, node, modifiedBy, usedBy);
 	}
 	return node;
@@ -121,11 +114,8 @@ void PKB::handleCalls(Node* callingProc, Node* node) {
 void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
 	modifiesTable.addModifies(modifiedBy, node->getValue());
 	modifiesTable.addModifies(procedure, node->getValue());
-	variableTable.addModifiedBy(node->getVariable()->getName(), modifiedBy);
-	variableTable.addModifiedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
 		modifiesTable.addModifies(parent, node->getValue());
-		variableTable.addModifiedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
 			parent = grandParent;
@@ -138,11 +128,8 @@ void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* 
 void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
 	usesTable.addUses(usedBy, node->getValue());
 	usesTable.addUses(procedure, node->getValue());
-	variableTable.addUsedBy(node->getVariable()->getName(), usedBy);
-	variableTable.addUsedBy(node->getVariable()->getName(), procedure);
 	while (parent != nullptr) {
 		usesTable.addUses(parent, node->getValue());
-		variableTable.addUsedBy(node->getVariable()->getName(), parent);
 		Node* grandParent = parent->getParent()->getParent();
 		if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
 			parent = grandParent;
@@ -852,7 +839,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 		}
 		else{
 			for (unsigned int i = 0 ; i < whileList.size() ; i++){
-				if (whileList.at(i)->getLeftChild()->getVariable()->getName().compare(left) == 0){
+				if (whileList.at(i)->getLeftChild()->getValue().compare(left) == 0){
 					pair<string, string> stmtPair ( whileList[i]->getLine(), whileList[i]->getLeftChild()->getValue() );
 					results.push_back(stmtPair);
 				}
@@ -868,7 +855,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 		}
 		else{
 			for (unsigned int i = 0 ; i < ifList.size() ; i++){
-				if (ifList.at(i)->getLeftChild()->getVariable()->getName().compare(left) == 0){
+				if (ifList.at(i)->getLeftChild()->getValue().compare(left) == 0){
 					pair<string, string> stmtPair ( ifList[i]->getLine(), ifList[i]->getLeftChild()->getValue() );
 					results.push_back(stmtPair);
 				}
@@ -887,16 +874,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 				}
 			}
 			else{
-				Variable* var = getVariable(left);
-				vector<Node*> assignList  = var->getModifiedBy();
-				for(unsigned int i = 0 ; i < assignList.size() ; i++){
-					if(assignList.at(i)->getType() == assignment){
-						pair<string, string> stmtPair ( assignList[i]->getLine(), assignList[i]->getLeftChild()->getValue() );
-						results.push_back(stmtPair);
-					}
-				}
-
-				return results;
+				results = getModifies(assignment, left);
 			}
 		}
 		//if the right side is not an expression (eg. variable or constant)
@@ -911,7 +889,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 						results.push_back(stmtPair);
 					}
 					else{
-						if(parentNode->getLeftChild()->getVariable()->getName() == left){
+						if(parentNode->getLeftChild()->getValue() == left){
 							pair<string, string> stmtPair ( parentNode->getLine(), parentNode->getLeftChild()->getValue() );
 							results.push_back(stmtPair);
 						}
@@ -929,7 +907,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 					results.push_back(stmtPair);
 				}
 				else{
-					if(parentNode->getLeftChild()->getVariable()->getName() == left){
+					if(parentNode->getLeftChild()->getValue() == left){
 						pair<string, string> stmtPair ( parentNode->getLine(), parentNode->getLeftChild()->getValue() );
 						results.push_back(stmtPair);
 					}
@@ -963,7 +941,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 							results.push_back(stmtPair);
 						}
 						else{
-							if(parentNode->getLeftChild()->getVariable()->getName() == left){
+							if(parentNode->getLeftChild()->getValue() == left){
 								pair<string, string> stmtPair ( parentNode->getLine(), parentNode->getLeftChild()->getValue() );
 								results.push_back(stmtPair);
 							}
@@ -977,7 +955,7 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 						results.push_back(stmtPair);
 					}
 					else{
-						if(parentNode->getLeftChild()->getVariable()->getName() == left){
+						if(parentNode->getLeftChild()->getValue() == left){
 							pair<string, string> stmtPair ( parentNode->getLine(), parentNode->getLeftChild()->getValue() );
 							results.push_back(stmtPair);
 						}

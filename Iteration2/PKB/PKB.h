@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "Node.h"
-#include "Variable.h"
 #include "VariableTable.h"
 #include "UsesTable.h"
 #include "ParentsTable.h"
@@ -59,7 +58,6 @@ public:
 	void addStatement(Node*, Node*);
 
 	vector<Node*> getNodes(SyntType);
-	Variable* getVariable(string);
 	int getCount(SyntType);
 
 	vector<pair<string, string>> getModifies(SyntType, SyntType);

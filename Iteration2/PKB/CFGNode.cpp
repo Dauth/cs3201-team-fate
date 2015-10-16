@@ -2,8 +2,6 @@
 #include "CFGNode.h"
 #include "Node.h"
 
-
-
 CFGNode::CFGNode (Node* node){
 	statement = node;
 }

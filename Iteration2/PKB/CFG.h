@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CFGNode.h"
+#include "Node.h"
 
 using namespace std;
 
@@ -19,10 +20,11 @@ class CFG{
 	void createAndAddPair(CFGNode*,CFGNode*);
 
 public:
+	CFG();
 	void buildCFG(Node*);
 	vector<pair<string, string>> getAllPairs();
 	CFGNode* getCFG(std::string);
-}
+};
 
 
 #endif

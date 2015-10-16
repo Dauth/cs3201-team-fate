@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "CFG.h"
-#include "PKB.h"
-
-using namespace std;
 
 CFG::CFG(){
 }
@@ -13,7 +10,7 @@ CFGNode* CFG::getCFG(std::string name){
 			return cfgs.at(i);
 		}
 	}
-	return ;
+	return nullptr;
 }
 void CFG::buildCFG(Node* node){
 	CFGNode* startNode = new CFGNode(node);

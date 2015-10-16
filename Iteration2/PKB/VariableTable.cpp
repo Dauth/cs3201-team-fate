@@ -5,22 +5,17 @@ VariableTable::VariableTable () {
 
 }
 
-Variable* VariableTable::getOrCreateVariable(std::string varName) {
+std::vector<Node*> VariableTable::getNode(std::string varName) {
 	if ( table.find(varName) == table.end() ) {
-		Variable* var = new Variable(varName);
-		table[varName] = var;
-		return var;
-	} else {
-		return table[varName];
+		return std::vector<Node*>();
 	}
+	return table[varName];
 }
 
-std::vector<Node*> VariableTable::getVariableNodes() {
+std::vector<Node*> VariableTable::getNodes() {
 	std::vector<Node*> nodes;
-	for(std::unordered_map<std::string, Variable*>::iterator it = table.begin(); it != table.end(); ++it) {
-		Variable* var = it->second;
-		std::vector<Node*> varNodes = var->getNodes();
-		nodes.insert(nodes.end(), varNodes.begin(), varNodes.end());
+	for(std::unordered_map<std::string, std::vector<Node*>>::iterator it = table.begin(); it != table.end(); ++it) {
+		nodes.push_back(it->second.at(0));
 	}
 	return nodes;
 }
@@ -33,31 +28,12 @@ int VariableTable::getVariableCount(std::string varName) {
 	if ( table.find(varName) == table.end() ) {
 		return 0;
 	}
-	return table[varName]->getNodeCount();
+	return table[varName].size();
 }
 
-std::vector<Node*> VariableTable::getModifiedBy(std::string varName) {
-	if ( table.find(varName) == table.end() ) {
-		return std::vector<Node*>();
+void VariableTable::addNode(Node* node) {
+	if ( table.find(node->getValue()) == table.end() ) {
+		table[node->getValue()] = std::vector<Node*>();
 	}
-	return table[varName]->getModifiedBy();
-}
-
-std::vector<Node*> VariableTable::getUsedBy(std::string varName) {
-	if ( table.find(varName) == table.end() ) {
-		return std::vector<Node*>();
-	}
-	return table[varName]->getUsedBy();
-}
-
-void VariableTable::addModifiedBy(std::string varName, Node* node) {
-	table[varName]->addModifiedBy(node);
-}
-
-void VariableTable::addUsedBy(std::string varName, Node* node) {
-	table[varName]->addUsedBy(node);
-}
-
-void VariableTable::addNode(std::string varName, Node* node) {
-	table[varName]->addNode(node);
+	table[node->getValue()].push_back(node);
 }
