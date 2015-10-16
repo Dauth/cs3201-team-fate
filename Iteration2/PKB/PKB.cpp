@@ -1084,7 +1084,13 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	}
 
 	vector<pair<string, string>> follows = getFollowsStar(num1,statement);
-	vector<pair<string, string>> temp;
+	vector<pair<string, string>> followsWhile = getFollowsStar(num1, whileLoop);
+	vector<pair<string, string>> followsIf = getFollowsStar(num1, ifelse);
+
+	vector<pair<string, string>> temp; //store all while and if
+
+	temp.insert(temp.end(),followsWhile.begin(),followsWhile.end());
+	temp.insert(temp.end(),followsIf.begin(),followsIf.end());
 
 	for(int i = 0 ; i < parents.size(); i++){
 		vector<pair<string, string>> tempFollows = getFollowsStar(parents[i].first,statement);
