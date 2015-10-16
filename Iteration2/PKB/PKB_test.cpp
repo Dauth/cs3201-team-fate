@@ -180,6 +180,41 @@ void PKB_test::setupTestData() {
 	// 15. call test3 }
 	Node* s15 = pkb->createNode(call, 15, "test3", nullptr, nullptr, nullptr, proc2);
 	test2StmtLst->addStmt(s15);
+
+	// 16. if q {
+	Node* s16 = pkb->createNode(ifelse, 16, "", nullptr, nullptr, nullptr, proc);
+	Node* s16v_q = pkb->createNode(variable, 16, "q", s16, nullptr, nullptr, proc);
+	Node* ifStmtLst = pkb->createNode(statementList, 16);
+	Node* elseStmtLst = pkb->createNode(statementList, 16);
+	s16->setLeftChild(s16v_q);
+	s16->setRightChild(ifStmtLst);
+	s16->setThirdChild(elseStmtLst);
+	test2StmtLst->addStmt(s16);
+
+	// 17.     w = e + r }
+	Node* s17 = pkb->createNode(assignment, 17, "", nullptr, nullptr, s16, proc);
+	Node* s17a = pkb->createNode(variable, 17, "w", nullptr, s17, s16, proc);
+	Node* s17v_e = pkb->createNode(variable, 17, "e", s17, nullptr, s16, proc);
+	Node* s17e_plus = pkb->createNode(expression, 17, "+", s17, nullptr, nullptr, proc);
+	Node* s17v_r = pkb->createNode(variable, 17, "r", s17, nullptr, s16, proc);
+	s17->setLeftChild(s17a);
+	s17->setRightChild(s17e_plus);
+	s17e_plus->setLeftChild(s17v_e);
+	s17e_plus->setRightChild(s17v_r);
+	ifStmtLst->addStmt(s17);
+
+	//     else {
+	// 18.     t = y + u }
+	Node* s18 = pkb->createNode(assignment, 18, "", nullptr, nullptr, s16, proc);
+	Node* s18a = pkb->createNode(variable, 18, "t", nullptr, s18, s16, proc);
+	Node* s18v_t = pkb->createNode(variable, 18, "y", s18, nullptr, s16, proc);
+	Node* s18e_plus = pkb->createNode(expression, 18, "+", s18, nullptr, nullptr, proc);
+	Node* s18v_u = pkb->createNode(variable, 18, "u", s18, nullptr, s16, proc);
+	s18->setLeftChild(s18a);
+	s18->setRightChild(s18e_plus);
+	s18e_plus->setLeftChild(s18v_t);
+	s18e_plus->setRightChild(s18v_u);
+	elseStmtLst->addStmt(s18);
 }
 
 void PKB_test::printResults(vector<pair<string, string>> results) {
@@ -191,8 +226,6 @@ void PKB_test::printResults(vector<pair<string, string>> results) {
 
 void PKB_test::runTests() {
 
-	//vector<string> r = sp->readSourceFile("C:\\Users\\user\\Documents\\simple.txt");
-	//vector<Node*> a = sp->execute(r);
 	// procedure test {
 	// 1. y = 3
 	// 2. x = 4
@@ -210,7 +243,12 @@ void PKB_test::runTests() {
 	// 13. f = g + h }
 	// procedure test2 {
 	// 14. i = j + k
-	// 14. call test3 }
+	// 15. call test3 }
+	// 16. if q {
+	// 17.     w = e + r }
+	//     else {
+	// 18.     t = y + u }
+
 	
 	setupTestData();
 
@@ -253,11 +291,17 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Uses(statement, variable) \n"; 
 	printResults(pkb->getUses(statement, variable));
 
+	cout << "\n\nQuery is follows(statement, assignment) \n"; 
+	printResults(pkb->getFollows(statement, assignment));
+
 	cout << "\n\nQuery is follows(\"2\", statement) \n"; 
 	printResults(pkb->getFollows("2", statement));
 
 	cout << "\n\nQuery is follows(whileLoop, statement) \n"; 
 	printResults(pkb->getFollows(whileLoop, statement));
+
+	cout << "\n\nQuery is follows(statement, ifelse) \n"; 
+	printResults(pkb->getFollows(statement, ifelse));
 
 	cout << "\n\nQuery is follows(statement, \"6\") \n"; 
 	printResults(pkb->getFollows(statement, "6"));
@@ -273,9 +317,6 @@ void PKB_test::runTests() {
 
 	cout << "\n\nQuery is Follows*(\"1\", \"3\") \n"; 
 	printResults(pkb->getFollowsStar("1", "3"));
-
-	cout << "\n\nQuery is follows(statement, assignment) \n"; 
-	printResults(pkb->getFollows(statement, assignment));
 
 	cout << "\n\nQuery is Parents(\"4\", statement) \n"; 
 	printResults(pkb->getParents("4", statement));
@@ -333,6 +374,9 @@ void PKB_test::runTests() {
 
 	cout << "\n\nQuery is Pattern whileLoop(variable, \"_\") \n"; 
 	printResults(pkb->searchWithPattern(whileLoop, "_", "_"));
+
+	cout << "\n\nQuery is Pattern if(variable, \"_\") \n"; 
+	printResults(pkb->searchWithPattern(ifelse, "_", "_"));
 
 	cout << "\n\nQuery is Pattern assignment(variable, \"_x_\") \n"; 
 	printResults(pkb->searchWithPattern(assignment, "_", "_x_"));
