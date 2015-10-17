@@ -386,7 +386,7 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Pattern assignment(\"f\", \"_\") \n"; 
 	printResults(pkb->searchWithPattern(assignment, "f", "_"));
 
-	cout << "\n\nQuery is next*(\"7\", progline) \n"; 
+	cout << "\n\nQuery is next*(\"1\", progline) \n"; 
 	printResults(pkb->getNextStar("1", progline));
 
 	cin.get();
