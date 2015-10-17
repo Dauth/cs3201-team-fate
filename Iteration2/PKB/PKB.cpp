@@ -1087,7 +1087,7 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 		Node* pNode = statementTable.getStatement(parent[0].first);
 		while( parent.size() != 0 ){
 			Node* tempPNode = statementTable.getStatement(parent[0].first);
-			if ( tempPNode->getType() == whileLoop && tempPNode->getLine() <= pNode->getLine()){
+			if ( tempPNode->getType() == whileLoop && atoi(tempPNode->getLine().c_str()) <= atoi(pNode->getLine().c_str())){
 				pNode = tempPNode;
 			}
 			parent = getParents(statement,tempPNode->getLine());
