@@ -1091,6 +1091,13 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	}
 
 	vector<pair<string, string>> follows = getFollowsStar(num1,statement);
+	
+	vector<pair<string, string>> childrens = getParentsStar(num1,statement);
+	follows.insert(follows.end(),childrens.begin(),childrens.end());
+
+	vector<pair<string, string>> childrensWhile = getParentsStar(num1,whileLoop);
+	vector<pair<string, string>> childrensIf = getParentsStar(num1, ifelse);
+
 	vector<pair<string, string>> followsWhile = getFollowsStar(num1, whileLoop);
 	vector<pair<string, string>> followsIf = getFollowsStar(num1, ifelse);
 
@@ -1098,6 +1105,9 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 
 	temp.insert(temp.end(),followsWhile.begin(),followsWhile.end());
 	temp.insert(temp.end(),followsIf.begin(),followsIf.end());
+
+	temp.insert(temp.end(),childrensWhile.begin(),childrensWhile.end());
+	temp.insert(temp.end(),childrensIf.begin(),childrensIf.end());
 
 	for(int i = 0 ; i < parents.size(); i++){
 		vector<pair<string, string>> tempFollows = getFollowsStar(parents[i].first,statement);
@@ -1117,7 +1127,8 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 		pair<string, string> nextPair (num1, follows[i].second);
 		results.push_back(nextPair);
 	}
-
+	set<pair<string, string>> s (results.begin(),results.end());
+	results.assign(s.begin(),s.end());
 	return results;
 }
 vector<pair<string, string>> PKB::getNextStar(string num1, string num2){
