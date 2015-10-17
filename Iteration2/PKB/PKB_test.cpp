@@ -146,7 +146,7 @@ void PKB_test::setupTestData() {
 	// procedure test3 {
 	Node* proc3 = pkb->createProcedure("test3");
 	Node* test3StmtLst = pkb->createNode(statementList, 0);
-	proc->setLeftChild(test3StmtLst);
+	proc3->setLeftChild(test3StmtLst);
 
 	// 13. f = g + h }
 	Node* s13 = pkb->createNode(assignment, 13, "", nullptr, nullptr, nullptr, proc3);
@@ -163,7 +163,7 @@ void PKB_test::setupTestData() {
 	// procedure test2 {
 	Node* proc2 = pkb->createProcedure("test2");
 	Node* test2StmtLst = pkb->createNode(statementList, 0);
-	proc->setLeftChild(test2StmtLst);
+	proc2->setLeftChild(test2StmtLst);
 
 	// 14. i = j + k 
 	Node* s14 = pkb->createNode(assignment, 14, "", nullptr, nullptr, nullptr, proc2);
@@ -215,6 +215,8 @@ void PKB_test::setupTestData() {
 	s18e_plus->setLeftChild(s18v_t);
 	s18e_plus->setRightChild(s18v_u);
 	elseStmtLst->addStmt(s18);
+
+	pkb->buildCFG();
 }
 
 void PKB_test::printResults(vector<pair<string, string>> results) {
@@ -383,6 +385,9 @@ void PKB_test::runTests() {
 
 	cout << "\n\nQuery is Pattern assignment(\"f\", \"_\") \n"; 
 	printResults(pkb->searchWithPattern(assignment, "f", "_"));
+
+	cout << "\n\nQuery is next*(\"7\", progline) \n"; 
+	printResults(pkb->getNextStar("1", progline));
 
 	cin.get();
 }

@@ -51,11 +51,14 @@ class PKB {
 public:
 	PKB(ExpressionTree*);
 
+
 	Node* createProcedure(string);
 	//type, statement/prog num, constant/procname/expr, UsedBy, ModifiedBy
 	// Parent, ProcedureNode
 	Node* createNode(SyntType, int, string="",
 		Node* usedBy=nullptr, Node* modifiedBy=nullptr, Node* parent=nullptr, Node* procedure=nullptr); 
+
+	void buildCFG();
 
 	void addStatement(Node*, Node*);
 

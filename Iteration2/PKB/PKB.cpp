@@ -12,6 +12,13 @@ PKB::PKB(ExpressionTree* _et) {
 	et = _et;
 }
 
+void PKB::buildCFG() {
+	vector<Node*> procedures = procedureTable.getAllProcedures();
+	for (int i=0; i<procedures.size(); i++) {
+		cfg.buildCFG(procedures.at(i));
+	}
+}
+
 vector<Node*> PKB::getNodes(SyntType st) {
 	if(st == variable) {
 		return variableTable.getNodes();

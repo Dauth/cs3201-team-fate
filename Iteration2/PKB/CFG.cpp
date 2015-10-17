@@ -13,9 +13,11 @@ CFGNode* CFG::getCFG(std::string name){
 	return nullptr;
 }
 void CFG::buildCFG(Node* node){
+	cout << "building cfg " << node->getValue() << "\n";
 	CFGNode* startNode = new CFGNode(node);
 	CFGNode* currentNode = startNode;
-	std::map<int,Node*> temp = node->getStmtLst();
+	Node* stmtLst = node->getLeftChild();
+	std::map<int,Node*> temp = stmtLst->getStmtLst();
 	for(unsigned i = 1; i <= temp.size();i++){
 		CFGNode* nextNode = createNext(temp.at(i));
 
