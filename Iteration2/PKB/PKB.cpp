@@ -23,7 +23,11 @@ vector<Node*> PKB::getNodes(SyntType st) {
 	if(st == variable) {
 		return variableTable.getNodes();
 	} else if(st == constant) {
-		return constants;
+		std::vector<Node*> nodes;
+		for(std::unordered_map<string, vector<Node*>>::iterator it = constants.begin(); it != constants.end(); ++it) {
+			nodes.push_back(it->second.at(0));
+		}
+		return nodes;;
 	}else if(st == procedure) {
 		return procedureTable.getAllProcedures();
 	} else if (st == progline) {
@@ -50,7 +54,10 @@ Node* PKB::createNode(SyntType st, int line, string value,
 	oss << line;
 	Node* node = new Node(st, oss.str(), value);
 	if (st == constant) {
-		constants.push_back(node);
+		if ( constants.find(node->getValue()) == constants.end() ) {
+			constants[node->getValue()] = vector<Node*>();
+		}
+		constants[node->getValue()].push_back(node);
 	}
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {
 		statementTable.addStatement(oss.str(), node);

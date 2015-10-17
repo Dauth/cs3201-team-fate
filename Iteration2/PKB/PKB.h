@@ -29,7 +29,7 @@ class PKB {
 	ProcedureTable procedureTable;
 	StatementTable statementTable;
 	CallsTable callsTable;
-	vector<Node*> constants;
+	unordered_map<string, vector<Node*>> constants;
 	CFG cfg;
 
 	int LIST_INDEX_OFFSET;
