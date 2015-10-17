@@ -1075,7 +1075,7 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParentsStar(statement,num1);
 	
-	for(int i = parents.size()-1; i >= 0; i-- ){
+	for(int i = 0; i < parents.size(); i++ ){
 		Node* parent = statementTable.getStatement(parents[i].first);
 		if( parent->getType() == whileLoop){
 			pair<string, string> nextPair (num1,parent->getLine());

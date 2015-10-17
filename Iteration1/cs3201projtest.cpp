@@ -16,7 +16,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	QueryEvaluator* qe = new QueryEvaluator(&pkb, &de);
 	QueryParser qp = QueryParser();
 
-	std::vector<std::string> r = sp.readSourceFile("C:\\Users\\Kamui\\Documents\\Visual Studio 2010\\Projects\\cs3201projtest\\simpletest.txt");
+	std::vector<std::string> r = sp.readSourceFile("C:\\Users\\sonclark\\Desktop\\simple.txt");
 	std::vector<Node*> a = sp.execute(r);
 
 	std::string input;
