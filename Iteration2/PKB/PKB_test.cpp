@@ -413,6 +413,7 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Next(\"9\", \"4\") \n"; 
 	printResults(pkb->getNext("9", "4"));
 	
+	cout << pkb->getNodes(progline).size();
 	cin.get();
 }
 

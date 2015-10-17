@@ -31,7 +31,7 @@ vector<Node*> PKB::getNodes(SyntType st) {
 	}else if(st == procedure) {
 		return procedureTable.getAllProcedures();
 	} else if (st == progline) {
-		statementTable.getStatements(statement);
+		return statementTable.getStatements(statement);
 	}
 	return statementTable.getStatements(st);
 }
