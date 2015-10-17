@@ -389,6 +389,30 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is next*(\"1\", progline) \n"; 
 	printResults(pkb->getNextStar("1", progline));
 
+	cout << "\n\nQuery is next*(\"1\", progline) \n"; 
+	printResults(pkb->getNextStar("1", progline));
+
+	cout << "\n\nQuery is next*(progline, \"6\") \n"; 
+	printResults(pkb->getNextStar(progline, "6"));
+
+	cout << "\n\nQuery is next*(progline, progline) \n"; 
+	printResults(pkb->getNextStar(progline, progline));
+
+	cout << "\n\nQuery is next*(\"15\", \"14\") \n"; 
+	printResults(pkb->getNextStar("15", "14"));
+
+	cout << "\n\nQuery is Next(\"4\", progline) \n"; 
+	printResults(pkb->getNext("4", progline));
+
+	cout << "\n\nQuery is Next(progline, progline) \n"; 
+	printResults(pkb->getNext(progline, progline));
+
+	cout << "\n\nQuery is Next(progline, \"4\") \n"; 
+	printResults(pkb->getNext(progline, "4"));
+
+	cout << "\n\nQuery is Next(\"9\", \"4\") \n"; 
+	printResults(pkb->getNext("9", "4"));
+	
 	cin.get();
 }
 
