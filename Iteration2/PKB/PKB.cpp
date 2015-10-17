@@ -1073,23 +1073,30 @@ vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
 }
 vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	vector<pair<string, string>> results;
-	vector<pair<string, string>> parents = getParentsStar(statement,num1);
 	
-	for(int i = 0; i < parents.size(); i++ ){
-		Node* parent = statementTable.getStatement(parents[i].first);
-		if( parent->getType() == whileLoop){
-			pair<string, string> nextPair (num1,parent->getLine());
+	vector<pair<string, string>> parent = getParents(statement,num1);
+	
+	if( parent.size() != 0 ){
+		Node* pNode = statementTable.getStatement(parent[0].first);
+		while( parent.size() != 0 ){
+			Node* tempPNode = statementTable.getStatement(parent[0].first);
+			if ( tempPNode->getType() == whileLoop && tempPNode->getLine() <= pNode->getLine()){
+				pNode = tempPNode;
+			}
+			parent = getParents(statement,tempPNode->getLine());
+		}
+		if ( pNode->getType() == whileLoop){
+			pair<string, string> nextPair (num1,pNode->getLine());
 			results.push_back(nextPair);
-			vector<pair<string, string>> childrens = getParentsStar(parent->getLine(),statement);
-
+			vector<pair<string, string>> childrens = getParentsStar(pNode->getLine(),statement);
 			for( int j = 0; j < childrens.size(); j++){
 				pair<string, string> nextPair (num1,childrens[j].second);
 				results.push_back(nextPair);
 			}
-			break; //after the first whileLoop parent found, no need to proceed further
 		}
 	}
 
+	vector<pair<string, string>> parents = getParentsStar(statement,num1);
 	vector<pair<string, string>> follows = getFollowsStar(num1,statement);
 	
 	vector<pair<string, string>> childrens = getParentsStar(num1,statement);
