@@ -245,7 +245,7 @@ void PKB_test::runTests() {
 	// 13. f = g + h }
 	// procedure test2 {
 	// 14. i = j + k
-	// 15. call test3 }
+	// 15. call test3 
 	// 16. if q {
 	// 17.     w = e + r }
 	//     else {

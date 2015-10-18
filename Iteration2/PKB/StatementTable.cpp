@@ -32,7 +32,7 @@ std::vector<Node*> StatementTable::getStatements(SyntType st) {
     for(std::map<std::string, Node*>::iterator it = table.begin(); it != table.end(); ++it) {
 		Node* node = it->second;
 		SyntType nt = node->getType();
-		if (nt == st || (st == statement && (nt == assignment || nt == ifelse || nt == whileLoop))) {
+		if (nt == st || (st == statement && (node->isStatement()))) {
 			nodes.push_back(node);
 		}
     }
