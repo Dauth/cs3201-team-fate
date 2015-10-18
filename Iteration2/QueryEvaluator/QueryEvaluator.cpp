@@ -16,9 +16,9 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	synonymVec.clear();
 	resultTuples.clear();
 	finalResult.clear();
+	optimise();
 
 	if(!queryParts.empty()) {
-		optimise();
 
 		if(hasResult) {
 			evalQueryWithNoResult();
@@ -31,10 +31,9 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 		if(hasResult) {
 			evalQueryWithTwoResults();
 		}
-		
-		evalFinalResult();
 	}
-
+		
+	evalFinalResult();
 	return finalResult;
 }
 
