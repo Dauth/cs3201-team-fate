@@ -160,10 +160,12 @@ void PKB::handleParent(Node* child, Node* parent) {
 
 
 vector<pair<string, string>> PKB::getModifies(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
 	return modifiesTable.getByLeftKey(st1);
 }
 
 vector<pair<string, string>> PKB::getModifies(SyntType st, string varName) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> temp1 = modifiesTable.getByLeftKey(st);
 	vector<pair<string, string>> temp2 = modifiesTable.getByRightKey(varName);
@@ -226,10 +228,12 @@ vector<pair<string, string>> PKB::getModifies(string ident, string varName) {
 }
 
 vector<pair<string, string>> PKB::getUses(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
 	return usesTable.getByLeftKey(st1);
 }
 
 vector<pair<string, string>> PKB::getUses(SyntType st, string varName) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> temp1 = usesTable.getByLeftKey(st);
 	vector<pair<string, string>> temp2 = usesTable.getByRightKey(varName);
@@ -292,6 +296,8 @@ vector<pair<string, string>> PKB::getUses(string ident, string varName) {
 }
 
 vector<pair<string, string>> PKB::getParents(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
+	if (st2 == progline) st2 = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st1);
 	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st2);
@@ -319,6 +325,7 @@ vector<pair<string, string>> PKB::getParents(SyntType st1, SyntType st2) {
 }
 
 vector<pair<string, string>> PKB::getParents(SyntType st, string stmtNum) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st);
 	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(stmtNum);
@@ -345,6 +352,7 @@ vector<pair<string, string>> PKB::getParents(SyntType st, string stmtNum) {
 }
 
 vector<pair<string, string>> PKB::getParents(string stmtNum, SyntType st) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(stmtNum);
 	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st);
@@ -396,6 +404,8 @@ vector<pair<string, string>> PKB::getParents(string stmtNum1, string stmtNum2) {
 }
 
 vector<pair<string, string>> PKB::getParentsStar(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
+	if (st2 == progline) st2 = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(st1, statement);
 	if (parents.empty()){
@@ -425,6 +435,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st1, SyntType st2) {
 }
 
 vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(st, stmtNum);
 	if (parents.empty()){
@@ -452,6 +463,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
 }
 
 vector<pair<string, string>> PKB::getParentsStar(string stmtNum, SyntType st) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(stmtNum, statement);
 	if (parents.empty()){
@@ -509,6 +521,8 @@ vector<pair<string, string>> PKB::getParentsStar(string stmtNum1, string stmtNum
 
 
 vector<pair<string, string>> PKB::getFollows(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
+	if (st2 == progline) st2 = statement;
 	vector<pair<string, string>> results;
 	vector<Node*> temp1 = statementTable.getStatements(st1);
 	vector<Node*> temp2 = statementTable.getStatements(st2);
@@ -540,6 +554,7 @@ vector<pair<string, string>> PKB::getFollows(SyntType st1, SyntType st2) {
 }
 
 vector<pair<string, string>> PKB::getFollows(SyntType st, string stmtNum) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	Node* rightNode = statementTable.getStatement(stmtNum);
 	if (rightNode != nullptr) {
@@ -553,6 +568,7 @@ vector<pair<string, string>> PKB::getFollows(SyntType st, string stmtNum) {
 }
 
 vector<pair<string, string>> PKB::getFollows(string stmtNum, SyntType st) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	Node* leftNode = statementTable.getStatement(stmtNum);
 	if (leftNode != nullptr) {
@@ -579,6 +595,8 @@ vector<pair<string, string>> PKB::getFollows(string stmtNum1, string stmtNum2) {
 }
 
 vector<pair<string, string>> PKB::getFollowsStar(SyntType st1, SyntType st2) {
+	if (st1 == progline) st1 = statement;
+	if (st2 == progline) st2 = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(st1, statement);
 	if (follows.empty()){
@@ -606,6 +624,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st1, SyntType st2) {
 }
 
 vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(st, stmtNum);
 	if (follows.empty()){
@@ -633,6 +652,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
 }
 
 vector<pair<string, string>> PKB::getFollowsStar(string stmtNum, SyntType st) {
+	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(stmtNum, statement);
 	if (follows.empty()){
