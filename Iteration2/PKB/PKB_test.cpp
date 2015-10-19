@@ -182,8 +182,8 @@ void PKB_test::setupTestData() {
 	test2StmtLst->addStmt(s15);
 
 	// 16. if q {
-	Node* s16 = pkb->createNode(ifelse, 16, "", nullptr, nullptr, nullptr, proc);
-	Node* s16v_q = pkb->createNode(variable, 16, "q", s16, nullptr, nullptr, proc);
+	Node* s16 = pkb->createNode(ifelse, 16, "", nullptr, nullptr, nullptr, proc2);
+	Node* s16v_q = pkb->createNode(variable, 16, "q", s16, nullptr, nullptr, proc2);
 	Node* ifStmtLst = pkb->createNode(statementList, 16);
 	Node* elseStmtLst = pkb->createNode(statementList, 16);
 	s16->setLeftChild(s16v_q);
@@ -192,11 +192,11 @@ void PKB_test::setupTestData() {
 	test2StmtLst->addStmt(s16);
 
 	// 17.     w = e + r }
-	Node* s17 = pkb->createNode(assignment, 17, "", nullptr, nullptr, s16, proc);
-	Node* s17a = pkb->createNode(variable, 17, "w", nullptr, s17, s16, proc);
-	Node* s17v_e = pkb->createNode(variable, 17, "e", s17, nullptr, s16, proc);
-	Node* s17e_plus = pkb->createNode(expression, 17, "+", s17, nullptr, nullptr, proc);
-	Node* s17v_r = pkb->createNode(variable, 17, "r", s17, nullptr, s16, proc);
+	Node* s17 = pkb->createNode(assignment, 17, "", nullptr, nullptr, s16, proc2);
+	Node* s17a = pkb->createNode(variable, 17, "w", nullptr, s17, s16, proc2);
+	Node* s17v_e = pkb->createNode(variable, 17, "e", s17, nullptr, s16, proc2);
+	Node* s17e_plus = pkb->createNode(expression, 17, "+", s17, nullptr, nullptr, proc2);
+	Node* s17v_r = pkb->createNode(variable, 17, "r", s17, nullptr, s16, proc2);
 	s17->setLeftChild(s17a);
 	s17->setRightChild(s17e_plus);
 	s17e_plus->setLeftChild(s17v_e);
@@ -205,11 +205,11 @@ void PKB_test::setupTestData() {
 
 	//     else {
 	// 18.     t = y + u }
-	Node* s18 = pkb->createNode(assignment, 18, "", nullptr, nullptr, s16, proc);
-	Node* s18a = pkb->createNode(variable, 18, "t", nullptr, s18, s16, proc);
-	Node* s18v_t = pkb->createNode(variable, 18, "y", s18, nullptr, s16, proc);
-	Node* s18e_plus = pkb->createNode(expression, 18, "+", s18, nullptr, nullptr, proc);
-	Node* s18v_u = pkb->createNode(variable, 18, "u", s18, nullptr, s16, proc);
+	Node* s18 = pkb->createNode(assignment, 18, "", nullptr, nullptr, s16, proc2);
+	Node* s18a = pkb->createNode(variable, 18, "t", nullptr, s18, s16, proc2);
+	Node* s18v_t = pkb->createNode(variable, 18, "y", s18, nullptr, s16, proc2);
+	Node* s18e_plus = pkb->createNode(expression, 18, "+", s18, nullptr, nullptr, proc2);
+	Node* s18v_u = pkb->createNode(variable, 18, "u", s18, nullptr, s16, proc2);
 	s18->setLeftChild(s18a);
 	s18->setRightChild(s18e_plus);
 	s18e_plus->setLeftChild(s18v_t);
@@ -413,6 +413,12 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Next(\"9\", \"4\") \n"; 
 	printResults(pkb->getNext("9", "4"));
 	
+	cout << "\n\nQuery is Modifies(call, variable) \n"; 
+	printResults(pkb->getModifies(call, variable));
+
+	cout << "\n\nQuery is Uses(call, variable) \n"; 
+	printResults(pkb->getUses(call, variable));
+
 	cin.get();
 }
 

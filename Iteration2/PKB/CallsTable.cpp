@@ -26,6 +26,14 @@ vector<pair<string, string>> CallsTable::getAll() {
 	return vector<pair<string, string>> (allCalls.begin(), allCalls.end());
 }
 
+vector<string> CallsTable::getCallingStatement(string procName) {
+	if (callingStatement.find(procName) == callingStatement.end()) {
+		return vector<string>();
+	}
+	set<string> callingStatements = callingStatement[procName];
+	return vector<string> (callingStatements.begin(), callingStatements.end());
+}
+
  
 bool CallsTable::isCalled(string procName) {
 	if (rightKeyTable.find(procName) == rightKeyTable.end()) {
@@ -34,21 +42,26 @@ bool CallsTable::isCalled(string procName) {
 	return true;
 }
 
-void CallsTable::addCalls(Node* nodeLeft, string procName) {
+void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getValue();
-	string right = procName;
+	string right = nodeRight->getValue();
 	pair<string, string> calls ( left, right );
 
 	if ( leftKeyTable.find(left) == leftKeyTable.end() ) {
-		 set<pair<string, string>> nodes;
+	    set<pair<string, string>> nodes;
 		leftKeyTable[left] = nodes;
 	}
 	if ( rightKeyTable.find(right) == rightKeyTable.end() ) {
-		 set<pair<string, string>> nodes;
+		set<pair<string, string>> nodes;
 		rightKeyTable[right] = nodes;
+	}
+	if ( callingStatement.find(right) == callingStatement.end() ) {
+		set<string> nodes;
+		callingStatement[right] = nodes;
 	}
 
 	leftKeyTable[left].insert(calls);
 	rightKeyTable[right].insert(calls);
+	callingStatement[right].insert(nodeRight->getLine());
 	allCalls.insert(calls);
 }
