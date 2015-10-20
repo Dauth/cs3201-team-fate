@@ -17,7 +17,7 @@ class QueryEvaluator {
 	vector<QueryPart*> queryWithOneResult;
 	vector<QueryPart*> queryWithTwoResults;
 	vector<SynonymValues*> synonymVec;
-	vector<vector<pair<string, string>>*> resultTuples;
+	vector<vector<pair<string, string>>> resultTuples;
 	list<string> finalResult;
 
 	void optimise();
