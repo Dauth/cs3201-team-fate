@@ -27,6 +27,8 @@ bool invalidSuchThat;
 bool existClauses;
 bool validWith;
 bool existWith;
+bool synonymError;
+bool completeSelectStmt;
 
 //QueryTree* rootTree;
 Symbol* newSymbol;
@@ -76,7 +78,11 @@ vector<string> split(const char *str, char c = ' ')
 
 	return result;
 }
-
+void removeCharsFromString( string &str, char* charsToRemove ) {
+	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
+		str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
+	}
+}
 
 bool verifyCorrectParameters(SyntType currentSyn, string firstParam, string secondParam, string thirdParam)
 {
@@ -232,7 +238,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		{
 			leftSynt =  newSymbol->getSyntType(attrVariables[0]);
 			// 1aii. Check if leftHand's synonym is a statement, then check if leftHand attribute is stmt#
-			if (leftSynt == SyntType::statement || leftSynt == SyntType::assignment || leftSynt == SyntType::call || leftSynt == SyntType::whileLoop || leftSynt == SyntType::ifelse)
+			if (leftSynt == SyntType::statementList||leftSynt == SyntType::statement || leftSynt == SyntType::assignment || leftSynt == SyntType::call || leftSynt == SyntType::whileLoop || leftSynt == SyntType::ifelse)
 			{
 				// left hand pass
 				const char * leftHandChar = attrVariables[1].c_str();
@@ -248,7 +254,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				}
 			}
 			// 1aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
-			else if (leftSynt == SyntType::constant || leftSynt == SyntType::variable)
+			else if (leftSynt == SyntType::constant)
 			{
 				const char * leftHandChar = attrVariables[1].c_str();
 				if (strcmp(leftHandChar,"value") == 0)
@@ -261,6 +267,33 @@ bool isCorrectWithClause(string leftString, string rightString)
 				{
 					// fail (this statement has a dot(.) something else besides value)
 				}
+			}
+			else if (leftSynt == SyntType::procedure || leftSynt == SyntType::call)
+			{
+				const char * leftHandChar = attrVariables[1].c_str();
+				if (strcmp(leftHandChar, "procName") == 0)
+				{
+					leftAttr = AttrType::stringType;
+					leftValid = true;
+				}
+				else
+				{
+					// fail (this statement has a dot(.) something else besides procName
+				}
+			}
+			else if (leftSynt == SyntType::variable)
+			{				
+				const char * leftHandChar = attrVariables[1].c_str();
+				if (strcmp(leftHandChar, "varName") == 0)
+				{
+					leftAttr = AttrType::stringType;
+					leftValid = true;
+				}
+				else
+				{
+					// fail (this statement has a dot(.) something else besides procName
+				}
+
 			}
 		} 
 		else
@@ -280,6 +313,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 			// pass
 			leftAttr = AttrType::integerType;
 			leftValid = true;
+			leftSynt = SyntType::progline;
 		}
 		else 
 		{
@@ -292,6 +326,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		// pass and store type for comparison
 		leftAttr = AttrType::integerType;
 		leftValid = true;
+		leftSynt = SyntType::integer;
 	}
 	// 1d)
 	else if (regex_match(leftString,quotesIndent))
@@ -299,6 +334,8 @@ bool isCorrectWithClause(string leftString, string rightString)
 		// pass and store type for comparison
 		leftAttr = AttrType::stringType;
 		leftValid = true;
+		leftSynt = SyntType::expression;
+		removeCharsFromString(leftString, "\"");
 	}
 	// 1e) FAILS
 	else
@@ -319,7 +356,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		{
 			rightSynt =  newSymbol->getSyntType(attrVariables[0]);
 			// 2aii. Check if rightHand's synonym is a statement, then check if rightHand attribute is stmt#
-			if (rightSynt == SyntType::statement || rightSynt == SyntType::assignment || rightSynt == SyntType::call || rightSynt == SyntType::whileLoop || rightSynt == SyntType::ifelse)
+			if (rightSynt == SyntType::statementList||rightSynt == SyntType::statement || rightSynt == SyntType::assignment || rightSynt == SyntType::call || rightSynt == SyntType::whileLoop || rightSynt == SyntType::ifelse)
 			{
 				// right hand pass
 				const char * rightHandChar = attrVariables[1].c_str();
@@ -335,7 +372,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				}
 			}
 			// 2aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
-			else if (rightSynt == SyntType::constant || rightSynt == SyntType::variable)
+			else if (rightSynt == SyntType::constant)
 			{
 				const char * rightHandChar = attrVariables[1].c_str();
 				if (strcmp(rightHandChar,"value") == 0)
@@ -348,6 +385,33 @@ bool isCorrectWithClause(string leftString, string rightString)
 				{
 					// fail (this statement has a dot(.) something else besides value)
 				}
+			}
+			else if (rightSynt == SyntType::procedure || rightSynt == SyntType::call)
+			{
+				const char * rightHandChar = attrVariables[1].c_str();
+				if (strcmp(rightHandChar, "procName") == 0)
+				{
+					rightAttr = AttrType::stringType;
+					rightValid = true;
+				}
+				else
+				{
+					// fail (this statement has a dot(.) something else besides procName
+				}
+			}
+			else if (rightSynt == SyntType::variable)
+			{				
+				const char * rightHandChar = attrVariables[1].c_str();
+				if (strcmp(rightHandChar, "varName") == 0)
+				{
+					rightAttr = AttrType::stringType;
+					rightValid = true;
+				}
+				else
+				{
+					// fail (this statement has a dot(.) something else besides procName
+				}
+
 			}
 		} 
 		else
@@ -389,6 +453,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		rightAttr = AttrType::stringType;
 		rightValid = true;
 		rightSynt = SyntType::expression;
+		removeCharsFromString(rightString, "\"");
 	}
 	// 1e) FAILS
 	else
@@ -510,11 +575,7 @@ QueryType getType (char* queryType)
 }
 
 
-void removeCharsFromString( string &str, char* charsToRemove ) {
-	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
-		str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
-	}
-}
+
 
 
 
@@ -530,7 +591,7 @@ void ProcessEachToken(char *currentToken)
 		existClauses = true;
 		expectingThat = false;
 	}
-	else if (strcmp(currentToken,"with") == 0)
+	else if (strcmp(currentToken,"with") == 0 && (currToken == TOKEN::AND_END || currToken == TOKEN::RESULT_CL))
 	{
 		currToken = TOKEN::WITH_CL;
 		existWith = true;
@@ -578,7 +639,7 @@ void ProcessEachToken(char *currentToken)
 						previousToken = TOKEN::WITH_CL;
 					};
 				}
-				
+
 			}break;
 		case TOKEN::AND_END:
 			{
@@ -605,6 +666,7 @@ void ProcessEachToken(char *currentToken)
 			{  // assign a;
 				// Select a pattern a(_, _"x + 1"_)
 				patternExist = true;
+				patternPass = false;
 				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)(\,([^\\)]+|[^\,]+)\\))+)");
 
 				concatStmt.append(currentToken);
@@ -731,7 +793,7 @@ void ProcessEachToken(char *currentToken)
 		case TOKEN::RESULT_CL: 
 			{
 
-				regex tuple("<.+>");
+				regex tuple("<[^>]+>");
 				regex boolean("BOOLEAN");
 				// 
 				if (regex_match(currentToken,tuple))
@@ -766,7 +828,97 @@ void ProcessEachToken(char *currentToken)
 				{
 					resultBool = true;
 					concatStmt = "";
+					//qo.resultVec.push_back(new ParamNode());
 				}
+				else if (regex_match(currentToken,attrRef))
+				{
+					std::string currString = std::string(currentToken);
+					std::vector<char> writable(currString.begin(), currString.end());
+					writable.push_back('\0');
+					vector<string> attrVariables = split(&writable[0],'.');
+
+					SyntType currSynt = SyntType::synError;
+					AttrType currAttr = AttrType::integerType;
+
+					// 1ai. Check if leftHand's synonym exists and then get the SyntType
+					if(newSymbol->exists(attrVariables[0]))
+					{
+						currSynt =  newSymbol->getSyntType(attrVariables[0]);
+						// 1aii. Check if leftHand's synonym is a statement, then check if leftHand attribute is stmt#
+						if (currSynt == SyntType::statementList||currSynt == SyntType::statement || currSynt == SyntType::assignment || currSynt == SyntType::call || currSynt == SyntType::whileLoop || currSynt == SyntType::ifelse)
+						{
+							// left hand pass
+							const char * leftHandChar = attrVariables[1].c_str();
+							if (strcmp(leftHandChar,"stmt#") == 0)
+							{
+								// pass ( .stmt#) and set AttrType to integer
+								currAttr = AttrType::integerType;
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								qo.resultVec.push_back(newParamNode);
+							}
+							else
+							{
+								nonExistantSyn = true;
+								// fail (this statement has a dot(.) something else besides stmt#)
+							}
+						}
+						// 1aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
+						else if (currSynt == SyntType::constant)
+						{
+							const char * leftHandChar = attrVariables[1].c_str();
+							if (strcmp(leftHandChar,"value") == 0)
+							{
+								// pass ( .value) and set AttrType to integer
+								currAttr = AttrType::integerType;
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								qo.resultVec.push_back(newParamNode);
+							}
+							else
+							{
+								nonExistantSyn = true;
+								// fail (this statement has a dot(.) something else besides value)
+							}
+						}
+						else if (currSynt == SyntType::procedure || currSynt == SyntType::call)
+						{
+							const char * leftHandChar = attrVariables[1].c_str();
+							if (strcmp(leftHandChar, "procName") == 0)
+							{
+								currAttr = AttrType::stringType;
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								qo.resultVec.push_back(newParamNode);
+							}
+							else
+							{
+								nonExistantSyn = true;
+								// fail (this statement has a dot(.) something else besides procName
+							}
+						}
+						else if (currSynt == SyntType::variable)
+						{				
+							const char * leftHandChar = attrVariables[1].c_str();
+							if (strcmp(leftHandChar, "varName") == 0)
+							{
+								currAttr = AttrType::stringType;
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								qo.resultVec.push_back(newParamNode);
+							}
+							else
+							{
+								nonExistantSyn = true;
+								// fail (this statement has a dot(.) something else besides procName
+							}
+
+						}
+
+					} 
+					else
+					{
+						nonExistantSyn = true;
+						//Synonym does not exist in Symbol table, fail!
+					}
+
+				}// end of checking left hand for synonym.attributeName
 				else
 				{
 					if (!newSymbol->exists(currentToken)) 
@@ -777,20 +929,24 @@ void ProcessEachToken(char *currentToken)
 					} //TODO THROW ERROR because variable doesn't exist
 					else
 					{							
-							SyntType newSyntSymbol = newSymbol->getSyntType(currentToken);
-							if (newSyntSymbol != SyntType::synError)
-							{
-								ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),currentToken);
-								qo.resultVec.push_back(newResultSynonym);
-							}
+						SyntType newSyntSymbol = newSymbol->getSyntType(currentToken);
+						if (newSyntSymbol != SyntType::synError)
+						{
+							ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),currentToken);
+							qo.resultVec.push_back(newResultSynonym);
+						}
 					}
 				}
+
+
+				completeSelectStmt = true;
 			}break;
 
 		case TOKEN::SUCHTHAT_CL: 
 			{ // 
 				regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)\,([^\\)]+|[^\,]+)\\))");
 				suchThatQueryExist = true;
+				suchThatQueryPass = false;
 
 				concatStmt.append(currentToken);
 
@@ -882,7 +1038,7 @@ void ProcessEachToken(char *currentToken)
 
 void Match (char *c)
 {
-	regex re(" *(procedure|stmtLst|stmt|assign|call|while|if|variable|constant|prog_line) +([a-zA-Z])+(\\d|#)*( *, *[a-zA-Z]+(\\d|#)*)*");
+	regex re(" *(procedure|stmtLst|stmt|assign|call|while|if|variable|constant|prog_line) +([a-zA-Z])+(\\d|#)*( *, *[a-zA-Z]+(\\d|#)*)* *");
 	regex sel(" *Select *.*");
 
 	if (regex_match(c,re))
@@ -969,6 +1125,7 @@ void Match (char *c)
 	}
 	else
 	{
+		synonymError = true;
 		errorMsg += "Syntax error in synonym declaration!;\n";
 	}
 
@@ -981,6 +1138,8 @@ Query_Object QueryParser::getQueryObject(std::string i){
 	//string concatStmt = "";
 	//you need to reset the original global variable
 	concatStmt = "";
+	qo.queryVec.clear();
+	qo.resultVec.clear();
 
 	//rootTree = new QueryTree();
 	newSymbol = new Symbol();
@@ -997,6 +1156,8 @@ Query_Object QueryParser::getQueryObject(std::string i){
 	existClauses = false;
 	validWith = false;
 	existWith = false;
+	synonymError = false;
+	completeSelectStmt = false;
 
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
@@ -1015,35 +1176,31 @@ Query_Object QueryParser::getQueryObject(std::string i){
 			break;
 		}
 	}
-	if ((existWith && validWith == false)||nonQueryToken||tupleError||nonExistantSyn||(suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist)|| (existClauses && (!suchThatQueryExist && !patternExist)))
+	if (completeSelectStmt == false ||synonymError||(existWith && validWith == false)||nonQueryToken||tupleError||nonExistantSyn||(suchThatQueryPass == false && suchThatQueryExist) || (patternPass == false && patternExist)|| (existClauses && (!suchThatQueryExist && !patternExist)))
 	{
-		/*
-		qo.queryVec = NULL;
-		qo.resultVec = NULL;
-		*/
+		qo.isValid = false;
 		return qo;
 	}
 	else // means there were no errors
 	{
-		/*
-		qo.symbol = newSymbol;
-		qo.tree = rootTree;
-
-		qo.queryVec = NULL;
-		qo.resultVec = NULL;
-		*/
+		qo.isValid = true;
 		return qo;
 	}
 
 }
 
-/*
+
 int main ()
 {
-	string query;
-	getline (cin,query);
 	QueryParser qp;
-	Query_Object qs = qp.getQueryObject(query);
+	string query;
+	while (query!= "1")
+	{
+		getline (cin,query);
+
+		Query_Object qs = qp.getQueryObject(query);
+	}
 }
-*/
+
+
 
