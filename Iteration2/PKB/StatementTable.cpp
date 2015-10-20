@@ -34,6 +34,10 @@ std::vector<Node*> StatementTable::getStatements(SyntType st) {
 		SyntType nt = node->getType();
 		if (nt == st || (st == statement && (node->isStatement()))) {
 			nodes.push_back(node);
+		} else if (st == statementList) {
+			if(node->getParent()->getIndexLst()[node] == 1) {
+				nodes.push_back(node);
+			}
 		}
     }
 	return nodes;
