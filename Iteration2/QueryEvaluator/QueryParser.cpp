@@ -853,7 +853,7 @@ void ProcessEachToken(char *currentToken)
 							{
 								// pass ( .stmt#) and set AttrType to integer
 								currAttr = AttrType::integerType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -870,7 +870,7 @@ void ProcessEachToken(char *currentToken)
 							{
 								// pass ( .value) and set AttrType to integer
 								currAttr = AttrType::integerType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -885,7 +885,7 @@ void ProcessEachToken(char *currentToken)
 							if (strcmp(leftHandChar, "procName") == 0)
 							{
 								currAttr = AttrType::stringType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -900,7 +900,7 @@ void ProcessEachToken(char *currentToken)
 							if (strcmp(leftHandChar, "varName") == 0)
 							{
 								currAttr = AttrType::stringType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,leftHandChar);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -1189,7 +1189,7 @@ Query_Object QueryParser::getQueryObject(std::string i){
 
 }
 
-
+/*
 int main ()
 {
 	QueryParser qp;
@@ -1201,6 +1201,6 @@ int main ()
 		Query_Object qs = qp.getQueryObject(query);
 	}
 }
-
+*/
 
 
