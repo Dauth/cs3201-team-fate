@@ -8,8 +8,7 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 	SPA* spa = new SPA();
-	std::string file;
-	std::cin>>file;
+	std::string file = "C:\\Users\\user\\Documents\\simple3.txt";
 	spa->processSimpleSourceFile(file);
 	spa->startCommandLinePQLShell();
 }

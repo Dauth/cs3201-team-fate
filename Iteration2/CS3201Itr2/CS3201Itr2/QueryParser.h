@@ -7,7 +7,7 @@
 class QueryParser {
 
 public:
-	QueryParser();
+	QueryParser ();
 	Query_Object QueryParser::getQueryObject(std::string);
 };
 

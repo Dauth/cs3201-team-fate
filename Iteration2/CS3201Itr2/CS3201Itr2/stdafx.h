@@ -15,9 +15,9 @@
 #include <unordered_map>
 #include <set>
 #include <list>
+#include "SyntType.h"
 #include <utility>
 #include <ctype.h>
-#include "SyntType.h"
 
 
 // TODO: reference additional headers your program requires here

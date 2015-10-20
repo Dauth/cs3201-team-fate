@@ -29,7 +29,11 @@ void SPA::startCommandLinePQLShell() {
 	
 	while(input != "off") {
 		Query_Object qObj = qp->getQueryObject(input);
-		result = qe->evaluate(qObj.resultVec, qObj.queryVec);
+		if(qObj.isValid) {
+			result = qe->evaluate(qObj.resultVec, qObj.queryVec);
+		} else {
+			result = std::list<std::string>();
+		}
 		if(!result.empty()){
 			std::list<std::string>::iterator i = result.begin();
 			std::cout<<(*i);

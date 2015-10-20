@@ -93,17 +93,26 @@ void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* 
 		vector<pair<string, string>> calls = getCallsStar(procedure, procNode->getValue());
 		for (int i=0; i<calls.size(); i++) {
 			Node* callingProc = procedureTable.getProcedure(calls[i].first);
+			vector<string> callingStatements = callsTable.getCallingStatement(calls[i].second);
 			if (modifiedBy != nullptr) {
 				modifiesTable.addModifies(callingProc, node->getValue());
+				for (int j=0; j<callingStatements.size(); j++) {
+					Node* callsNode = statementTable.getStatement(callingStatements[j]);
+					modifiesTable.addModifies(callsNode, node->getValue());
+				}
 			} else if (usedBy != nullptr) {
 				usesTable.addUses(callingProc, node->getValue());
+				for (int j=0; j<callingStatements.size(); j++) {
+					Node* callsNode = statementTable.getStatement(callingStatements[j]);
+					usesTable.addUses(callsNode, node->getValue());
+				}
 			}
 		}
 	}
 }
 
 void PKB::handleCalls(Node* callingProc, Node* node) {
-	callsTable.addCalls(callingProc, node->getValue());
+	callsTable.addCalls(callingProc, node);
 	Node* targetProc = procedureTable.getProcedure(node->getValue());
 	if (targetProc != nullptr ) {
 		vector<pair<string, string>> calls = getCallsStar(targetProc->getValue(), procedure);;
@@ -114,13 +123,24 @@ void PKB::handleCalls(Node* callingProc, Node* node) {
 			string calledProc = calls[i].second;
 			vector<pair<string, string>> modifies = getModifies(calledProc, variable);
 			vector<pair<string, string>> uses = getUses(calledProc, variable);
+			vector<string> callingStatements = callsTable.getCallingStatement(calls[i].first);
 			for(int j=0; j<modifies.size(); j++) {
 				Node* proc = procedureTable.getProcedure(calls[i].first);
 				modifiesTable.addModifies(proc, modifies[j].second);
+				for (int k=0; k<callingStatements.size(); k++) {
+					Node* callsNode = statementTable.getStatement(callingStatements[k]);
+					modifiesTable.addModifies(callsNode, modifies[j].second);
+				}
+				modifiesTable.addModifies(node, modifies[j].second);
 			}
 			for(int j=0; j<uses.size(); j++) {
 				Node* proc = procedureTable.getProcedure(calls[i].first);
 				usesTable.addUses(proc, uses[j].second);
+				for (int k=0; k<callingStatements.size(); k++) {
+					Node* callsNode = statementTable.getStatement(callingStatements[k]);
+					usesTable.addUses(callsNode, uses[j].second);
+				}
+				usesTable.addUses(node, uses[j].second);
 			}
 		}
 	}

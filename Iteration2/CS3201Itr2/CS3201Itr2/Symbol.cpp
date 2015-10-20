@@ -19,6 +19,10 @@ std::vector<std::pair<std::string,SyntType>> Symbol::getQuery()
 {	
 	return symbolTable;
 }
+int Symbol::getSize()
+{
+	return symbolTable.max_size();
+}
 int Symbol::getIndex(std::string var)
 {
 	for(std::vector<std::pair<std::string,SyntType>>::iterator i = symbolTable.begin(); i != symbolTable.end(); i++)
