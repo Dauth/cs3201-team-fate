@@ -188,14 +188,14 @@ bool verifyCorrectParameters(QueryType queryClause,string firstParam, string sec
 			valid = true;
 		}
 	}
-	else if (queryClause == QueryType::next)
+	else if (queryClause == QueryType::nxt)
 	{
 		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
 		{
 			valid = true;
 		}
 	}
-	else if (queryClause == QueryType::nextStar)
+	else if (queryClause == QueryType::nxtStar)
 	{
 		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
 		{
@@ -553,11 +553,11 @@ QueryType getType (char* queryType)
 	}
 	else if (strcmp(queryType, "Next") == 0)
 	{
-		return QueryType::next;
+		return QueryType::nxt;
 	}
 	else if (strcmp(queryType, "Next*") == 0)
 	{
-		return QueryType::nextStar;
+		return QueryType::nxtStar;
 	}
 	else if (strcmp(queryType, "Affects") == 0)
 	{
