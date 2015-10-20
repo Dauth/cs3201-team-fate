@@ -466,7 +466,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
 		string left = parents[i].first;
 		string right = parents[i].second;
 		Node* stmtNode = statementTable.getStatement(left);
-		vector<pair<string, string>> indirectParents = getParentsStar(st, left);
+		vector<pair<string, string>> indirectParents = getParentsStar(statement, left);
 		for (int j=0; j<indirectParents.size(); j++) {
 			string indirectLeft = indirectParents[j].first;
 			Node* indirectStmtNode = statementTable.getStatement(indirectLeft);
@@ -655,7 +655,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
 		string left = follows[i].first;
 		string right = follows[i].second;
 		Node* stmtNode = statementTable.getStatement(left);
-		vector<pair<string, string>> indirectFollows = getFollowsStar(st, left);
+		vector<pair<string, string>> indirectFollows = getFollowsStar(statement, left);
 		for (int j=0; j<indirectFollows.size(); j++) {
 			string indirectLeft = indirectFollows[j].first;
 			Node* indirectStmtNode = statementTable.getStatement(indirectLeft);
