@@ -191,7 +191,8 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 
 			if(isSemiColon){
-				if(statementType == CALLSTM && !stmNameString.empty()){
+				if(statementType == CALLSTM){
+					catchMissingStmNameException(stmString, stmNameString, i);
 					expTree->catchInvalidNameException(stmNameString);
 					createCallNode(stmNameString, lineNumber, currentProcName, twinVector, i);
 					lineNumber += 1;
@@ -204,11 +205,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				}
 			}
 			if(cChar == OPENBRACE){
-				if(statementType >= 1 && statementType <= 3 && !stmNameString.empty()){	//when type is obtained, stmString is completed.
+				
+				if(statementType >= 1 && statementType <= 3){	//when type is obtained, stmString is completed.
+					catchMissingStmNameException(stmString, stmNameString, i);
 					bracesStack.push("{");
 					//fire event for while, proc and ifelse
 					expTree->catchInvalidNameException(stmNameString);
-					catchMissingStmNameException(stmString, stmNameString, i);
 					catchProcedureInceptionException(twinVector, i, statementType);
 					if(statementType == PROCEDURESTM && twinVector.empty()){
 						catchParamProcException(stmNameString, i);
