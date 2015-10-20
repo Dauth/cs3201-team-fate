@@ -574,13 +574,66 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 		set<string> leftVal = leftSyn->getValues();
 		set<string> rightVal = rightSyn->getValues();
 
+		for(unsigned int i = 0; i < resultTuples.size(); i++) {
+			if(resultTuples[i][0].first == lNode->getParam() && resultTuples[i][0].second == rNode->getParam()) {
+				for(unsigned int j = 0; j < vec.size(); j++) {
+					bool pairExists = false;
+
+					for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+						if(vec[j].first == resultTuples[i][k].first && vec[j].second == resultTuples[i][k].second) {
+							pairExists = true;
+							break;
+						}
+					}
+
+					if(!pairExists) {
+						vec.erase(vec.begin() + j);
+						j--;
+					}
+				}
+
+				resultTuples.erase(resultTuples.begin() + i);
+				break;
+			}
+			else if(resultTuples[i][0].first == rNode->getParam() && resultTuples[i][0].second == lNode->getParam()) {
+				for(unsigned int j = 0; j < vec.size(); j++) {
+					bool pairExists = false;
+
+					for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+						if(vec[j].first == resultTuples[i][k].second && vec[j].second == resultTuples[i][k].first) {
+							pairExists = true;
+							break;
+						}
+					}
+
+					if(!pairExists) {
+						vec.erase(vec.begin() + j);
+						j--;
+					}
+				}
+
+				resultTuples.erase(resultTuples.begin() + i);
+				break;
+			}
+		}
+
+		if(vec.empty()) {
+			hasResult = false;
+			return;
+		}
+
 		if(!leftVal.empty()) {
-			for(unsigned int i = 0; i != vec.size(); i++) {
+			for(unsigned int i = 0; i < vec.size(); i++) {
 				if(leftVal.find(vec[i].first) == leftVal.end()) {
 					vec.erase(vec.begin() + i);
 					i--;
 				}
 			}
+		}
+
+		if(vec.empty()) {
+			hasResult = false;
+			return;
 		}
 
 		if(!rightVal.empty()) {
@@ -635,7 +688,7 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 			tuples.push_back(vec[i]);
 		}
 
-		resultTuples.push_back(&tuples);
+		resultTuples.push_back(tuples);
 	}
 	else if(lNode != NULL) {
 		SynonymValues* leftSyn = getSynVal(lNode->getParam());
@@ -707,56 +760,60 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 	set<string> valSet = synVal->getValues();
 
 	for(unsigned int i = 0; i < resultTuples.size(); i++) {
-		unsigned int initSize = resultTuples[i]->size();
+		unsigned int initSize = resultTuples[i].size();
 
-		if(resultTuples[i]->begin()->first == synVal->getName()) {
-			for(unsigned int j = 1; j != resultTuples[i]->size(); j++) {
-				if(valSet.find(resultTuples[i]->at(j).first) == valSet.end()) {
-					resultTuples[i]->erase(resultTuples[i]->begin() + j);
+		if(resultTuples[i][0].first == synVal->getName()) {
+			for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+				if(valSet.find(resultTuples[i][j].first) == valSet.end()) {
+					resultTuples[i].erase(resultTuples[i].begin() + j);
 					j--;
 				}
 			}
 
-			if(resultTuples[i]->size() == 1) {
+			if(resultTuples[i].size() == 1) {
 				hasResult = false;
 				return;
 			}
 
-			if(resultTuples[i]->size() < initSize) {
+			if(resultTuples[i].size() < initSize) {
 				set<string> rightVal;
 
-				for(unsigned int j = 1; j < resultTuples[i]->size(); j++) {
-					rightVal.insert(resultTuples[i]->at(j).second);
+				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+					rightVal.insert(resultTuples[i][j].second);
 				}
 
-				SynonymValues* rightSyn = getSynVal(resultTuples[i]->begin()->second);
-				rightSyn->setValues(rightVal);
-				updateRelatedSynVal(rightSyn);
+				SynonymValues* rightSyn = getSynVal(resultTuples[i][0].second);
+				if(rightSyn->getValues().size() > rightVal.size()) {
+					rightSyn->setValues(rightVal);
+					updateRelatedSynVal(rightSyn);
+				}
 			}
 		}
-		else if(resultTuples[i]->begin()->second == synVal->getName()) {
-			for(unsigned int j = 0; j < resultTuples[i]->size(); j++) {
-				if(valSet.find(resultTuples[i]->at(j).second) == valSet.end()) {
-					resultTuples[i]->erase(resultTuples[i]->begin() + j);
+		else if(resultTuples[i][0].second == synVal->getName()) {
+			for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+				if(valSet.find(resultTuples[i][j].second) == valSet.end()) {
+					resultTuples[i].erase(resultTuples[i].begin() + j);
 					j--;
 				}
 			}
 
-			if(resultTuples[i]->size() == 1) {
+			if(resultTuples[i].size() == 1) {
 				hasResult = false;
 				return;
 			}
 
-			if(resultTuples[i]->size() < initSize) {
+			if(resultTuples[i].size() < initSize) {
 				set<string> leftVal;
 
-				for(unsigned int j = 1; j < resultTuples[i]->size(); j++) {
-					leftVal.insert(resultTuples[i]->at(j).first);
+				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+					leftVal.insert(resultTuples[i][j].first);
 				}
 
-				SynonymValues* leftSyn = getSynVal(resultTuples[i]->begin()->first);
-				leftSyn->setValues(leftVal);
-				updateRelatedSynVal(leftSyn);
+				SynonymValues* leftSyn = getSynVal(resultTuples[i][0].first);
+				if(leftSyn->getValues().size() > leftVal.size()) {
+					leftSyn->setValues(leftVal);
+					updateRelatedSynVal(leftSyn);
+				}
 			}
 		}
 
