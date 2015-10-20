@@ -4,6 +4,8 @@
 
 CFGNode::CFGNode (Node* node){
 	statement = node;
+	nextNode = NULL;
+	exNextNode = NULL;
 }
 
 Node* CFGNode::getStatement(){
