@@ -16,25 +16,21 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	synonymVec.clear();
 	resultTuples.clear();
 	finalResult.clear();
+	optimise();
 
-	if(!queryParts.empty()) {
-		optimise();
-
-		if(hasResult) {
+	if(hasResult && !queryWithNoResult.empty()) {
 			evalQueryWithNoResult();
-		}
-
-		if(hasResult) {
-			evalQueryWithOneResult();
-		}
-
-		if(hasResult) {
-			evalQueryWithTwoResults();
-		}
-		
-		evalFinalResult();
 	}
 
+	if(hasResult && !queryWithOneResult.empty()) {
+			evalQueryWithOneResult();
+	}
+
+	if(hasResult && !queryWithTwoResults.empty()) {
+			evalQueryWithTwoResults();
+	}
+		
+	evalFinalResult();
 	return finalResult;
 }
 
@@ -792,7 +788,7 @@ void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	if(valSet.empty()) {
 		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
 
-		if((node->getType() == call && node->getAttrType() == stringType) || node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
+		if((node->getType() == call && node->getAttrType() == stringType) || node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
 			for(unsigned int i = 0; i < result.size(); i++) {
 				valSet.insert(result[i]->getValue());
 			}
