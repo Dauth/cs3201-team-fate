@@ -222,6 +222,8 @@ bool isCorrectWithClause(string leftString, string rightString)
 {
 	SyntType leftSynt, rightSynt;
 	AttrType leftAttr, rightAttr;
+	string leftParam , rightParam = "";
+
 	bool leftValid= false;
 	bool rightValid = false;
 	bool isValid = false;
@@ -245,6 +247,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				if (strcmp(leftHandChar,"stmt#") == 0)
 				{
 					// pass ( .stmt#) and set AttrType to integer
+					leftParam = attrVariables[0];
 					leftAttr = AttrType::integerType;
 					leftValid = true;
 				}
@@ -260,6 +263,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				if (strcmp(leftHandChar,"value") == 0)
 				{
 					// pass ( .value) and set AttrType to integer
+					leftParam = attrVariables[0];
 					leftAttr = AttrType::integerType;
 					leftValid = true;
 				}
@@ -273,6 +277,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				const char * leftHandChar = attrVariables[1].c_str();
 				if (strcmp(leftHandChar, "procName") == 0)
 				{
+					leftParam = attrVariables[0];
 					leftAttr = AttrType::stringType;
 					leftValid = true;
 				}
@@ -286,6 +291,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				const char * leftHandChar = attrVariables[1].c_str();
 				if (strcmp(leftHandChar, "varName") == 0)
 				{
+					leftParam = attrVariables[0];
 					leftAttr = AttrType::stringType;
 					leftValid = true;
 				}
@@ -311,6 +317,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if(newSymbol->getSyntType(leftString) == SyntType::progline)
 		{
 			// pass
+			leftParam = leftString;
 			leftAttr = AttrType::integerType;
 			leftValid = true;
 			leftSynt = SyntType::progline;
@@ -324,6 +331,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 	else if (regex_match(leftString, integerRegex))
 	{
 		// pass and store type for comparison
+		leftParam = leftString;
 		leftAttr = AttrType::integerType;
 		leftValid = true;
 		leftSynt = SyntType::integer;
@@ -336,6 +344,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		leftValid = true;
 		leftSynt = SyntType::expression;
 		removeCharsFromString(leftString, "\"");
+		leftParam = leftString;
 	}
 	// 1e) FAILS
 	else
@@ -363,6 +372,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				if (strcmp(rightHandChar,"stmt#") == 0)
 				{
 					// pass ( .stmt#) and set AttrType to integer
+					rightParam = attrVariables[0];
 					rightAttr = AttrType::integerType;
 					rightValid = true;
 				}
@@ -378,6 +388,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				if (strcmp(rightHandChar,"value") == 0)
 				{
 					// pass ( .value) and set AttrType to integer
+					rightParam = attrVariables[0];
 					rightAttr = AttrType::integerType;
 					rightValid = true;
 				}
@@ -391,6 +402,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				const char * rightHandChar = attrVariables[1].c_str();
 				if (strcmp(rightHandChar, "procName") == 0)
 				{
+					rightParam = attrVariables[0];
 					rightAttr = AttrType::stringType;
 					rightValid = true;
 				}
@@ -404,6 +416,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				const char * rightHandChar = attrVariables[1].c_str();
 				if (strcmp(rightHandChar, "varName") == 0)
 				{
+					rightParam = attrVariables[0];
 					rightAttr = AttrType::stringType;
 					rightValid = true;
 				}
@@ -429,6 +442,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if(newSymbol->getSyntType(rightString) == SyntType::progline)
 		{
 			// pass
+			rightParam = rightString;
 			rightAttr = AttrType::integerType;
 			rightValid = true;
 			rightSynt = SyntType::progline;
@@ -442,6 +456,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 	else if (regex_match(rightString, integerRegex))
 	{
 		// pass and store type for comparison
+		rightParam = rightString;
 		rightAttr = AttrType::integerType;
 		rightValid = true;
 		rightSynt = SyntType::integer;
@@ -454,6 +469,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		rightValid = true;
 		rightSynt = SyntType::expression;
 		removeCharsFromString(rightString, "\"");
+		rightParam = rightString;
 	}
 	// 1e) FAILS
 	else
@@ -466,8 +482,8 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if (leftAttr == rightAttr)
 		{
 			isValid = true;
-			ParamNode* leftParamNode  = new ParamNode(leftSynt,leftAttr,leftString);
-			ParamNode* rightParamNode = new ParamNode(rightSynt,rightAttr,rightString);
+			ParamNode* leftParamNode  = new ParamNode(leftSynt,leftAttr,leftParam);
+			ParamNode* rightParamNode = new ParamNode(rightSynt,rightAttr,rightParam);
 			QueryPart* qp = new QueryPart(QueryType::with,leftParamNode,rightParamNode,NULL);
 			qo.queryVec.push_back(qp);
 		}
@@ -853,7 +869,7 @@ void ProcessEachToken(char *currentToken)
 							{
 								// pass ( .stmt#) and set AttrType to integer
 								currAttr = AttrType::integerType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -870,7 +886,7 @@ void ProcessEachToken(char *currentToken)
 							{
 								// pass ( .value) and set AttrType to integer
 								currAttr = AttrType::integerType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -885,7 +901,7 @@ void ProcessEachToken(char *currentToken)
 							if (strcmp(leftHandChar, "procName") == 0)
 							{
 								currAttr = AttrType::stringType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
@@ -900,7 +916,7 @@ void ProcessEachToken(char *currentToken)
 							if (strcmp(leftHandChar, "varName") == 0)
 							{
 								currAttr = AttrType::stringType;
-								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,currentToken);
+								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
 							}
 							else
