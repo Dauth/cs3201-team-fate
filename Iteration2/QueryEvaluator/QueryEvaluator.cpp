@@ -52,7 +52,7 @@ void QueryEvaluator::optimise() {
 		ParamNode* left = queryParts[i]->getLeftParam();
 		ParamNode* right = queryParts[i]->getRightParam();
 
-		if((queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
+		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 			hasResult = false;
 			return;
 		}
@@ -89,7 +89,7 @@ void QueryEvaluator::sortQueryParts() {
 			ParamNode* left = queryParts[i]->getLeftParam();
 			ParamNode* right = queryParts[i]->getRightParam();
 
-			if((queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
+			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 				hasResult = false;
 				return;
 			}
@@ -568,7 +568,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 }
 
 void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
-	if(lNode != NULL && rNode != NULL) {
+	if(lNode != NULL && rNode != NULL && lNode->getParam() != rNode->getParam()) {
 		SynonymValues* leftSyn = getSynVal(lNode->getParam());
 		SynonymValues* rightSyn = getSynVal(rNode->getParam());
 		set<string> leftVal = leftSyn->getValues();
@@ -691,6 +691,20 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 		resultTuples.push_back(tuples);
 	}
 	else if(lNode != NULL) {
+		if(rNode != NULL) {
+			for(unsigned int i = 0; i < vec.size(); i++) {
+				if(vec[i].first != vec[i].second) {
+					vec.erase(vec.begin() + i);
+					i--;
+				}
+			}
+
+			if(vec.empty()) {
+				hasResult = false;
+				return;
+			}
+		}
+
 		SynonymValues* leftSyn = getSynVal(lNode->getParam());
 		set<string> leftVal = leftSyn->getValues();
 
