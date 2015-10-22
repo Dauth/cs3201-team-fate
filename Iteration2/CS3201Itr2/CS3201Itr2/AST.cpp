@@ -234,7 +234,6 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					bracesStack.push("{");
 					SyntType prevSynType = twinVector[twinVector.size() - 1]->getStmNode()->getType();
 					catchElseBeforeIfStmException(i, prevSynType);
-					lineNumber += 1;
 					clearStmHolder(stmString, stmNameString, statementType);
 				}else{
 					//throw exception here
