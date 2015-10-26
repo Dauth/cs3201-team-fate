@@ -775,7 +775,7 @@ vector<pair<string, string>> PKB::getCallsStar(SyntType st1, SyntType st2) {
 		string right = calls[i].second;
 		vector<pair<string, string>> indirectCalls = getCallsStar(right, st2);
 		for (int j=0; j<indirectCalls.size(); j++) {
-			string indirectRight = indirectCalls[i].second;
+			string indirectRight = indirectCalls[j].second;
 			pair<string, string> callsStar ( left, indirectRight );
 			results.push_back(callsStar);
 		}
@@ -796,7 +796,7 @@ vector<pair<string, string>> PKB::getCallsStar(SyntType st, string procName) {
 		string right = calls[i].second;
 		vector<pair<string, string>> indirectCalls = getCallsStar(st, left);
 		for (int j=0; j<indirectCalls.size(); j++) {
-			string indirectLeft = indirectCalls[i].first;
+			string indirectLeft = indirectCalls[j].first;
 			pair<string, string> callsStar ( indirectLeft, right );
 			results.push_back(callsStar);
 		}
@@ -817,7 +817,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName, SyntType st) {
 		string right = calls[i].second;
 		vector<pair<string, string>> indirectCalls = getCallsStar(right, st);
 		for (int j=0; j<indirectCalls.size(); j++) {
-			string indirectRight = indirectCalls[i].second;
+			string indirectRight = indirectCalls[j].second;
 			pair<string, string> callsStar ( left, indirectRight );
 			results.push_back(callsStar);
 		}
@@ -841,7 +841,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName1, string procName
 		} else {
 			vector<pair<string, string>> indirectCalls = getCallsStar(right, procedure);
 			for (int j=0; j<indirectCalls.size(); j++) {
-				string indirectRight = indirectCalls[i].second;
+				string indirectRight = indirectCalls[j].second;
 				if (indirectRight.compare(procName2) == 0){
 					pair<string, string> followsStar ( left, indirectRight );
 					results.push_back(followsStar);
