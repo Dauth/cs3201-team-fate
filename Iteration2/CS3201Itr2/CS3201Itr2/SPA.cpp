@@ -17,8 +17,14 @@ void SPA::processSimpleSourceFile(std::string filepath) {
 }
 
 std::list<std::string> SPA::executeQuery(std::string pql) {
+	std::list<std::string> result;
 	Query_Object qObj = qp->getQueryObject(pql);
-	return qe->evaluate(qObj.resultVec, qObj.queryVec);
+	if(qObj.isValid) {
+		result = qe->evaluate(qObj.resultVec, qObj.queryVec);
+	} else {
+		result = std::list<std::string>();
+	}
+	return result;
 }
 
 void SPA::startCommandLinePQLShell() {
