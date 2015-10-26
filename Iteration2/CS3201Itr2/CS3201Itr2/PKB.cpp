@@ -1120,67 +1120,46 @@ vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
 }
 vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	vector<pair<string, string>> results;
-	
-	vector<pair<string, string>> parent = getParents(statement,num1);
-	
-	if( parent.size() != 0 ){
-		Node* pNode = statementTable.getStatement(parent[0].first);
-		while( parent.size() != 0 ){
-			Node* tempPNode = statementTable.getStatement(parent[0].first);
-			if ( tempPNode->getType() == whileLoop && atoi(tempPNode->getLine().c_str()) <= atoi(pNode->getLine().c_str())){
-				pNode = tempPNode;
-			}
-			parent = getParents(statement,tempPNode->getLine());
-		}
-		if ( pNode->getType() == whileLoop){
-			pair<string, string> nextPair (num1,pNode->getLine());
+	Node* tempNode = statementTable.getStatement(num1);
+	if( tempNode->getType() == whileLoop || tempNode->getType() == ifelse){
+		vector<pair<string, string>> childrens = getParentsStar(tempNode->getLine(),statement);
+		for( int j = 0; j < childrens.size(); j++){
+			pair<string, string> nextPair (num1,childrens[j].second);
 			results.push_back(nextPair);
-			vector<pair<string, string>> childrens = getParentsStar(pNode->getLine(),statement);
-			for( int j = 0; j < childrens.size(); j++){
-				pair<string, string> nextPair (num1,childrens[j].second);
+		}
+		CFGNode* nextNode;
+		if( tempNode->getType() == whileLoop){
+			pair<string, string> nextPair (num1,tempNode->getLine());
+			results.push_back(nextPair);
+			nextNode = tempNode->getCfgNode()->getNextNode();
+		}
+		else{
+			nextNode = tempNode->getCfgNode()->getEndLeft()->getNextNode();
+		}
+		if (nextNode){
+			pair<string, string> nextPair (num1,nextNode->getStatement()->getLine());
+			results.push_back(nextPair);
+			vector<pair<string,string>> tempResults = getNextStar(nextNode->getStatement()->getLine(),s2);
+			for(int i = 0; i < tempResults.size(); i++){
+				pair<string, string> nextPair (num1,tempResults[i].second);
 				results.push_back(nextPair);
 			}
 		}
 	}
 
-	vector<pair<string, string>> parents = getParentsStar(statement,num1);
-	vector<pair<string, string>> follows = getFollowsStar(num1,statement);
-	
-	vector<pair<string, string>> childrens = getParentsStar(num1,statement);
-	follows.insert(follows.end(),childrens.begin(),childrens.end());
-
-	vector<pair<string, string>> childrensWhile = getParentsStar(num1,whileLoop);
-	vector<pair<string, string>> childrensIf = getParentsStar(num1, ifelse);
-
-	vector<pair<string, string>> followsWhile = getFollowsStar(num1, whileLoop);
-	vector<pair<string, string>> followsIf = getFollowsStar(num1, ifelse);
-
-	vector<pair<string, string>> temp; //store all while and if
-
-	temp.insert(temp.end(),followsWhile.begin(),followsWhile.end());
-	temp.insert(temp.end(),followsIf.begin(),followsIf.end());
-
-	temp.insert(temp.end(),childrensWhile.begin(),childrensWhile.end());
-	temp.insert(temp.end(),childrensIf.begin(),childrensIf.end());
-
-	for(int i = 0 ; i < parents.size(); i++){
-		vector<pair<string, string>> tempFollows = getFollowsStar(parents[i].first,statement);
-		vector<pair<string, string>> tempWhile = getFollowsStar(parents[i].first,whileLoop);
-		vector<pair<string, string>> tempIf = getFollowsStar(parents[i].first,ifelse);
-		follows.insert(follows.end(),tempFollows.begin(),tempFollows.end());
-		temp.insert(temp.end(),tempWhile.begin(),tempWhile.end());
-		temp.insert(temp.end(),tempIf.begin(),tempIf.end());
+	else {
+		CFGNode* nextNode = tempNode->getCfgNode()->getNextNode();
+		if(nextNode){
+			pair<string, string> nextPair (num1,nextNode->getStatement()->getLine());
+			results.push_back(nextPair);
+			vector<pair<string,string>> tempResults = getNextStar(nextNode->getStatement()->getLine(),s2);
+			for(int i = 0; i < tempResults.size(); i++){
+				pair<string, string> nextPair (num1,tempResults[i].second);
+				results.push_back(nextPair);
+			}
+		}
 	}
 
-	for(int i = 0; i < temp.size(); i++){
-		vector<pair<string,string>> childrens = getParentsStar(temp[i].second,statement);
-		follows.insert(follows.end(),childrens.begin(),childrens.end());
-	}
-	
-	for(int i = 0; i < follows.size(); i++){
-		pair<string, string> nextPair (num1, follows[i].second);
-		results.push_back(nextPair);
-	}
 	set<pair<string, string>> s (results.begin(),results.end());
 	results.assign(s.begin(),s.end());
 	return results;
