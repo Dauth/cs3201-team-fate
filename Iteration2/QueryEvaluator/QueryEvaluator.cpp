@@ -888,9 +888,9 @@ void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
 		string singleResult = s;
 		singleResult.append(*i);
-		singleResult.append(" ");
 
 		if(index < resultSynonyms.size()) {
+			singleResult.append(" ");
 			formFinalResult(singleResult, index);
 		}
 		else {
