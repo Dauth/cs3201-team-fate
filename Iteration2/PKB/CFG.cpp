@@ -56,9 +56,7 @@ CFGNode* CFG::createWhile(Node* node){
 
 		currentNode = nextNode;
 	}
-	currentNode->setNextNode(whileNode);
-	whileNode->setPrevNode(currentNode);
-	createAndAddPair(currentNode,whileNode);
+	linkNode(currentNode,whileNode);
 	return whileNode;
 }
 
