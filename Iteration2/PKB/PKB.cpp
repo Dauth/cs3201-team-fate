@@ -79,7 +79,7 @@ Node* PKB::createNode(SyntType st, int line, string value,
 		handleParent(node, parent);
 	}
 	if (st == call) {
-		handleCalls(procedure, node);
+		handleCalls(procedure, node, parent);
 	}
 	if (st == variable) {
 		variableTable.addNode(node);
@@ -131,7 +131,7 @@ void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* 
 	}
 }
 
-void PKB::handleCalls(Node* callingProc, Node* node) {
+void PKB::handleCalls(Node* callingProc, Node* node, Node* parent) {
 	callsTable.addCalls(callingProc, node);
 	Node* targetProc = procedureTable.getProcedure(node->getValue());
 	if (targetProc != nullptr ) {
@@ -143,13 +143,18 @@ void PKB::handleCalls(Node* callingProc, Node* node) {
 			vector<pair<string, string>> modifies = getModifies(calledProc, variable);
 			vector<pair<string, string>> uses = getUses(calledProc, variable);
 			vector<string> callingStatements = callsTable.getCallingStatement(calls[i].first);
+			vector<string> callingStatements2 = callsTable.getCallingStatement(node->getValue());
+			callingStatements.insert(callingStatements.end(), callingStatements2.begin(), callingStatements2.end());
 			for(int j=0; j<modifies.size(); j++) {
 				Node* proc = procedureTable.getProcedure(calls[i].first);
 				modifiesTable.addModifies(proc, modifies[j].second);
 				for (int k=0; k<callingStatements.size(); k++) {
 					Node* callsNode = statementTable.getStatement(callingStatements[k]);
 					modifiesTable.addModifies(callsNode, modifies[j].second);
-					Node* grandParent = callsNode->getParent()->getParent();
+					Node* grandParent = parent;
+					if(callsNode != node) {
+						grandParent = callsNode->getParent()->getParent();
+					}
 					while (grandParent != nullptr) {
 						if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
 							modifiesTable.addModifies(grandParent, modifies[j].second);
@@ -167,7 +172,10 @@ void PKB::handleCalls(Node* callingProc, Node* node) {
 				for (int k=0; k<callingStatements.size(); k++) {
 					Node* callsNode = statementTable.getStatement(callingStatements[k]);
 					usesTable.addUses(callsNode, uses[j].second);
-					Node* grandParent = callsNode->getParent()->getParent();
+					Node* grandParent = parent;
+					if(callsNode != node) {
+						grandParent = callsNode->getParent()->getParent();
+					}
 					while (grandParent != nullptr) {
 						if (grandParent->getType() == whileLoop || grandParent->getType() == ifelse) {
 							usesTable.addUses(grandParent, uses[j].second);

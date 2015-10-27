@@ -39,7 +39,7 @@ class PKB {
 
 	 
 	void handleInheritance(Node*, Node*, Node*, Node*);
-	void handleCalls(Node*, Node*);
+	void handleCalls(Node*, Node*, Node*);
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
 	void handleParent(Node*, Node*);
