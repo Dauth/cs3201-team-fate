@@ -239,12 +239,13 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if(newSymbol->exists(attrVariables[0]))
 		{
 			leftSynt =  newSymbol->getSyntType(attrVariables[0]);
+			
+			const char * leftHandChar = attrVariables[1].c_str();
 			// 1aii. Check if leftHand's synonym is a statement, then check if leftHand attribute is stmt#
-			if (leftSynt == SyntType::statementList||leftSynt == SyntType::statement || leftSynt == SyntType::assignment || leftSynt == SyntType::call || leftSynt == SyntType::whileLoop || leftSynt == SyntType::ifelse)
+			if (strcmp(leftHandChar,"stmt#") == 0)
 			{
 				// left hand pass
-				const char * leftHandChar = attrVariables[1].c_str();
-				if (strcmp(leftHandChar,"stmt#") == 0)
+				if (leftSynt == SyntType::statementList||leftSynt == SyntType::statement || leftSynt == SyntType::assignment || leftSynt == SyntType::call || leftSynt == SyntType::whileLoop || leftSynt == SyntType::ifelse)
 				{
 					// pass ( .stmt#) and set AttrType to integer
 					leftParam = attrVariables[0];
@@ -257,10 +258,9 @@ bool isCorrectWithClause(string leftString, string rightString)
 				}
 			}
 			// 1aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
-			else if (leftSynt == SyntType::constant)
+			else if (strcmp(leftHandChar,"value") == 0) 
 			{
-				const char * leftHandChar = attrVariables[1].c_str();
-				if (strcmp(leftHandChar,"value") == 0)
+				if (leftSynt == SyntType::constant)
 				{
 					// pass ( .value) and set AttrType to integer
 					leftParam = attrVariables[0];
@@ -272,10 +272,9 @@ bool isCorrectWithClause(string leftString, string rightString)
 					// fail (this statement has a dot(.) something else besides value)
 				}
 			}
-			else if (leftSynt == SyntType::procedure || leftSynt == SyntType::call)
+			else if (strcmp(leftHandChar, "procName") == 0) 
 			{
-				const char * leftHandChar = attrVariables[1].c_str();
-				if (strcmp(leftHandChar, "procName") == 0)
+				if (leftSynt == SyntType::procedure || leftSynt == SyntType::call)
 				{
 					leftParam = attrVariables[0];
 					leftAttr = AttrType::stringType;
@@ -286,10 +285,10 @@ bool isCorrectWithClause(string leftString, string rightString)
 					// fail (this statement has a dot(.) something else besides procName
 				}
 			}
-			else if (leftSynt == SyntType::variable)
+			else if (strcmp(leftHandChar, "varName") == 0)
 			{				
 				const char * leftHandChar = attrVariables[1].c_str();
-				if (strcmp(leftHandChar, "varName") == 0)
+				if (leftSynt == SyntType::variable)
 				{
 					leftParam = attrVariables[0];
 					leftAttr = AttrType::stringType;
@@ -364,12 +363,13 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if(newSymbol->exists(attrVariables[0]))
 		{
 			rightSynt =  newSymbol->getSyntType(attrVariables[0]);
+			const char * rightHandChar = attrVariables[1].c_str();
 			// 2aii. Check if rightHand's synonym is a statement, then check if rightHand attribute is stmt#
-			if (rightSynt == SyntType::statementList||rightSynt == SyntType::statement || rightSynt == SyntType::assignment || rightSynt == SyntType::call || rightSynt == SyntType::whileLoop || rightSynt == SyntType::ifelse)
+			if (strcmp(rightHandChar,"stmt#") == 0) 
 			{
 				// right hand pass
-				const char * rightHandChar = attrVariables[1].c_str();
-				if (strcmp(rightHandChar,"stmt#") == 0)
+				
+				if (rightSynt == SyntType::statementList||rightSynt == SyntType::statement || rightSynt == SyntType::assignment || rightSynt == SyntType::call || rightSynt == SyntType::whileLoop || rightSynt == SyntType::ifelse)
 				{
 					// pass ( .stmt#) and set AttrType to integer
 					rightParam = attrVariables[0];
@@ -382,10 +382,9 @@ bool isCorrectWithClause(string leftString, string rightString)
 				}
 			}
 			// 2aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
-			else if (rightSynt == SyntType::constant)
+			else if (strcmp(rightHandChar,"value") == 0) 
 			{
-				const char * rightHandChar = attrVariables[1].c_str();
-				if (strcmp(rightHandChar,"value") == 0)
+				if (rightSynt == SyntType::constant)
 				{
 					// pass ( .value) and set AttrType to integer
 					rightParam = attrVariables[0];
@@ -397,10 +396,10 @@ bool isCorrectWithClause(string leftString, string rightString)
 					// fail (this statement has a dot(.) something else besides value)
 				}
 			}
-			else if (rightSynt == SyntType::procedure || rightSynt == SyntType::call)
+			else if (strcmp(rightHandChar, "procName") == 0) 
 			{
-				const char * rightHandChar = attrVariables[1].c_str();
-				if (strcmp(rightHandChar, "procName") == 0)
+				
+				if (rightSynt == SyntType::procedure || rightSynt == SyntType::call)
 				{
 					rightParam = attrVariables[0];
 					rightAttr = AttrType::stringType;
@@ -411,10 +410,10 @@ bool isCorrectWithClause(string leftString, string rightString)
 					// fail (this statement has a dot(.) something else besides procName
 				}
 			}
-			else if (rightSynt == SyntType::variable)
+			else if (strcmp(rightHandChar, "varName") == 0) 
 			{				
-				const char * rightHandChar = attrVariables[1].c_str();
-				if (strcmp(rightHandChar, "varName") == 0)
+				
+				if (rightSynt == SyntType::variable)
 				{
 					rightParam = attrVariables[0];
 					rightAttr = AttrType::stringType;
@@ -524,7 +523,7 @@ SyntType getSynType (string synType)
 }
 AttrType getAttrType(SyntType syntType)
 {
-	if (syntType == SyntType::integer || syntType == SyntType::progline || syntType == SyntType::constant)
+	if (syntType == SyntType::integer || syntType == SyntType::progline || syntType == SyntType::constant || syntType == SyntType::call)
 	{
 		return AttrType::integerType;
 	}
@@ -860,12 +859,11 @@ void ProcessEachToken(char *currentToken)
 					if(newSymbol->exists(attrVariables[0]))
 					{
 						currSynt =  newSymbol->getSyntType(attrVariables[0]);
-						// 1aii. Check if leftHand's synonym is a statement, then check if leftHand attribute is stmt#
-						if (currSynt == SyntType::statementList||currSynt == SyntType::statement || currSynt == SyntType::assignment || currSynt == SyntType::call || currSynt == SyntType::whileLoop || currSynt == SyntType::ifelse)
+						const char * leftHandChar = attrVariables[1].c_str();
+
+						if (strcmp(leftHandChar,"stmt#") == 0)
 						{
-							// left hand pass
-							const char * leftHandChar = attrVariables[1].c_str();
-							if (strcmp(leftHandChar,"stmt#") == 0)
+							if (currSynt == SyntType::statementList||currSynt == SyntType::statement || currSynt == SyntType::assignment || currSynt == SyntType::call || currSynt == SyntType::whileLoop || currSynt == SyntType::ifelse)
 							{
 								// pass ( .stmt#) and set AttrType to integer
 								currAttr = AttrType::integerType;
@@ -875,14 +873,11 @@ void ProcessEachToken(char *currentToken)
 							else
 							{
 								nonExistantSyn = true;
-								// fail (this statement has a dot(.) something else besides stmt#)
 							}
 						}
-						// 1aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
-						else if (currSynt == SyntType::constant)
+						else if (strcmp(leftHandChar, "value") == 0 )
 						{
-							const char * leftHandChar = attrVariables[1].c_str();
-							if (strcmp(leftHandChar,"value") == 0)
+							if (currSynt == SyntType::constant)
 							{
 								// pass ( .value) and set AttrType to integer
 								currAttr = AttrType::integerType;
@@ -892,13 +887,12 @@ void ProcessEachToken(char *currentToken)
 							else
 							{
 								nonExistantSyn = true;
-								// fail (this statement has a dot(.) something else besides value)
 							}
+							
 						}
-						else if (currSynt == SyntType::procedure || currSynt == SyntType::call)
+						else if (strcmp(leftHandChar, "procName") == 0)
 						{
-							const char * leftHandChar = attrVariables[1].c_str();
-							if (strcmp(leftHandChar, "procName") == 0)
+							if (currSynt == SyntType::procedure || currSynt == SyntType::call)
 							{
 								currAttr = AttrType::stringType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
@@ -907,13 +901,11 @@ void ProcessEachToken(char *currentToken)
 							else
 							{
 								nonExistantSyn = true;
-								// fail (this statement has a dot(.) something else besides procName
 							}
 						}
-						else if (currSynt == SyntType::variable)
-						{				
-							const char * leftHandChar = attrVariables[1].c_str();
-							if (strcmp(leftHandChar, "varName") == 0)
+						else if (strcmp(leftHandChar, "varName") == 0)
+						{
+							if (currSynt == SyntType::variable)
 							{
 								currAttr = AttrType::stringType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
@@ -922,9 +914,7 @@ void ProcessEachToken(char *currentToken)
 							else
 							{
 								nonExistantSyn = true;
-								// fail (this statement has a dot(.) something else besides procName
 							}
-
 						}
 
 					} 
