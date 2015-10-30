@@ -1243,9 +1243,6 @@ vector<pair<string, string>> PKB::getAffects(SyntType st, string assign) {
 	vector<pair<string, string>> uses = getUses(assign, variable);
 	for (int x=0; x<uses.size(); x++) {
 		vector<pair<string, string>> modifies = getModifies(assignment, uses[x].second);
-		if (modifies.size() == 0) {
-			return results;
-		} 
 		for (int i=0; i<modifies.size(); i++ ) {
 			vector<pair<string, string>> affects = getAffects(modifies[i].first, assign);
 			if(affects.size() == 1) {
@@ -1264,9 +1261,6 @@ vector<pair<string, string>> PKB::getAffects(string assign, SyntType st) {
 	}
 	string variable = assignnode->getLeftChild()->getValue();
 	vector<pair<string, string>> uses = getUses(assignment, variable);
-	if (uses.size() == 0) {
-		return results;
-	} 
 	for (int i=0; i<uses.size(); i++ ) {
 		vector<pair<string, string>> affects = getAffects(assign, uses[i].first);
 		if(affects.size() == 1) {
