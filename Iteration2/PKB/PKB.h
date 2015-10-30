@@ -115,6 +115,11 @@ public:
 	vector<pair<string, string>> getNextStar(string, SyntType);
 	vector<pair<string, string>> getNextStar(string, string);
 	
+	vector<pair<string, string>> getAffects(SyntType, SyntType);
+	vector<pair<string, string>> getAffects(SyntType, string);
+	vector<pair<string, string>> getAffects(string, SyntType);
+	vector<pair<string, string>> getAffects(string, string);
+
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);
 	vector<pair<string, string>> searchWithPattern(SyntType,std::string,std::string);

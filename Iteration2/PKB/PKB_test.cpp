@@ -419,6 +419,18 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Uses(call, variable) \n"; 
 	printResults(pkb->getUses(call, variable));
 
+	cout << "\n\nQuery is Affects(\"5\", \"8\") \n"; 
+	printResults(pkb->getAffects("5", "8"));
+
+	cout << "\n\nQuery is Affects(\"1\", assignment) \n"; 
+	printResults(pkb->getAffects("1", assignment));
+
+	cout << "\n\nQuery is Affects(assignment, \"11\") \n"; 
+	printResults(pkb->getAffects(assignment, "11"));
+
+	cout << "\n\nQuery is Affects(assignment, assignment) \n"; 
+	printResults(pkb->getAffects(assignment, assignment));
+
 	cin.get();
 }
 
