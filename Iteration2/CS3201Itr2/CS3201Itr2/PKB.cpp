@@ -62,6 +62,7 @@ Node* PKB::createNode(SyntType st, int line, string value,
 	}
 	if (st == whileLoop || st == ifelse || st == assignment || st == call) {
 		statementTable.addStatement(oss.str(), node);
+		node->setRoot(procedure);
 	} else if (st == expression ) {
 		expressionTable.addExpression(node);
 		node->setExpParent(usedBy);
@@ -1244,9 +1245,11 @@ vector<pair<string, string>> PKB::getAffects(SyntType st, string assign) {
 	for (int x=0; x<uses.size(); x++) {
 		vector<pair<string, string>> modifies = getModifies(assignment, uses[x].second);
 		for (int i=0; i<modifies.size(); i++ ) {
-			vector<pair<string, string>> affects = getAffects(modifies[i].first, assign);
-			if(affects.size() == 1) {
-				results.push_back(make_pair(modifies[i].first, assign));
+			if(assignnode->getRoot() == statementTable.getStatement(uses[x].first)->getRoot()) {
+				vector<pair<string, string>> affects = getAffects(modifies[i].first, assign);
+				if(affects.size() == 1) {
+					results.push_back(make_pair(modifies[i].first, assign));
+				}
 			}
 		}
 	}
@@ -1262,12 +1265,14 @@ vector<pair<string, string>> PKB::getAffects(string assign, SyntType st) {
 	string variable = assignnode->getLeftChild()->getValue();
 	vector<pair<string, string>> uses = getUses(assignment, variable);
 	for (int i=0; i<uses.size(); i++ ) {
-		vector<pair<string, string>> affects = getAffects(assign, uses[i].first);
-		if(affects.size() == 1) {
-			results.push_back(make_pair(assign, uses[i].first));
+		if(assignnode->getRoot() == statementTable.getStatement(uses[i].first)->getRoot()) {
+			vector<pair<string, string>> affects = getAffects(assign, uses[i].first);
+			if(affects.size() == 1) {
+				results.push_back(make_pair(assign, uses[i].first));
+			}
 		}
 	}
-	return results;
+	return results; 
 }
 
 vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
@@ -1289,11 +1294,11 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 	}
 	set<string> intersectCheck;
 	set<string> between;
-	vector<pair<string,string>> nextForwards = getNext(assign1, progline);
+	vector<pair<string,string>> nextForwards = getNextStar(assign1, progline);
 	for (int i=0; i<nextForwards.size(); i++) {
 		intersectCheck.insert(nextForwards[i].second);
 	}
-	vector<pair<string, string>> nextBackwards = getNext(progline, assign1);
+	vector<pair<string, string>> nextBackwards = getNextStar(progline, assign1);
 	for (int i=0; i<nextBackwards.size(); i++) {
 		if (intersectCheck.find(nextBackwards[i].first) != intersectCheck.end()) {
 			between.insert(nextBackwards[i].first);
@@ -1302,7 +1307,7 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 	for (set<string>::iterator i = between.begin(); i != between.end(); i++) {
 		Node* stmt = statementTable.getStatement(*i);
 		if(stmt->getType() == assignment) {
-			if(stmt->getLeftChild()->getValue() == variable) {
+			if(stmt->getLeftChild()->getValue() == variable && stmt->getLine() != assign1node->getLine()) {
 				return results;
 			}
 		} else if (stmt->getType() == call) {
