@@ -1327,7 +1327,7 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 	for (set<string>::iterator i = between.begin(); i != between.end(); i++) {
 		Node* stmt = statementTable.getStatement(*i);
 		if(stmt->getType() == assignment) {
-			if(stmt->getLeftChild()->getValue() == variable && stmt->getLine() != assign1node->getLine()) {
+			if(stmt->getLeftChild()->getValue() == variable && stmt->getLine() != assign1node->getLine() && stmt->getLine() != assign2node->getLine()) {
 				return results;
 			}
 		} else if (stmt->getType() == call) {
