@@ -1156,13 +1156,33 @@ vector<pair<string, string>> PKB::getNextStar(SyntType s1, SyntType s2){
 }
 vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
 	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp = getNextStar(statement,statement);
-	for(int i = 0; i < temp.size(); i++){
-		if(temp[i].second == num2 ) {
-			results.push_back(temp[i]);
+	Node* tempNode = statementTable.getStatement(num2);
+	if ( tempNode->getType() == whileLoop){
+		pair<string, string> nextPair (num2,num2);
+		results.push_back(nextPair);
+		vector<pair<string, string>> children = getParentsStar(num2,statement);
+		for( int j = 0; j < children.size(); j++){
+			pair<string, string> nextPair (children[j].second,num2);
+			results.push_back(nextPair);
 		}
 	}
 
+	vector<CFGNode*> prevNodes = tempNode->getCfgNode()->getPrevNode();
+	for( int j = 0; j < prevNodes.size(); j++){
+		Node* pNode = prevNodes[j]->getStatement();
+		pair<string, string> prevPair (pNode->getLine(),num2);
+		results.push_back(prevPair);
+		if( atoi(pNode->getLine().c_str()) < atoi(num2.c_str())){
+			vector<pair<string, string>> prevResults = getNextStar(s1,pNode->getLine());
+			for ( int i = 0; i < prevResults.size(); i++){
+				pair<string, string> prevPair (prevResults[i].first,num2);
+				results.push_back(prevPair);
+			}
+		}
+	}
+
+	set<pair<string, string>> s (results.begin(),results.end());
+	results.assign(s.begin(),s.end());
 	return results;
 }
 vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
