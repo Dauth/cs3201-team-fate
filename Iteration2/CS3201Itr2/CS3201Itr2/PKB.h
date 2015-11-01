@@ -36,6 +36,8 @@ class PKB {
 	void is_digit(string);
 	int compare(Node*, Node*);
 	bool isExpression(std::string);
+	bool isUsed(string, string);
+	bool doesNotModify(string, string);
 
 	 
 	void handleInheritance(Node*, Node*, Node*, Node*);
@@ -47,6 +49,7 @@ class PKB {
 	SyntType getStatementType(Node&);
 	Node* getFollowee(Node*);
 	Node* getFollowedBy(Node*);
+	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string);
 
 public:
 	PKB(ExpressionTree*);
@@ -119,6 +122,11 @@ public:
 	vector<pair<string, string>> getAffects(SyntType, string);
 	vector<pair<string, string>> getAffects(string, SyntType);
 	vector<pair<string, string>> getAffects(string, string);
+
+	vector<pair<string, string>> getAffectsStar(SyntType, SyntType);
+	vector<pair<string, string>> getAffectsStar(SyntType, string);
+	vector<pair<string, string>> getAffectsStar(string, SyntType);
+	vector<pair<string, string>> getAffectsStar(string, string);
 
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);

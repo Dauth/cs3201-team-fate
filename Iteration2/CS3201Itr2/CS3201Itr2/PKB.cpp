@@ -1343,6 +1343,78 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 	return results;
 }
 
+vector<pair<string, string>> PKB::getAffectsStar(SyntType st1, SyntType st2) {
+	vector<pair<string, string>> results;
+
+	return results;
+}
+
+vector<pair<string, string>> PKB::getAffectsStar(SyntType st, string assign) {
+	vector<pair<string, string>> results;
+
+	return results;
+}
+
+vector<pair<string, string>> PKB::getAffectsStar(string assign, SyntType st) {
+	set<pair<string, string>> results;
+	Node* assignnode = statementTable.getStatement(assign);
+	if(assignnode->getType() != assignment) {
+		return vector<pair<string, string>>();
+	}
+	string varName = assignnode->getLeftChild()->getValue();
+	vector<pair<string, string>> uses = getUses(assignnode->getRoot()->getValue(), varName);
+	if(uses.size() == 0) {
+		return vector<pair<string, string>>();
+	}
+	set<pair<string, Node*>> searched;
+	forwardAffectsSearch(&results, &searched, assignnode, assign, varName);
+	return vector<pair<string, string>> (results.begin(), results.end());
+}
+
+void PKB::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<string, Node*>>* searched, Node* node, string origin, string varName) {
+	vector<pair<string, string>> next = getNext(node->getLine(), progline);
+	for(int i=0; i<next.size(); i++) {
+		Node* stmt = statementTable.getStatement(next[i].second);
+		//cout << "checking for " << stmt->getLine() << " " << varName << "\n";
+		if(searched->find(make_pair(varName, stmt)) == searched->end()) {
+			searched->insert(make_pair(varName, stmt));
+			if(stmt->getType() == assignment && isUsed(stmt->getLine(), varName)) {
+				results->insert(make_pair(origin, stmt->getLine()));
+				forwardAffectsSearch(results, searched, stmt, origin, varName);
+				forwardAffectsSearch(results, searched, stmt, origin, stmt->getLeftChild()->getValue());
+			} else if (stmt->getType() == assignment && stmt->getValue() != varName){
+				forwardAffectsSearch(results, searched, stmt, origin, varName);
+			} else if (stmt->getType() == call && doesNotModify(stmt->getLine(), varName)) {
+				forwardAffectsSearch(results, searched, stmt, origin, varName);
+			} else if (stmt->getType() != call && stmt->getType() != assignment) {
+				forwardAffectsSearch(results, searched, stmt, origin, varName);
+			}
+		}
+	}
+}
+
+vector<pair<string, string>> PKB::getAffectsStar(string assign1, string assign2) {
+	vector<pair<string, string>> results;
+
+	return results;
+}
+
+bool PKB::isUsed(string assign, string varName) {
+	vector<pair<string, string>> uses = getUses(assign, varName);
+	if(uses.size() > 0) {
+		return true;
+	}
+	return false;
+}
+
+bool PKB::doesNotModify(string assign, string varName) {
+	vector<pair<string, string>> modifies = getModifies(assign, varName);
+	if(modifies.size() > 0) {
+		return false;
+	}
+	return true;
+}
+
 int PKB::compare(Node* p,Node* q){
    if(p == NULL && q == NULL){
 	   return 1;

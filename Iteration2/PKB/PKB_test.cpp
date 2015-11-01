@@ -431,6 +431,9 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Affects(assignment, assignment) \n"; 
 	printResults(pkb->getAffects(assignment, assignment));
 
+	cout << "\n\nQuery is Affects*(\"1\", assignment) \n"; 
+	printResults(pkb->getAffectsStar("1", assignment));
+
 	cin.get();
 }
 
