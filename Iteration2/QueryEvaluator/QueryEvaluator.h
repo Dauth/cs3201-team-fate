@@ -22,6 +22,7 @@ class QueryEvaluator {
 
 	void optimise();
 	void sortQueryParts();
+	void orderQueryParts(vector<QueryPart*>*);
 	void evalQueryWithNoResult();
 	void evalQueryWithOneResult();
 	void evalQueryWithTwoResults();
@@ -32,6 +33,8 @@ class QueryEvaluator {
 	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, string);
 	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, SyntType);
 	void updateSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
+	void QueryEvaluator::updateTwoSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
+	void QueryEvaluator::updateOneSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void updateRelatedSynVal(SynonymValues*);
 	void evalFinalResult();
 	void formFinalResult(string, unsigned int);

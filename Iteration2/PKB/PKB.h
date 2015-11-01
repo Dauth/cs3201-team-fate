@@ -36,10 +36,12 @@ class PKB {
 	void is_digit(string);
 	int compare(Node*, Node*);
 	bool isExpression(std::string);
+	bool isUsed(string, string);
+	bool isModified(string, string);
 
 	 
 	void handleInheritance(Node*, Node*, Node*, Node*);
-	void handleCalls(Node*, Node*);
+	void handleCalls(Node*, Node*, Node*);
 	void handleModifiedBy(Node*, Node*, Node*, Node*);
 	void handleUsedBy(Node*, Node*, Node*, Node*);
 	void handleParent(Node*, Node*);
@@ -47,7 +49,8 @@ class PKB {
 	SyntType getStatementType(Node&);
 	Node* getFollowee(Node*);
 	Node* getFollowedBy(Node*);
-
+	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, string, bool);
+	void reverseAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, bool);
 public:
 	PKB(ExpressionTree*);
 
@@ -115,6 +118,16 @@ public:
 	vector<pair<string, string>> getNextStar(string, SyntType);
 	vector<pair<string, string>> getNextStar(string, string);
 	
+	vector<pair<string, string>> getAffects(SyntType, SyntType);
+	vector<pair<string, string>> getAffects(SyntType, string);
+	vector<pair<string, string>> getAffects(string, SyntType);
+	vector<pair<string, string>> getAffects(string, string);
+
+	vector<pair<string, string>> getAffectsStar(SyntType, SyntType);
+	vector<pair<string, string>> getAffectsStar(SyntType, string);
+	vector<pair<string, string>> getAffectsStar(string, SyntType);
+	vector<pair<string, string>> getAffectsStar(string, string);
+
 	vector<Node*> getExpressions(string);
 	vector<Node*> getRootExpressions(string);
 	vector<pair<string, string>> searchWithPattern(SyntType,std::string,std::string);

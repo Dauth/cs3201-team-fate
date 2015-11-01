@@ -5,6 +5,7 @@ QueryEvaluator::QueryEvaluator(PKB* p) {
 	pkb = p;
 }
 
+//method called to evaluate a PQL query
 list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*> qVec) {
 	resultSynonyms = rVec;
 	queryParts = qVec;
@@ -34,6 +35,7 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	return finalResult;
 }
 
+//optimises evaluation process by filtering, sorting and ordering QueryParts
 void QueryEvaluator::optimise() {
 	if(!resultSynonyms.empty()) {
 		for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
@@ -47,21 +49,25 @@ void QueryEvaluator::optimise() {
 		}
 	}
 	
+	//QueryParts not sorted into groups will be put into queryWithNoResult vector
 	for(unsigned int i = 0; i < queryParts.size(); i++) {
 		QueryType queryType = queryParts[i]->getType();
 		ParamNode* left = queryParts[i]->getLeftParam();
 		ParamNode* right = queryParts[i]->getRightParam();
 
+		//filters QueryParts such as "Next(s,s)" that guarantees empty result
 		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 			hasResult = false;
 			return;
 		}
 
+		//filters QueryParts such as "Affects(w,a)" that guarantees empty result
 		if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 			hasResult = false;
 			return;
 		}
 
+		//filters QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
 		if(queryType == with && left->getType() == right->getType()) {
 			if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 				hasResult = false;
@@ -73,10 +79,22 @@ void QueryEvaluator::optimise() {
 			}
 		}
 
-		queryWithNoResult.push_back(queryParts[i]);
+		//Ensures QueryParts with 2 synonyms in queryWithNoResult vector to be at the back
+		if(left->getType() != integer && left->getType() != expression && right->getType() != integer && right->getType() != expression) {
+			queryWithNoResult.push_back(queryParts[i]);
+		}
+		else {
+			queryWithNoResult.insert(queryWithOneResult.begin(), queryParts[i]);
+		}
 	}
+
+	//further order QueryParts in groups to improve optimisation
+	orderQueryParts(&queryWithNoResult);
+	orderQueryParts(&queryWithOneResult);
+	orderQueryParts(&queryWithTwoResults);
 }
 
+//QueryParts are sorted into 3 groups depending on the number of useful synonyms they have
 void QueryEvaluator::sortQueryParts() {
 	int initSize = 1;
 	int currSize = 0;
@@ -89,24 +107,28 @@ void QueryEvaluator::sortQueryParts() {
 			ParamNode* left = queryParts[i]->getLeftParam();
 			ParamNode* right = queryParts[i]->getRightParam();
 
+			//filters QueryParts such as "Next(s,s)" that guarantees empty result
 			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 				hasResult = false;
 				return;
 			}
 
+			//filters QueryParts such as "Affects(w,a)" that guarantees empty result
 			if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 				hasResult = false;
 				return;
 			}
 
+			//filters QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
 			if(queryType == with && left->getType() == right->getType()) {
 				if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 					hasResult = false;
 					return;
 				}
-			
-				queryParts.erase(queryParts.begin() + i);
-				i--;
+				else if(left->getParam() == right->getParam()) {
+					queryParts.erase(queryParts.begin() + i);
+					i--;
+				}
 			}
 
 			if(left->getType() == integer || left->getType() == expression) {
@@ -117,7 +139,8 @@ void QueryEvaluator::sortQueryParts() {
 					i--;
 				}
 				else if(existsInSynVec(right->getParam())) {
-					if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
+					//QueryParts that takes shorter time to evaluate is inserted into the front of the group
+					if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
 						queryWithOneResult.insert(queryWithOneResult.begin(), queryParts[i]);
 					}
 					else {
@@ -129,7 +152,8 @@ void QueryEvaluator::sortQueryParts() {
 				}
 			}
 			else if((right->getType() == integer || right->getType() == expression) && existsInSynVec(left->getParam())) {
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
+				//QueryParts that takes less time to evaluate is inserted into the front of the group
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
 					queryWithOneResult.insert(queryWithOneResult.begin(), queryParts[i]);
 				}
 				else {
@@ -144,7 +168,8 @@ void QueryEvaluator::sortQueryParts() {
 					synonymVec.push_back(new SynonymValues(right->getParam()));
 				}
 
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
+				//QueryParts that takes less time to evaluate is inserted into the front of the group
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
 					queryWithTwoResults.insert(queryWithTwoResults.begin(), queryParts[i]);
 				}
 				else {
@@ -157,7 +182,8 @@ void QueryEvaluator::sortQueryParts() {
 			else if(existsInSynVec(right->getParam())) {
 				synonymVec.push_back(new SynonymValues(left->getParam()));
 
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == nxt || queryType == with) {
+				//QueryParts that takes less time to evaluate is inserted into the front of the group
+				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
 					queryWithTwoResults.insert(queryWithTwoResults.begin(), queryParts[i]);
 				}
 				else {
@@ -173,6 +199,7 @@ void QueryEvaluator::sortQueryParts() {
 	}
 }
 
+//checks if a synonym exists in synonymVec
 bool QueryEvaluator::existsInSynVec(string name) {
 	for(unsigned int i = 0; i < synonymVec.size(); i++) {
 		if(name == synonymVec[i]->getName()) {
@@ -180,6 +207,18 @@ bool QueryEvaluator::existsInSynVec(string name) {
 		}
 	}
 	return false;
+}
+
+//QueryParts in a group are ordered by their types in the order (front)others->nxt->nxtStar->affects->affectsStar(end)
+void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
+	for(int i = 10; i < 14; i++) {
+		for(unsigned int j = 0; j < qVec->size(); j++) {
+			if(qVec->at(j)->getType() == i) {
+				qVec->push_back(qVec->at(j));
+				qVec->erase(qVec->begin() + j);
+			}
+		}
+	}
 }
 
 void QueryEvaluator::evalQueryWithNoResult() {
@@ -224,6 +263,7 @@ void QueryEvaluator::evalQueryWithTwoResults() {
 	}
 }
 
+//get result for a QueryPart
 vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	if(qp->getType() == with) {
 		return evalWithQuery(qp);
@@ -258,6 +298,7 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	}
 }
 
+//QueryParts of type "with" are evaluated in QueryEvaluator with the help of PKB
 vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
@@ -567,209 +608,199 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 	}
 }
 
+//results of evaluated QueryParts are filtered and values of synonyms are updated
 void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	if(lNode != NULL && rNode != NULL && lNode->getParam() != rNode->getParam()) {
-		SynonymValues* leftSyn = getSynVal(lNode->getParam());
-		SynonymValues* rightSyn = getSynVal(rNode->getParam());
-		set<string> leftVal = leftSyn->getValues();
-		set<string> rightVal = rightSyn->getValues();
-
-		for(unsigned int i = 0; i < resultTuples.size(); i++) {
-			if(resultTuples[i][0].first == lNode->getParam() && resultTuples[i][0].second == rNode->getParam()) {
-				for(unsigned int j = 0; j < vec.size(); j++) {
-					bool pairExists = false;
-
-					for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
-						if(vec[j].first == resultTuples[i][k].first && vec[j].second == resultTuples[i][k].second) {
-							pairExists = true;
-							break;
-						}
-					}
-
-					if(!pairExists) {
-						vec.erase(vec.begin() + j);
-						j--;
-					}
-				}
-
-				resultTuples.erase(resultTuples.begin() + i);
-				break;
-			}
-			else if(resultTuples[i][0].first == rNode->getParam() && resultTuples[i][0].second == lNode->getParam()) {
-				for(unsigned int j = 0; j < vec.size(); j++) {
-					bool pairExists = false;
-
-					for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
-						if(vec[j].first == resultTuples[i][k].second && vec[j].second == resultTuples[i][k].first) {
-							pairExists = true;
-							break;
-						}
-					}
-
-					if(!pairExists) {
-						vec.erase(vec.begin() + j);
-						j--;
-					}
-				}
-
-				resultTuples.erase(resultTuples.begin() + i);
-				break;
-			}
-		}
-
-		if(vec.empty()) {
-			hasResult = false;
-			return;
-		}
-
-		if(!leftVal.empty()) {
-			for(unsigned int i = 0; i < vec.size(); i++) {
-				if(leftVal.find(vec[i].first) == leftVal.end()) {
-					vec.erase(vec.begin() + i);
-					i--;
-				}
-			}
-		}
-
-		if(vec.empty()) {
-			hasResult = false;
-			return;
-		}
-
-		if(!rightVal.empty()) {
-			for(unsigned int i = 0; i < vec.size(); i++) {
-				if(rightVal.find(vec[i].second) == rightVal.end()) {
-					vec.erase(vec.begin() + i);
-					i--;
-				}
-			}
-		}
-
-		if(vec.empty()) {
-			hasResult = false;
-			return;
-		}
-
-		set<string> newLeftVal;
-		set<string> newRightVal;
-
-		for(unsigned int i = 0; i < vec.size(); i++) {
-			newLeftVal.insert(vec[i].first);
-			newRightVal.insert(vec[i].second);
-		}
-
-		if(leftVal.empty()) {
-			leftSyn->setValues(newLeftVal);
-		}
-		else if(newLeftVal.size() < leftVal.size()) {
-			leftSyn->setValues(newLeftVal);
-			updateRelatedSynVal(leftSyn);
-		}
-
-		if(rightVal.empty()) {
-			rightSyn->setValues(newRightVal);
-		}
-		else if(newRightVal.size() < rightVal.size()) {
-			rightSyn->setValues(newRightVal);
-			updateRelatedSynVal(rightSyn);
-		}
-
-		if(!hasResult) {
-			return;
-		}
-		
-		vector<pair<string, string>> tuples;
-		pair<string, string> p;
-		p.first = leftSyn->getName();
-		p.second = rightSyn->getName();
-		tuples.push_back(p);
-
-		for(unsigned int i = 0; i < vec.size(); i++) {
-			tuples.push_back(vec[i]);
-		}
-
-		resultTuples.push_back(tuples);
+		updateTwoSynVal(lNode, rNode, vec);
 	}
 	else if(lNode != NULL) {
-		if(rNode != NULL) {
-			for(unsigned int i = 0; i < vec.size(); i++) {
-				if(vec[i].first != vec[i].second) {
-					vec.erase(vec.begin() + i);
-					i--;
-				}
-			}
-
-			if(vec.empty()) {
-				hasResult = false;
-				return;
-			}
-		}
-
-		SynonymValues* leftSyn = getSynVal(lNode->getParam());
-		set<string> leftVal = leftSyn->getValues();
-
-		if(!leftVal.empty()) {
-			for(unsigned int i = 0; i < vec.size(); i++) {
-				if(leftVal.find(vec[i].first) == leftVal.end()) {
-					vec.erase(vec.begin() + i);
-					i--;
-				}
-			}
-		}
-
-		if(vec.empty()) {
-			hasResult = false;
-			return;
-		}
-
-		set<string> newLeftVal;
-
-		for(unsigned int i = 0; i < vec.size(); i++) {
-			newLeftVal.insert(vec[i].first);
-		}
-
-		if(leftVal.empty()) {
-			leftSyn->setValues(newLeftVal);
-		}
-		else if(newLeftVal.size() < leftVal.size()) {
-			leftSyn->setValues(newLeftVal);
-			updateRelatedSynVal(leftSyn);
-		}
+		updateOneSynVal(lNode, rNode, vec);
 	}
 	else {
-		SynonymValues* rightSyn = getSynVal(rNode->getParam());
-		set<string> rightVal = rightSyn->getValues();
-
-		if(!rightVal.empty()) {
-			for(unsigned int i = 0; i < vec.size(); i++) {
-				if(rightVal.find(vec[i].second) == rightVal.end()) {
-					vec.erase(vec.begin() + i);
-					i--;
-				}
-			}
-		}
-
-		if(vec.empty()) {
-			hasResult = false;
-			return;
-		}
-
-		set<string> newRightVal;
-
-		for(unsigned int i = 0; i < vec.size(); i++) {
-			newRightVal.insert(vec[i].second);
-		}
-
-		if(rightVal.empty()) {
-			rightSyn->setValues(newRightVal);
-		}
-		else if(newRightVal.size() < rightVal.size()) {
-			rightSyn->setValues(newRightVal);
-			updateRelatedSynVal(rightSyn);
-		}
+		updateOneSynVal(rNode, lNode, vec);
 	}
 }
 
+void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+	SynonymValues* leftSyn = getSynVal(lNode->getParam());
+	SynonymValues* rightSyn = getSynVal(rNode->getParam());
+	set<string> leftVal = leftSyn->getValues();
+	set<string> rightVal = rightSyn->getValues();
+
+	//filter pairs of results with existing pairs of values that belong to the same synonyms
+	for(unsigned int i = 0; i < resultTuples.size(); i++) {
+		if(resultTuples[i][0].first == lNode->getParam() && resultTuples[i][0].second == rNode->getParam()) {
+			for(unsigned int j = 0; j < vec.size(); j++) {
+				bool pairExists = false;
+
+				for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+					if(vec[j].first == resultTuples[i][k].first && vec[j].second == resultTuples[i][k].second) {
+						pairExists = true;
+						break;
+					}
+				}
+
+				if(!pairExists) {
+					vec.erase(vec.begin() + j);
+					j--;
+				}
+			}
+
+			resultTuples.erase(resultTuples.begin() + i);
+			break;
+		}
+		else if(resultTuples[i][0].first == rNode->getParam() && resultTuples[i][0].second == lNode->getParam()) {
+			for(unsigned int j = 0; j < vec.size(); j++) {
+				bool pairExists = false;
+
+				for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+					if(vec[j].first == resultTuples[i][k].second && vec[j].second == resultTuples[i][k].first) {
+						pairExists = true;
+						break;
+					}
+				}
+
+				if(!pairExists) {
+					vec.erase(vec.begin() + j);
+					j--;
+				}
+			}
+
+			resultTuples.erase(resultTuples.begin() + i);
+			break;
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	//filter left of results with existing values of the same synonym
+	if(!leftVal.empty()) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(leftVal.find(vec[i].first) == leftVal.end()) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	//filter right of results with existing values of the same synonym
+	if(!rightVal.empty()) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(rightVal.find(vec[i].second) == rightVal.end()) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	set<string> newLeftVal;
+	set<string> newRightVal;
+
+	for(unsigned int i = 0; i < vec.size(); i++) {
+		newLeftVal.insert(vec[i].first);
+		newRightVal.insert(vec[i].second);
+	}
+
+	//update values of left synonym
+	if(leftVal.empty()) {
+		leftSyn->setValues(newLeftVal);
+	}
+	else if(newLeftVal.size() < leftVal.size()) {
+		leftSyn->setValues(newLeftVal);
+		updateRelatedSynVal(leftSyn);
+	}
+
+	//update values of right synonym
+	if(rightVal.empty()) {
+		rightSyn->setValues(newRightVal);
+	}
+	else if(newRightVal.size() < rightVal.size()) {
+		rightSyn->setValues(newRightVal);
+		updateRelatedSynVal(rightSyn);
+	}
+
+	if(!hasResult) {
+		return;
+	}
+		
+	vector<pair<string, string>> tuples;
+	pair<string, string> p;
+	p.first = leftSyn->getName();
+	p.second = rightSyn->getName();
+	tuples.push_back(p);
+
+	for(unsigned int i = 0; i < vec.size(); i++) {
+		tuples.push_back(vec[i]);
+	}
+
+	resultTuples.push_back(tuples);
+}
+
+void QueryEvaluator::updateOneSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+	//if both sides of results are values of the same synonym
+	//filter pairs that have different values on both sides
+	if(rNode != NULL) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(vec[i].first != vec[i].second) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+
+		if(vec.empty()) {
+			hasResult = false;
+			return;
+		}
+	}
+
+	SynonymValues* leftSyn = getSynVal(lNode->getParam());
+	set<string> leftVal = leftSyn->getValues();
+
+	//filter left of results with existing values of the same synonym
+	if(!leftVal.empty()) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(leftVal.find(vec[i].first) == leftVal.end()) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	set<string> newLeftVal;
+
+	for(unsigned int i = 0; i < vec.size(); i++) {
+		newLeftVal.insert(vec[i].first);
+	}
+
+	//update values of left synonym
+	if(leftVal.empty()) {
+		leftSyn->setValues(newLeftVal);
+	}
+	else if(newLeftVal.size() < leftVal.size()) {
+		leftSyn->setValues(newLeftVal);
+		updateRelatedSynVal(leftSyn);
+	}
+}
+
+//values of related synonyms are re-filtered and updated
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 	set<string> valSet = synVal->getValues();
 
@@ -796,6 +827,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 					rightVal.insert(resultTuples[i][j].second);
 				}
 
+				//update values of synonym
 				SynonymValues* rightSyn = getSynVal(resultTuples[i][0].second);
 				if(rightSyn->getValues().size() > rightVal.size()) {
 					rightSyn->setValues(rightVal);
@@ -823,6 +855,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 					leftVal.insert(resultTuples[i][j].first);
 				}
 
+				//update values of synonym
 				SynonymValues* leftSyn = getSynVal(resultTuples[i][0].first);
 				if(leftSyn->getValues().size() > leftVal.size()) {
 					leftSyn->setValues(leftVal);
@@ -851,6 +884,7 @@ void QueryEvaluator::evalFinalResult() {
 	}
 }
 
+//forms the list of strings for the final result
 void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	ParamNode* node = resultSynonyms[index];
 	SynonymValues* synVal = getSynVal(node->getParam());
@@ -888,9 +922,9 @@ void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
 		string singleResult = s;
 		singleResult.append(*i);
-		singleResult.append(" ");
 
 		if(index < resultSynonyms.size()) {
+			singleResult.append(" ");
 			formFinalResult(singleResult, index);
 		}
 		else {
@@ -899,6 +933,7 @@ void QueryEvaluator::formFinalResult(string s, unsigned int index) {
 	}
 }
 
+//returns the set of values for a synonym
 SynonymValues* QueryEvaluator::getSynVal(string name) {
 
 	for(unsigned int i = 0; i < synonymVec.size(); i++) {

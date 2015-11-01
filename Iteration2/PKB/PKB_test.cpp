@@ -407,8 +407,8 @@ void PKB_test::runTests() {
 	cout << "\n\nQuery is Next(progline, progline) \n"; 
 	printResults(pkb->getNext(progline, progline));
 
-	cout << "\n\nQuery is Next(progline, \"4\") \n"; 
-	printResults(pkb->getNext(progline, "4"));
+	cout << "\n\nQuery is Next(progline, \"8\") \n"; 
+	printResults(pkb->getNext(progline, "8"));
 
 	cout << "\n\nQuery is Next(\"9\", \"4\") \n"; 
 	printResults(pkb->getNext("9", "4"));
@@ -418,6 +418,30 @@ void PKB_test::runTests() {
 
 	cout << "\n\nQuery is Uses(call, variable) \n"; 
 	printResults(pkb->getUses(call, variable));
+
+	cout << "\n\nQuery is Affects(\"5\", \"8\") \n"; 
+	printResults(pkb->getAffects("5", "8"));
+
+	cout << "\n\nQuery is Affects(\"1\", assignment) \n"; 
+	printResults(pkb->getAffects("1", assignment));
+
+	cout << "\n\nQuery is Affects(assignment, \"11\") \n"; 
+	printResults(pkb->getAffects(assignment, "11"));
+
+	cout << "\n\nQuery is Affects(assignment, assignment) \n"; 
+	printResults(pkb->getAffects(assignment, assignment));
+
+	cout << "\n\nQuery is Affects*(\"1\", assignment) \n"; 
+	printResults(pkb->getAffectsStar("1", assignment));
+
+	cout << "\n\nQuery is Affects*(assignment, \"8\") \n"; 
+	printResults(pkb->getAffectsStar(assignment, "8"));
+
+	cout << "\n\nQuery is Affects*(\"1\", \"8\") \n"; 
+	printResults(pkb->getAffectsStar("1", "8"));
+
+	cout << "\n\nQuery is Affects*(assignment, assignment) \n"; 
+	printResults(pkb->getAffectsStar(assignment, assignment));
 
 	cin.get();
 }
