@@ -1381,14 +1381,14 @@ void PKB::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<stri
 				if(stop == "" || (stop != "" && stop == stmt->getLine())) {
 					results->insert(make_pair(origin, stmt->getLine()));
 				}
-				forwardAffectsSearch(results, searched, stmt, origin, varName, stop, true);
+				forwardAffectsSearch(results, searched, stmt, origin, varName, stop, indirect);
 				if (indirect) { 
-					forwardAffectsSearch(results, searched, stmt, origin, stmt->getLeftChild()->getValue(), stop, true);
+					forwardAffectsSearch(results, searched, stmt, origin, stmt->getLeftChild()->getValue(), stop, indirect);
 				}
 			} else if ((stmt->getType() == assignment && stmt->getLeftChild()->getValue() != varName)
 					|| (stmt->getType() == call && !isModified(stmt->getLine(), varName))
 					|| (stmt->getType() != call && stmt->getType() != assignment)){
-				forwardAffectsSearch(results, searched, stmt, origin, varName, stop, true);
+				forwardAffectsSearch(results, searched, stmt, origin, varName, stop, indirect);
 			}
 		}
 	}
@@ -1405,13 +1405,13 @@ void PKB::reverseAffectsSearch(set<pair<string, string>>* results, set<pair<stri
 				if (indirect) {
 					vector<pair<string, string>> uses = getUses(stmt->getLine(), variable);
 					for (int j=0; j<uses.size(); j++) {
-						reverseAffectsSearch(results, searched, stmt, origin, uses[j].second, true);
+						reverseAffectsSearch(results, searched, stmt, origin, uses[j].second, indirect);
 					}
 				}
 			} else if ((stmt->getType() == assignment && !isModified(stmt->getLine(), varName))
 					|| (stmt->getType() == call && !isModified(stmt->getLine(), varName))
 					|| (stmt->getType() != call && stmt->getType() != assignment)) {
-				reverseAffectsSearch(results, searched, stmt, origin, varName, true);
+				reverseAffectsSearch(results, searched, stmt, origin, varName, indirect);
 			}
 		}
 	}
