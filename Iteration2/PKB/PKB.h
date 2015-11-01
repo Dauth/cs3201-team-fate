@@ -49,8 +49,8 @@ class PKB {
 	SyntType getStatementType(Node&);
 	Node* getFollowee(Node*);
 	Node* getFollowedBy(Node*);
-	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, string);
-	void reverseAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string);
+	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, string, bool);
+	void reverseAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, bool);
 public:
 	PKB(ExpressionTree*);
 
