@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <stack>
@@ -172,6 +174,9 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 	std::string stmString = "";
 	std::string stmNameString = "";
 	int statementType = -1;
+	std::string dotGraph = "digraph AST{\n graph [ordering=\"out\"];\n prog[label=\"MainProg\" shape=box];\n";
+	std::vector<int> graphVector;
+	int counter = 1;
 
 	for(unsigned int i = 0; i < sourceVector.size(); i++){
 
@@ -194,12 +199,12 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				if(statementType == CALLSTM){
 					catchMissingStmNameException(stmString, stmNameString, i);
 					expTree->catchInvalidNameException(stmNameString);
-					createCallNode(stmNameString, lineNumber, currentProcName, twinVector, i);
+					createCallNode(stmNameString, lineNumber, currentProcName, twinVector, i, dotGraph, counter, graphVector);
 					lineNumber += 1;
 					clearStmHolder(stmString, stmNameString, statementType);
 				}else if(statementType == ASSIGNSTM){//for assignstm, all will be stored only in stmstring
 					//catchMissingSemiColonException(line, i);
-					createAssignNode(stmString, lineNumber, twinVector, i);
+					createAssignNode(stmString, lineNumber, twinVector, i, dotGraph, counter, graphVector);
 					lineNumber += 1;
 					clearStmHolder(stmString, stmNameString, statementType);
 				}
@@ -215,10 +220,10 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 					if(statementType == PROCEDURESTM && twinVector.empty()){
 						catchParamProcException(stmNameString, i);
 						currentProcName = stmNameString;
-						createProcNode(stmNameString, mainProg, bracesStack, twinVector, i);
+						createProcNode(stmNameString, mainProg, bracesStack, twinVector, i, dotGraph, counter, graphVector);
 						clearStmHolder(stmString, stmNameString, statementType);
 					}else if(statementType == WHILESTM){
-						createWhileNode(stmNameString, lineNumber, twinVector);
+						createWhileNode(stmNameString, lineNumber, twinVector, dotGraph, counter, graphVector);
 						lineNumber += 1;
 						clearStmHolder(stmString, stmNameString, statementType);
 					}else if(statementType == IFTHENSTM){
@@ -226,7 +231,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 						bool isThenPresent = getIndexOfThen(stmNameString, indexOfThen);
 						catchThenException(i, isThenPresent);
 						std::string ifStmName = stmNameString.substr(0, indexOfThen);
-						createIfElseNode(ifStmName, lineNumber, twinVector);
+						createIfElseNode(ifStmName, lineNumber, twinVector, dotGraph, counter, graphVector);
 						lineNumber += 1;
 						clearStmHolder(stmString, stmNameString, statementType);
 					}
@@ -245,6 +250,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 				catchUnequalBracesException(bracesStack, i);
 				catchEmptyContainerException(twinVector, i);
 				popImmediateParent(bracesStack, twinVector);
+				graphVector.pop_back();
 			}
 		}
 
@@ -253,7 +259,13 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 
 	}
-
+	/*Graph drawing*/
+	dotGraph.append("}");
+	ofstream myfile;
+	myfile.open ("ast.dot");
+	myfile << dotGraph;
+	myfile.close();
+	////
 	return mainProg;
 
 }
@@ -337,7 +349,7 @@ bool AST::isParamProcedure(std::string input){
 	return result;
 }
 
-void AST::createIfElseNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector){
+void AST::createIfElseNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* ifStm = nullptr;
 
@@ -355,6 +367,23 @@ void AST::createIfElseNode(std::string varName, int lineNumber, std::vector<Twin
 
 	twinVector.push_back(yTwin);
 	twinVector.push_back(tTwin);
+
+
+	/*Graph Drawing*/
+	std::string ifStmString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() +"[label=\":if\" shape=box];\n";
+	std::string ifStmVarString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ varName +":variable\" shape=box];\n";
+	std::string thenStmLstString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\"then:stmLst\" shape=box];\n";
+	std::string elseStmLstString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\"else:stmLst\" shape=box];\n";
+	dotGraph.append(ifStmString);
+	dotGraph.append(ifStmVarString);
+	dotGraph.append(thenStmLstString);
+	dotGraph.append(elseStmLstString);
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << graphVector[graphVector.size()-1]) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 4) )->str()+'\n');
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 4) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 3) )->str()+'\n');//link if to var
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 4) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 2) )->str()+'\n');//link if to then stmlst
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 4) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');//link if to else stmlst
+	graphVector.push_back(counter - 1);
+	graphVector.push_back(counter - 2);
 }
 
 void AST::setupIfThenListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& ifStm, Node* procNode, Node*& thenStmLst, Node*& elseStmLst){
@@ -378,7 +407,7 @@ void AST::setupIfThenListNode(int lineNumber, std::vector<Twin*>& twinVector, st
 	ifStm->setThirdChild(elseStmLst);
 }
 
-void AST::createWhileNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector){
+void AST::createWhileNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* whileStm = nullptr;
 
@@ -392,6 +421,19 @@ void AST::createWhileNode(std::string varName, int lineNumber, std::vector<Twin*
 	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(whileStm);
 
 	twinVector.push_back(tTwin);
+
+	/*Graph Drawing*/
+	std::string whileStmString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() +"[label=\":while\" shape=box];\n";
+	std::string whileStmVarString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ varName +":variable\" shape=box];\n";
+	std::string whileStmGraphString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\":stmLst\" shape=box];\n";
+	dotGraph.append(whileStmString);
+	dotGraph.append(whileStmVarString);
+	dotGraph.append(whileStmGraphString);
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << graphVector[graphVector.size()-1]) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 3) )->str()+'\n');
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 3) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 2) )->str()+'\n');
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 3) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');
+	graphVector.push_back(counter - 1);
+
 }
 
 void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst){
@@ -443,7 +485,7 @@ void AST::catchExpressionException(unsigned i, std::vector<std::string>& assignV
 	}
 }
 
-void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i){
+void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	std::vector<std::string> assignVector;// should have size of 2 only. Left and Right side without the equal
 	extractExpressionVar(line, assignVector);
 	catchExpressionException(i, assignVector);
@@ -455,12 +497,14 @@ void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>&
 	Node* procNode = twinVector.front()->getStmNode();
 	Node* assignStm = nullptr;
 
-	setupAssignVarListNode(assignVector[1], lineNumber, twinVector, i, varName, procNode, assignStm);
+	setupAssignVarListNode(assignVector[1], lineNumber, twinVector, i, varName, procNode, assignStm, dotGraph, counter, graphVector);
 
 	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(assignStm);
+
+
 }
 
-void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm){
+void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* parentNode = nullptr;
 	Node* assignVar = nullptr;
@@ -484,9 +528,20 @@ void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<T
 
 	std::vector<std::string> postflix = expTree->expressionConverter(line);
 
-	Node* assignExp = expTree->exptreeSetup(pkb, postflix, lineNumber, assignStm, procNode, parentNode);
+	Node* assignExp = expTree->exptreeSetup(pkb, postflix, lineNumber, assignStm, procNode, parentNode, dotGraph, counter, graphVector);
 
 	assignStm->setRightChild(assignExp);
+
+
+	/*Graph Drawing*/
+	std::string assignStmString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() +"[label=\":assign\" shape=box];\n";
+	std::string assignStmVarString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ varName +":variable\" shape=box];\n";
+	dotGraph.append(assignStmString);
+	dotGraph.append(assignStmVarString);
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << graphVector[graphVector.size()-1]) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 2) )->str()+'\n');//link stmLst to assign
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 2) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');//link assign to var
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 2) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 3) )->str()+'\n');// link assign to right var
+
 }
 
 void AST::popImmediateParent(std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector){
@@ -494,7 +549,7 @@ void AST::popImmediateParent(std::stack<std::string>& bracesStack, std::vector<T
 	twinVector.erase(twinVector.end() - 1);
 }
 
-void AST::createCallNode(std::string stmName, int lineNumber, std::string& currentProcName, std::vector<Twin*>& twinVector, unsigned i){
+void AST::createCallNode(std::string stmName, int lineNumber, std::string& currentProcName, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	catchRecursiveCallException(currentProcName, i, stmName);
 
 	Node* tCall = nullptr;
@@ -508,10 +563,14 @@ void AST::createCallNode(std::string stmName, int lineNumber, std::string& curre
 	}
 
 	twinVector[twinVector.size() - 1]->getStmListNode()->addStmt(tCall);
+
+	/*Graph Drawing*/
+	std::string callStmString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ stmName +":Call\" shape=box];\n";
+	dotGraph.append(callStmString);
+	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << graphVector[graphVector.size()-1]) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');
 }
 
-void AST::createProcNode(std::string& currentProcName, std::vector<Node*>& mainProg, std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector, unsigned i){
-
+void AST::createProcNode(std::string& currentProcName, std::vector<Node*>& mainProg, std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){	
 	Node* procStm = nullptr;
 	Node* stmLst = nullptr;
 
@@ -529,4 +588,13 @@ void AST::createProcNode(std::string& currentProcName, std::vector<Node*>& mainP
 	Twin* tTwin = new Twin(procStm, stmLst);
 	twinVector.push_back(tTwin);
 
+	/*Graph Drawing*/
+	std::string procStmString = static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() +"[label=\""+ currentProcName+":procedure\" shape=box];\n";
+	std::string procStmGraphString = static_cast<ostringstream*>( &(ostringstream() << counter) )->str() + "[label=\":stmLst\" shape=box];\n";
+	dotGraph.append(procStmString);
+	dotGraph.append("prog->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');
+	dotGraph.append(procStmGraphString);
+	std::string linkString = static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str() + "->" + static_cast<ostringstream*>( &(ostringstream() << counter) )->str() + '\n';
+	dotGraph.append(linkString);
+	graphVector.push_back(counter++);
 }
