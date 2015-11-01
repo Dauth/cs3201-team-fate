@@ -37,7 +37,7 @@ class PKB {
 	int compare(Node*, Node*);
 	bool isExpression(std::string);
 	bool isUsed(string, string);
-	bool doesNotModify(string, string);
+	bool isModified(string, string);
 
 	 
 	void handleInheritance(Node*, Node*, Node*, Node*);
@@ -49,8 +49,8 @@ class PKB {
 	SyntType getStatementType(Node&);
 	Node* getFollowee(Node*);
 	Node* getFollowedBy(Node*);
-	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string);
-
+	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, string);
+	void reverseAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string);
 public:
 	PKB(ExpressionTree*);
 
