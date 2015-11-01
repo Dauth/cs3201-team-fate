@@ -502,10 +502,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -534,10 +534,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -566,10 +566,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -598,10 +598,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
