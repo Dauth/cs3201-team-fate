@@ -62,3 +62,14 @@ void UsesTable::addUses(Node* nodeLeft, string varName) {
 		leftTypeKeyTable[statement].insert(modifies);
 	}
 }
+
+bool UsesTable::isUsed(string stmt, string varname) {
+	if (leftKeyTable.find(stmt) == leftKeyTable.end()) {
+		return false;
+	}
+	set<pair<string, string>> uses = leftKeyTable[stmt];
+	if (uses.find(make_pair(stmt, varname)) == uses.end()) {
+		return false;
+	}
+	return true;
+}
