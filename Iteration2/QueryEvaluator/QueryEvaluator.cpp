@@ -84,7 +84,7 @@ void QueryEvaluator::optimise() {
 			queryWithNoResult.push_back(queryParts[i]);
 		}
 		else {
-			queryWithNoResult.insert(queryWithOneResult.begin(), queryParts[i]);
+			queryWithNoResult.insert(queryWithNoResult.begin(), queryParts[i]);
 		}
 	}
 
@@ -502,10 +502,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -534,10 +534,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -566,10 +566,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -598,10 +598,10 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 			return pkb->getNext(left, right);
 		case nxtStar	:
 			return pkb->getNextStar(left, right);
-/*		case affects	:
+		case affects	:
 			return pkb->getAffects(left, right);
 		case affectsStar:
-			return pkb->getAffectsStar(left, right);*/
+			return pkb->getAffectsStar(left, right);
 		default			:
 			vector<pair<string, string>> empty;
 			return empty;
@@ -614,10 +614,10 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 		updateTwoSynVal(lNode, rNode, vec);
 	}
 	else if(lNode != NULL) {
-		updateOneSynVal(lNode, rNode, vec);
+		updateLeftSynVal(lNode, rNode, vec);
 	}
 	else {
-		updateOneSynVal(rNode, lNode, vec);
+		updateRightSynVal(lNode, rNode, vec);
 	}
 }
 
@@ -749,7 +749,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 	resultTuples.push_back(tuples);
 }
 
-void QueryEvaluator::updateOneSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	//if both sides of results are values of the same synonym
 	//filter pairs that have different values on both sides
 	if(rNode != NULL) {
@@ -797,6 +797,41 @@ void QueryEvaluator::updateOneSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 	else if(newLeftVal.size() < leftVal.size()) {
 		leftSyn->setValues(newLeftVal);
 		updateRelatedSynVal(leftSyn);
+	}
+}
+
+void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+	SynonymValues* rightSyn = getSynVal(rNode->getParam());
+	set<string> rightVal = rightSyn->getValues();
+
+	//filter left of results with existing values of the same synonym
+	if(!rightVal.empty()) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(rightVal.find(vec[i].second) == rightVal.end()) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	set<string> newRightVal;
+
+	for(unsigned int i = 0; i < vec.size(); i++) {
+		newRightVal.insert(vec[i].second);
+	}
+
+	//update values of left synonym
+	if(rightVal.empty()) {
+		rightSyn->setValues(newRightVal);
+	}
+	else if(newRightVal.size() < rightVal.size()) {
+		rightSyn->setValues(newRightVal);
+		updateRelatedSynVal(rightSyn);
 	}
 }
 

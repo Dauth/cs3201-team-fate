@@ -34,7 +34,8 @@ class QueryEvaluator {
 	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, SyntType);
 	void updateSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void QueryEvaluator::updateTwoSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
-	void QueryEvaluator::updateOneSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
+	void QueryEvaluator::updateLeftSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
+	void QueryEvaluator::updateRightSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void updateRelatedSynVal(SynonymValues*);
 	void evalFinalResult();
 	void formFinalResult(string, unsigned int);
