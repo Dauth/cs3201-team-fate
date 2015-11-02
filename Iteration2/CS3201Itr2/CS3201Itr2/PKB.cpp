@@ -1229,8 +1229,7 @@ vector<pair<string, string>> PKB::getAffects(SyntType st, string assign) {
 	}
 	vector<pair<string, string>> uses = getUses(assign, variable);
 	for (int i=0; i<uses.size(); i++) {
-		vector<pair<string, string>> modifies = getModifies(assignment, uses[i].second);
-		if(modifies.size() != 0) {
+		if(modifiesTable.isModified(assignnode->getRoot()->getValue(), uses[i].second)) {
 			set<pair<string, Node*>> searched;
 			reverseAffectsSearch(&results, &searched, assignnode, assign, uses[i].second, false);
 		}
@@ -1245,8 +1244,7 @@ vector<pair<string, string>> PKB::getAffects(string assign, SyntType st) {
 		return vector<pair<string, string>>();
 	}
 	string varName = assignnode->getLeftChild()->getValue();
-	vector<pair<string, string>> uses = getUses(assignnode->getRoot()->getValue(), varName);
-	if(uses.size() == 0) {
+	if(!usesTable.isUsed(assignnode->getRoot()->getValue(), varName)) {
 		return vector<pair<string, string>>();
 	}
 	set<pair<string, Node*>> searched;
@@ -1265,8 +1263,7 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 		return vector<pair<string, string>>();
 	}
 	string varName = assign1node->getLeftChild()->getValue();
-	vector<pair<string, string>> uses = getUses(assign2node->getLine(), varName);
-	if(uses.size() == 0) {
+	if(!usesTable.isUsed(assign2node->getRoot()->getValue(), varName)) {
 		return vector<pair<string, string>>();
 	}
 	set<pair<string, Node*>> searched;
@@ -1292,8 +1289,7 @@ vector<pair<string, string>> PKB::getAffectsStar(SyntType st, string assign) {
 	}
 	vector<pair<string, string>> uses = getUses(assign, variable);
 	for (int i=0; i<uses.size(); i++) {
-		vector<pair<string, string>> modifies = getModifies(assignment, uses[i].second);
-		if(modifies.size() != 0) {
+		if(modifiesTable.isModified(assignnode->getRoot()->getValue(), uses[i].second)) {
 			set<pair<string, Node*>> searched;
 			reverseAffectsSearch(&results, &searched, assignnode, assign, uses[i].second, true);
 		}
@@ -1308,8 +1304,7 @@ vector<pair<string, string>> PKB::getAffectsStar(string assign, SyntType st) {
 		return vector<pair<string, string>>();
 	}
 	string varName = assignnode->getLeftChild()->getValue();
-	vector<pair<string, string>> uses = getUses(assignnode->getRoot()->getValue(), varName);
-	if(uses.size() == 0) {
+	if(!usesTable.isUsed(assignnode->getRoot()->getValue(), varName)) {
 		return vector<pair<string, string>>();
 	}
 	set<pair<string, Node*>> searched;
@@ -1328,8 +1323,7 @@ vector<pair<string, string>> PKB::getAffectsStar(string assign1, string assign2)
 		return vector<pair<string, string>>();
 	}
 	string varName = assign1node->getLeftChild()->getValue();
-	vector<pair<string, string>> uses = getUses(assign1node->getRoot()->getValue(), varName);
-	if(uses.size() == 0) {
+	if(!usesTable.isUsed(assign2node->getRoot()->getValue(), varName)) {
 		return vector<pair<string, string>>();
 	}
 	set<pair<string, Node*>> searched;
@@ -1347,7 +1341,9 @@ void PKB::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<stri
 				if(stop == "" || (stop != "" && stop == stmt->getLine())) {
 					results->insert(make_pair(origin, stmt->getLine()));
 				}
-				forwardAffectsSearch(results, searched, stmt, origin, varName, stop, indirect);
+				if(stop != stmt->getLine()) {
+					forwardAffectsSearch(results, searched, stmt, origin, varName, stop, indirect);
+				}
 				if (indirect) { 
 					forwardAffectsSearch(results, searched, stmt, origin, stmt->getLeftChild()->getValue(), stop, indirect);
 				}
