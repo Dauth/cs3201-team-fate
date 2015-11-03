@@ -965,77 +965,29 @@ void QueryEvaluator::evalFinalResult() {
 //forms the list of strings for the final result
 void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 	if(parentRow.empty()) {
-		vector<string> currentRow;
+		ParamNode* node = resultSynonyms[0];
+		SynonymValues* synVal = getSynVal(node->getParam());
+		set<string> valSet = synVal->getValues();
 
-		for(unsigned int i = 0; i < resultTuples.size(); i++) {
-			if(resultTuples[i][0].first == resultSynonyms[0]->getParam() && resultTuples[i][0].second == resultSynonyms[1]->getParam()) {
-				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-					currentRow.clear();
-					currentRow.push_back(resultTuples[i][j].first);
-					currentRow.push_back(resultTuples[i][j].second);
-					formFinalResult(currentRow);
+		if(valSet.empty()) {
+			vector<Node*> result = pkb->getNodes(node->getType());
+
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getValue());
 				}
-
-				break;
 			}
-			else if(resultTuples[i][0].first == resultSynonyms[1]->getParam() && resultTuples[i][0].second == resultSynonyms[0]->getParam()) {
-				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-					currentRow.clear();
-					currentRow.push_back(resultTuples[i][j].second);
-					currentRow.push_back(resultTuples[i][j].first);
-					formFinalResult(currentRow);
+			else {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getLine());
 				}
-
-				break;
 			}
 		}
 
-		if(currentRow.empty()) {
-			ParamNode* lNode = resultSynonyms[0];
-			ParamNode* rNode = resultSynonyms[1];
-			SynonymValues* lSynVal = getSynVal(lNode->getParam());
-			SynonymValues* rSynVal = getSynVal(rNode->getParam());
-			set<string> lValSet = lSynVal->getValues();
-			set<string> rValSet = rSynVal->getValues();
-
-			if(lValSet.empty()) {
-				vector<Node*> result = pkb->getNodes(lNode->getType());
-
-				if(lNode->getType() == procedure || lNode->getType() == variable || lNode->getType() == constant || lNode->getType() == statementList) {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						lValSet.insert(result[i]->getValue());
-					}
-				}
-				else {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						lValSet.insert(result[i]->getLine());
-					}
-				}
-			}
-			
-			if(rValSet.empty()) {
-				vector<Node*> result = pkb->getNodes(rNode->getType());
-
-				if(rNode->getType() == procedure || rNode->getType() == variable || rNode->getType() == constant || rNode->getType() == statementList) {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						rValSet.insert(result[i]->getValue());
-					}
-				}
-				else {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						rValSet.insert(result[i]->getLine());
-					}
-				}
-			}
-
-			for(set<string>::iterator i = lValSet.begin(); i != lValSet.end(); i++) {
-				for(set<string>::iterator j = rValSet.begin(); j != rValSet.end(); j++) {
-					currentRow.clear();
-					currentRow.push_back(*i);
-					currentRow.push_back(*j);
-					formFinalResult(currentRow);
-				}
-			}
+		for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+			vector<string> currentRow;
+			currentRow.push_back(*i);
+			formFinalResult(currentRow);
 		}
 	}
 	else if(parentRow.size() < resultSynonyms.size()) {
