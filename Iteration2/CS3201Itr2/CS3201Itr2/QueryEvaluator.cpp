@@ -1041,6 +1041,7 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 	else if(parentRow.size() < resultSynonyms.size()) {
 		vector<vector<string>> rows;
 		int curIndex = parentRow.size();
+		bool tuplesExist = false;
 
 		for(unsigned int h = 0; h < curIndex; h++) {
 			for(unsigned int i = 0; i < resultTuples.size(); i++) {
@@ -1049,6 +1050,8 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 					//else, compare corresponding 2 values in each "row" of rows with every pair values in current resultTuples
 					//if the 2 values does not exist in current resultTuples, remove the "row"
 					if(rows.empty()) {
+						tuplesExist = true;
+
 						for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
 							if(parentRow[h] == resultTuples[i][j].first) {
 								vector<string> currentRow (parentRow);
@@ -1113,7 +1116,7 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 			}
 		}
 
-		if(rows.empty()) {
+		if(!tuplesExist) {
 			ParamNode* node = resultSynonyms[curIndex];
 			SynonymValues* synVal = getSynVal(node->getParam());
 			set<string> valSet = synVal->getValues();
