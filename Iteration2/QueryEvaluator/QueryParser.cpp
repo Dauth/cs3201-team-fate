@@ -606,12 +606,12 @@ void ProcessEachToken(char *currentToken)
 		existClauses = true;
 		expectingThat = false;
 	}
-	else if (strcmp(currentToken,"with") == 0 && (currToken == TOKEN::AND_END || currToken == TOKEN::RESULT_CL))
+	else if (strcmp(currentToken,"with") == 0 && currToken == TOKEN::AND_END )
 	{
 		currToken = TOKEN::WITH_CL;
 		existWith = true;
 	}
-	else if (strcmp(currentToken,"pattern") == 0)
+	else if (strcmp(currentToken,"pattern") == 0 && currToken == TOKEN::AND_END)
 	{
 		if (currToken != TOKEN::RESULT_CL)
 		{
@@ -620,7 +620,7 @@ void ProcessEachToken(char *currentToken)
 		currToken = TOKEN::PATTERN_CL;
 		existClauses = true;
 	}
-	else if (strcmp(currentToken,"such") == 0)
+	else if (strcmp(currentToken,"such") == 0 && currToken == TOKEN::AND_END)
 	{
 		expectingThat = true;
 	}
@@ -809,11 +809,22 @@ void ProcessEachToken(char *currentToken)
 			{
 
 				regex tuple("<[^>]+>");
+				regex beginTuple("<.*");
+				string strToken = "";
+				bool tupleExist = false;
 				regex boolean("BOOLEAN");
 				// 
-				if (regex_match(currentToken,tuple))
+				
+				concatStmt += currentToken;
+				if (regex_match(concatStmt, beginTuple) && !regex_match(concatStmt, tuple))
 				{
-					string strToken = currentToken;
+					strToken = concatStmt;
+					tupleExist = true;
+				}
+				
+				if (regex_match(concatStmt,tuple))
+				{
+					strToken = concatStmt;
 					removeCharsFromString( strToken, "<>" );
 					std::vector<char> writable(strToken.begin(), strToken.end());
 					writable.push_back('\0');
@@ -832,6 +843,8 @@ void ProcessEachToken(char *currentToken)
 							{
 								ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),*i);
 								qo.resultVec.push_back(newResultSynonym);
+								completeSelectStmt = true;
+								currToken = TOKEN::AND_END;
 								//newSymbol->setResult(newSymbol->getIndex(currentToken));
 							}
 						}
@@ -842,6 +855,8 @@ void ProcessEachToken(char *currentToken)
 				else if (regex_match(currentToken, boolean))
 				{
 					resultBool = true;
+					completeSelectStmt = true;
+					currToken = TOKEN::AND_END;
 					concatStmt = "";
 					//qo.resultVec.push_back(new ParamNode());
 				}
@@ -869,6 +884,9 @@ void ProcessEachToken(char *currentToken)
 								currAttr = AttrType::integerType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
+								completeSelectStmt = true;
+								currToken = TOKEN::AND_END;
+								concatStmt = "";
 							}
 							else
 							{
@@ -883,6 +901,9 @@ void ProcessEachToken(char *currentToken)
 								currAttr = AttrType::integerType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
+								completeSelectStmt = true;
+								currToken = TOKEN::AND_END;
+								concatStmt = "";
 							}
 							else
 							{
@@ -897,6 +918,9 @@ void ProcessEachToken(char *currentToken)
 								currAttr = AttrType::stringType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
+								completeSelectStmt = true;
+								currToken = TOKEN::AND_END;
+								concatStmt = "";
 							}
 							else
 							{
@@ -910,6 +934,9 @@ void ProcessEachToken(char *currentToken)
 								currAttr = AttrType::stringType;
 								ParamNode* newParamNode = new ParamNode(currSynt,currAttr,attrVariables[0]);
 								qo.resultVec.push_back(newParamNode);
+								completeSelectStmt = true;
+								currToken = TOKEN::AND_END;
+								concatStmt = "";
 							}
 							else
 							{
@@ -927,25 +954,29 @@ void ProcessEachToken(char *currentToken)
 				}// end of checking left hand for synonym.attributeName
 				else
 				{
-					if (!newSymbol->exists(currentToken)) 
+					if (!newSymbol->exists(currentToken) && !tupleExist) 
 					{ 
 						nonExistantSyn = true; 
 						concatStmt = "";
 						errorMsg += ("- Synonym \"%s\" after Select statement is not declared." , currentToken);
 					} //TODO THROW ERROR because variable doesn't exist
 					else
-					{							
+					{	
+						if (!tupleExist)
+						{
 						SyntType newSyntSymbol = newSymbol->getSyntType(currentToken);
 						if (newSyntSymbol != SyntType::synError)
 						{
 							ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),currentToken);
 							qo.resultVec.push_back(newResultSynonym);
+							currToken = TOKEN::AND_END;
+							completeSelectStmt = true;
+							concatStmt = "";
+						}
 						}
 					}
 				}
 
-
-				completeSelectStmt = true;
 			}break;
 
 		case TOKEN::SUCHTHAT_CL: 
