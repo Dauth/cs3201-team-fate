@@ -658,7 +658,7 @@ void ProcessEachToken(char *currentToken)
 			}break;
 		case TOKEN::AND_END:
 			{
-				if (strcmp(currentToken,"and") == 0)
+				if (strcmp(currentToken,"and") == 0 && previousToken != TOKEN::SELECT)
 				{
 					currToken = previousToken ;
 					// For future Iteration
