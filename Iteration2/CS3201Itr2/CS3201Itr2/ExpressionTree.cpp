@@ -36,8 +36,8 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
 		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
-			catchInvalidNameException(tempStr);
 			if(!tempStr.empty()){
+				catchInvalidNameException(tempStr);
 				splittedString.push_back(tempStr);
 				tempStr.clear();
 			}
