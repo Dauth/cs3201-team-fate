@@ -84,7 +84,7 @@ void QueryEvaluator::optimise() {
 			queryWithNoResult.push_back(queryParts[i]);
 		}
 		else {
-			queryWithNoResult.insert(queryWithOneResult.begin(), queryParts[i]);
+			queryWithNoResult.insert(queryWithNoResult.begin(), queryParts[i]);
 		}
 	}
 
@@ -273,11 +273,34 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	ParamNode* right = qp->getRightParam();
 
 	if(left->getType() == integer || left->getType() == expression) {
-		if(right->getType() == integer || right->getType() == expression) {
-			return getResultFromPKB(qp->getType(), left->getParam(), right->getParam());
+		if(left->getParam() == "_") {
+			SyntType leftType = getSyntType(qp->getType());
+			if(right->getType() == integer || right->getType() == expression) {
+				if(right->getParam() == "_") {
+					SyntType rightType = getSyntType(qp->getType());
+					return getResultFromPKB(qp->getType(), leftType, rightType);
+				}
+				else {
+					return getResultFromPKB(qp->getType(), leftType, right->getParam());
+				}
+			}
+			else {
+				return getResultFromPKB(qp->getType(), leftType, right->getType());
+			}
 		}
 		else {
-			return getResultFromPKB(qp->getType(), left->getParam(), right->getType());
+			if(right->getType() == integer || right->getType() == expression) {
+				if(right->getParam() == "_") {
+					SyntType rightType = getSyntType(qp->getType());
+					return getResultFromPKB(qp->getType(), left->getParam(), rightType);
+				}
+				else {
+					return getResultFromPKB(qp->getType(), left->getParam(), right->getParam());
+				}
+			}
+			else {
+				return getResultFromPKB(qp->getType(), left->getParam(), right->getType());
+			}
 		}
 	}
 	else if(right->getType() == integer || right->getType() == expression) {
@@ -285,7 +308,13 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 			return pkb->searchWithPattern(left->getType(), right->getParam(), qp->getLastParam()->getParam());
 		}
 		else {
-			return getResultFromPKB(qp->getType(), left->getType(), right->getParam());
+			if(right->getParam() == "_") {
+				SyntType rightType = getSyntType(qp->getType());
+				return getResultFromPKB(qp->getType(), left->getType(), rightType);
+			}
+			else {
+				return getResultFromPKB(qp->getType(), left->getType(), right->getParam());
+			}
 		}
 	}
 	else {
@@ -295,6 +324,19 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 		else {
 			return getResultFromPKB(qp->getType(), left->getType(), right->getType());
 		}
+	}
+}
+
+//get the appropriate SyntType that represents "_" in a QueryPart
+SyntType QueryEvaluator::getSyntType(QueryType qType) {
+	if(qType == calls || qType == callsStar) {
+		return procedure;
+	}
+	else if(qType == modifies || qType == uses) {
+		return variable;
+	}
+	else {
+		return statement;
 	}
 }
 
@@ -614,10 +656,10 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 		updateTwoSynVal(lNode, rNode, vec);
 	}
 	else if(lNode != NULL) {
-		updateOneSynVal(lNode, rNode, vec);
+		updateLeftSynVal(lNode, rNode, vec);
 	}
 	else {
-		updateOneSynVal(rNode, lNode, vec);
+		updateRightSynVal(lNode, rNode, vec);
 	}
 }
 
@@ -749,7 +791,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 	resultTuples.push_back(tuples);
 }
 
-void QueryEvaluator::updateOneSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	//if both sides of results are values of the same synonym
 	//filter pairs that have different values on both sides
 	if(rNode != NULL) {
@@ -797,6 +839,41 @@ void QueryEvaluator::updateOneSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 	else if(newLeftVal.size() < leftVal.size()) {
 		leftSyn->setValues(newLeftVal);
 		updateRelatedSynVal(leftSyn);
+	}
+}
+
+void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
+	SynonymValues* rightSyn = getSynVal(rNode->getParam());
+	set<string> rightVal = rightSyn->getValues();
+
+	//filter left of results with existing values of the same synonym
+	if(!rightVal.empty()) {
+		for(unsigned int i = 0; i < vec.size(); i++) {
+			if(rightVal.find(vec[i].second) == rightVal.end()) {
+				vec.erase(vec.begin() + i);
+				i--;
+			}
+		}
+	}
+
+	if(vec.empty()) {
+		hasResult = false;
+		return;
+	}
+
+	set<string> newRightVal;
+
+	for(unsigned int i = 0; i < vec.size(); i++) {
+		newRightVal.insert(vec[i].second);
+	}
+
+	//update values of left synonym
+	if(rightVal.empty()) {
+		rightSyn->setValues(newRightVal);
+	}
+	else if(newRightVal.size() < rightVal.size()) {
+		rightSyn->setValues(newRightVal);
+		updateRelatedSynVal(rightSyn);
 	}
 }
 
@@ -880,56 +957,171 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		formFinalResult("", 0);
+		vector<string> empty;
+		formFinalResult(empty);
 	}
 }
 
 //forms the list of strings for the final result
-void QueryEvaluator::formFinalResult(string s, unsigned int index) {
-	ParamNode* node = resultSynonyms[index];
-	SynonymValues* synVal = getSynVal(node->getParam());
-	set<string> valSet = synVal->getValues();
+void QueryEvaluator::formFinalResult(vector<string> parentRow) {
+	if(parentRow.empty()) {
+		ParamNode* node = resultSynonyms[0];
+		SynonymValues* synVal = getSynVal(node->getParam());
+		set<string> valSet = synVal->getValues();
 
-	if(valSet.empty()) {
-		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
+		if(valSet.empty()) {
+			vector<Node*> result = pkb->getNodes(node->getType());
 
-		if((node->getType() == call && node->getAttrType() == stringType) || node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
-			for(unsigned int i = 0; i < result.size(); i++) {
-				valSet.insert(result[i]->getValue());
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getValue());
+				}
+			}
+			else {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getLine());
+				}
 			}
 		}
-		else {
-			for(unsigned int i = 0; i < result.size(); i++) {
-				valSet.insert(result[i]->getLine());
-			}
+
+		for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+			vector<string> currentRow;
+			currentRow.push_back(*i);
+			formFinalResult(currentRow);
 		}
 	}
-	else if(resultSynonyms[index]->getType() == call && resultSynonyms[index]->getAttrType() == stringType) {
-		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
+	else if(parentRow.size() < resultSynonyms.size()) {
+		vector<vector<string>> rows;
+		int curIndex = parentRow.size();
+		bool tuplesExist = false;
 
-		for(unsigned int i = 0; i < result.size(); i++) {
-			string stmtLine = result[i]->getLine();
+		for(unsigned int h = 0; h < curIndex; h++) {
+			for(unsigned int i = 0; i < resultTuples.size(); i++) {
+				if(resultTuples[i][0].first == resultSynonyms[h]->getParam() && resultTuples[i][0].second == resultSynonyms[curIndex]->getParam()) {
+					//if values in parentRow and values of current synonym has not been added to rows, add them to rows
+					//else, compare corresponding 2 values in each "row" of rows with every pair values in current resultTuples
+					//if the 2 values does not exist in current resultTuples, remove the "row"
+					if(rows.empty()) {
+						tuplesExist = true;
 
-			if(valSet.find(stmtLine) != valSet.end()) {
-				valSet.insert(result[i]->getValue());
-				valSet.erase(stmtLine);
+						for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+							if(parentRow[h] == resultTuples[i][j].first) {
+								vector<string> currentRow (parentRow);
+								currentRow.push_back(resultTuples[i][j].second);
+								rows.push_back(currentRow);
+							}
+						}
+					}
+					else {
+						for(unsigned int j = 0; j < rows.size(); j++) {
+							bool pairExists = false;
+
+							for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+								if(rows[j][h] == resultTuples[i][k].first && rows[j][curIndex] == resultTuples[i][k].second) {
+									pairExists = true;
+									break;
+								}
+							}
+
+							if(!pairExists) {
+								rows.erase(rows.begin() + j);
+								j--;
+							}
+						}
+					}
+
+					break;
+				}
+				else if(resultTuples[i][0].first == resultSynonyms[curIndex]->getParam() && resultTuples[i][0].second == resultSynonyms[h]->getParam()) {
+					//if values in parentRow and values of current synonym has not been added to rows, add them to rows
+					//else, compare corresponding 2 values in each "row" of rows with every pair values in current resultTuples
+					//if the 2 values does not exist in current resultTuples, remove the "row"
+					if(rows.empty()) {
+						for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
+							if(parentRow[h] == resultTuples[i][j].second) {
+								vector<string> currentRow (parentRow);
+								currentRow.push_back(resultTuples[i][j].first);
+								rows.push_back(currentRow);
+							}
+						}
+					}
+					else {
+						for(unsigned int j = 0; j < rows.size(); j++) {
+							bool pairExists = false;
+
+							for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+								if(rows[j][h] == resultTuples[i][k].second && rows[j][curIndex] == resultTuples[i][k].first) {
+									pairExists = true;
+									break;
+								}
+							}
+
+							if(!pairExists) {
+								rows.erase(rows.begin() + j);
+								j--;
+							}
+						}
+					}
+
+					break;
+				}
 			}
 		}
+
+		if(!tuplesExist) {
+			ParamNode* node = resultSynonyms[curIndex];
+			SynonymValues* synVal = getSynVal(node->getParam());
+			set<string> valSet = synVal->getValues();
+
+			if(valSet.empty()) {
+				vector<Node*> result = pkb->getNodes(node->getType());
+
+				if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+					for(unsigned int i = 0; i < result.size(); i++) {
+						valSet.insert(result[i]->getValue());
+					}
+				}
+				else {
+					for(unsigned int i = 0; i < result.size(); i++) {
+						valSet.insert(result[i]->getLine());
+					}
+				}
+			}
+
+			for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+				vector<string> currentRow (parentRow);
+				currentRow.push_back(*i);
+				rows.push_back(currentRow);
+			}
+		}
+
+		for(unsigned int i = 0; i < rows.size(); i++) {
+			formFinalResult(rows[i]);
+		}
 	}
+	else {
+		string tuple;
 
-	index++;
+		for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
+			if(resultSynonyms[i]->getType() == call && resultSynonyms[i]->getAttrType() == stringType) {
+				vector<Node*> result = pkb->getNodes(call);
 
-	for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
-		string singleResult = s;
-		singleResult.append(*i);
+				for(unsigned int j = 0; j < result.size(); j++) {
+					if(parentRow[i] == result[j]->getLine()) {
+						parentRow.erase(parentRow.begin() + i);
+						parentRow.insert(parentRow.begin() + i, result[j]->getValue());
+					}
+				}
+			}
 
-		if(index < resultSynonyms.size()) {
-			singleResult.append(" ");
-			formFinalResult(singleResult, index);
+			tuple.append(parentRow[i]);
+
+			if(i < resultSynonyms.size() - 1) {
+				tuple.append(" ");
+			}
 		}
-		else {
-			finalResult.push_back(singleResult);
-		}
+
+		finalResult.push_back(tuple);
 	}
 }
 

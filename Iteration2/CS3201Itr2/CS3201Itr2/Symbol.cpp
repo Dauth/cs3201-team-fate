@@ -15,23 +15,6 @@ void Symbol::setVar(std::string var, SyntType varType)
 {
 	symbolTable.push_back(std::make_pair(var,varType));
 }
-std::vector<std::pair<std::string,SyntType>> Symbol::getQuery()
-{	
-	return symbolTable;
-}
-int Symbol::getSize()
-{
-	return symbolTable.max_size();
-}
-int Symbol::getIndex(std::string var)
-{
-	for(std::vector<std::pair<std::string,SyntType>>::iterator i = symbolTable.begin(); i != symbolTable.end(); i++)
-	{
-		if((*i).first==var)
-			return std::distance(symbolTable.begin(), i);
-	}
-	return -1;
-}
 bool Symbol::exists(std::string var)
 {
 	bool found = false;

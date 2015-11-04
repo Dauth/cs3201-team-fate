@@ -36,9 +36,6 @@ class PKB {
 	void is_digit(string);
 	int compare(Node*, Node*);
 	bool isExpression(std::string);
-	bool isUsed(string, string);
-	bool isModified(string, string);
-
 	 
 	void handleInheritance(Node*, Node*, Node*, Node*);
 	void handleCalls(Node*, Node*, Node*);

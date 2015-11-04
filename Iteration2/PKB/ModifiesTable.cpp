@@ -63,3 +63,14 @@ void ModifiesTable::addModifies(Node* nodeLeft, string varname) {
 		leftTypeKeyTable[statement].insert(modifies);
 	}
 }
+
+bool ModifiesTable::isModified(string stmt, string varname) {
+	if (leftKeyTable.find(stmt) == leftKeyTable.end()) {
+		return false;
+	}
+	set<pair<string, string>> modifies = leftKeyTable[stmt];
+	if (modifies.find(make_pair(stmt, varname)) == modifies.end()) {
+		return false;
+	}
+	return true;
+}
