@@ -40,14 +40,14 @@ string errorMsg = "ERROR(s) : \n";
 //regex stmtRef_old("(Parent|Parent\\*|Affects|Affects\\*|Follows|Follows\\*)\\((([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+),(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)\\)");
 
 // INDENT | "_" | INTEGER
-regex stmtRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
-regex lineRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+)");
+regex stmtRef("(_|(\\d)+)");
+regex lineRef("(_|(\\d)+)");
 
-// INDENT | "_"| "INDENT" | INTEGER
-regex entRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+//  "_"| "INDENT" | INTEGER
+regex entRef("(_|(\\d)+|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
-// INDENT | "_" | "INDENT"
-regex varRef("(([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*|_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
+//  "_" | "INDENT"
+regex varRef("(_|\"([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\")");
 
 // INDENT'.'attrName | "INDENT" | INTEGER | synonym
 regex attrRef("([a-zA-Z])+(([a-zA-Z])|#|(\\d)+)*\.(procName|varName|value|stmt#)");
@@ -82,6 +82,37 @@ void removeCharsFromString( string &str, char* charsToRemove ) {
 	for ( unsigned int i = 0; i < strlen(charsToRemove); ++i ) {
 		str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
 	}
+}
+
+SyntType getSynType (string synType)
+{
+	regex doubleQuotes ("\"[^\"]+\"");
+	regex underScoreBothSides("_\"[^\"]+\"_");
+	regex underScoreOnly("_");
+
+	regex integer ("\\d+");
+	SyntType toReturn = SyntType::synError;
+
+	if (regex_match(synType,doubleQuotes)|| regex_match(synType,underScoreBothSides))
+	{
+		toReturn = SyntType::expression;
+	}
+	else if (regex_match(synType,underScoreOnly))
+	{
+		toReturn = SyntType::expression;
+	}
+	else if (regex_match(synType,integer))
+	{
+		toReturn = SyntType::integer;
+	}
+	else
+	{
+		if(newSymbol->exists(synType))
+		{
+			toReturn = newSymbol->getSyntType(synType);
+		}
+	}
+	return toReturn;
 }
 
 bool verifyCorrectParameters(SyntType currentSyn, string firstParam, string secondParam, string thirdParam)
@@ -126,11 +157,13 @@ bool verifyCorrectParameters(SyntType currentSyn, string firstParam, string seco
 bool verifyCorrectParameters(QueryType queryClause,string firstParam, string secondParam)
 {
 	bool valid = false;
+	SyntType firstSyn = getSynType(firstParam);
+	SyntType secondSyn = getSynType(secondParam);
 	if (queryClause == QueryType::modifies)
 	{
-		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		if ((firstSyn == SyntType::procedure || firstSyn == SyntType::statement || firstSyn == SyntType::assignment|| firstSyn == SyntType::call || firstSyn == SyntType::whileLoop||firstSyn == SyntType::ifelse||regex_match(firstParam,entRef)||regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::variable || regex_match(secondParam,varRef)))
 		{
-			if (!regex_match(firstParam,underLine) && regex_match(secondParam,entRef))
+			if (!regex_match(firstParam,underLine) && (secondSyn == SyntType::variable || regex_match(secondParam,varRef)))
 			{
 				valid = true;
 			}
@@ -138,9 +171,9 @@ bool verifyCorrectParameters(QueryType queryClause,string firstParam, string sec
 	}
 	else if (queryClause == QueryType::uses)
 	{
-		if (regex_match(firstParam,entRef) && regex_match(secondParam,varRef))
+		if ((firstSyn == SyntType::procedure || firstSyn == SyntType::statement || firstSyn == SyntType::assignment|| firstSyn == SyntType::call || firstSyn == SyntType::whileLoop||firstSyn == SyntType::ifelse||regex_match(firstParam,entRef)||regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::variable || regex_match(secondParam,varRef)))
 		{
-			if (!regex_match(firstParam,underLine) && regex_match(secondParam,entRef))
+			if (!regex_match(firstParam,underLine) && (secondSyn == SyntType::variable || regex_match(secondParam,varRef)))
 			{
 				valid = true;
 			}
@@ -148,70 +181,70 @@ bool verifyCorrectParameters(QueryType queryClause,string firstParam, string sec
 	}
 	else if (queryClause == QueryType::calls)
 	{
-		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		if ((firstSyn == SyntType::procedure ||regex_match(firstParam,entRef)) && (secondSyn == SyntType::procedure ||regex_match(secondParam,entRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::callsStar)
 	{
-		if (regex_match(firstParam,entRef) && regex_match(secondParam,entRef))
+		if ((firstSyn == SyntType::procedure ||regex_match(firstParam,entRef)) && (secondSyn == SyntType::procedure ||regex_match(secondParam,entRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::parent)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::statement || firstSyn == SyntType::assignment || firstSyn == SyntType::call || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::statement || secondSyn == SyntType::assignment || secondSyn == SyntType::call || secondSyn == SyntType::whileLoop || secondSyn == SyntType::ifelse || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::parentStar)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::statement || firstSyn == SyntType::assignment || firstSyn == SyntType::call || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::statement || secondSyn == SyntType::assignment || secondSyn == SyntType::call || secondSyn == SyntType::whileLoop || secondSyn == SyntType::ifelse || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::follows)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::statement || firstSyn == SyntType::assignment || firstSyn == SyntType::call || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::statement || secondSyn == SyntType::assignment || secondSyn == SyntType::call || secondSyn == SyntType::whileLoop || secondSyn == SyntType::ifelse || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::followsStar)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::statement || firstSyn == SyntType::assignment || firstSyn == SyntType::call || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::statement || secondSyn == SyntType::assignment || secondSyn == SyntType::call || secondSyn == SyntType::whileLoop || secondSyn == SyntType::ifelse || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::nxt)
 	{
-		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
+		if ((firstSyn == SyntType::progline || regex_match(firstParam,lineRef)) && (secondSyn == SyntType::progline||regex_match(secondParam,lineRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::nxtStar)
 	{
-		if (regex_match(firstParam,lineRef) && regex_match(secondParam,lineRef))
+		if ((firstSyn == SyntType::progline || regex_match(firstParam,lineRef)) && (secondSyn == SyntType::progline||regex_match(secondParam,lineRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::affects)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::affectsStar)
 	{
-		if (regex_match(firstParam,stmtRef) && regex_match(secondParam,stmtRef))
+		if ((firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
@@ -491,39 +524,10 @@ bool isCorrectWithClause(string leftString, string rightString)
 }
 
 
-SyntType getSynType (string synType)
-{
-	regex doubleQuotes ("\"[^\"]+\"");
-	regex underScoreBothSides("_\"[^\"]+\"_");
-	regex underScoreOnly("_");
 
-	regex integer ("\\d+");
-	SyntType toReturn = SyntType::synError;
-
-	if (regex_match(synType,doubleQuotes)|| regex_match(synType,underScoreBothSides))
-	{
-		toReturn = SyntType::expression;
-	}
-	else if (regex_match(synType,underScoreOnly))
-	{
-		toReturn = SyntType::expression;
-	}
-	else if (regex_match(synType,integer))
-	{
-		toReturn = SyntType::integer;
-	}
-	else
-	{
-		if(newSymbol->exists(synType))
-		{
-			toReturn = newSymbol->getSyntType(synType);
-		}
-	}
-	return toReturn;
-}
 AttrType getAttrType(SyntType syntType)
 {
-	if (syntType == SyntType::integer || syntType == SyntType::progline || syntType == SyntType::constant || syntType == SyntType::call)
+	if (syntType == SyntType::integer || syntType == SyntType::progline || syntType == SyntType::constant || syntType == SyntType::call || syntType == SyntType::statementList)
 	{
 		return AttrType::integerType;
 	}
