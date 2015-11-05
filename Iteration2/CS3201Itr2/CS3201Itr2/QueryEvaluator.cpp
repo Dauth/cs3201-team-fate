@@ -11,6 +11,7 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	resultSynonyms = rVec;
 	queryParts = qVec;
 	hasResult = true;
+	timedOut = false;
 	
 	queryWithNoResult.clear();
 	queryWithOneResult.clear();
@@ -31,8 +32,11 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	if(hasResult && !queryWithTwoResults.empty()) {
 			evalQueryWithTwoResults();
 	}
-		
-	evalFinalResult();
+	
+	if(!timedOut) {
+		evalFinalResult();
+	}
+
 	return finalResult;
 }
 
@@ -89,6 +93,18 @@ void QueryEvaluator::optimise() {
 		}
 	}
 
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
+
 	//further order QueryParts in groups to improve optimisation
 	orderQueryParts(&queryWithNoResult);
 	orderQueryParts(&queryWithOneResult);
@@ -102,6 +118,19 @@ void QueryEvaluator::sortQueryParts() {
 	int currSize = 0;
 
 	while(currSize < initSize) {
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
+
 		initSize = queryParts.size();
 
 		for(unsigned int i = 0; i < queryParts.size(); i++) {
@@ -221,11 +250,35 @@ void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
 			}
 		}
 	}
+	
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
 }
 
 void QueryEvaluator::evalQueryWithNoResult() {
 	for(unsigned int i = 0; i < queryWithNoResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithNoResult[i]);
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
 
 		if(result.empty()) {
 			hasResult = false;
@@ -237,6 +290,18 @@ void QueryEvaluator::evalQueryWithNoResult() {
 void QueryEvaluator::evalQueryWithOneResult() {
 	for(unsigned int i = 0; i < queryWithOneResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithOneResult[i]);
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
 
 		if(result.empty()) {
 			hasResult = false;
@@ -255,6 +320,18 @@ void QueryEvaluator::evalQueryWithOneResult() {
 void QueryEvaluator::evalQueryWithTwoResults() {
 	for(unsigned int i = 0; i < queryWithTwoResults.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithTwoResults[i]);
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
 		
 		if(result.empty()) {
 			hasResult = false;
@@ -881,6 +958,18 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 
 //re-filters and updates values of related synonyms
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
+
 	set<string> valSet = synVal->getValues();
 
 	for(unsigned int i = 0; i < resultTuples.size(); i++) {
@@ -967,6 +1056,18 @@ void QueryEvaluator::evalFinalResult() {
 //forms the list of strings for the final result
 void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
 	vector<vector<string>> rows = formRows(parentRows);
+
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
 	
 	if(!rows.empty()) {
 		if(rows[0].size() < resultSynonyms.size()) {

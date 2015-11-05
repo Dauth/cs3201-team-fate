@@ -11,6 +11,7 @@ using namespace std;
 class QueryEvaluator {
 	PKB* pkb;
 	bool hasResult;
+	bool timedOut;
 	vector<ParamNode*> resultSynonyms;
 	vector<QueryPart*> queryParts;
 	vector<QueryPart*> queryWithNoResult;
