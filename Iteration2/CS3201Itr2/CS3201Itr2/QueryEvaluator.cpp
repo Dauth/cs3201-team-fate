@@ -3,6 +3,7 @@
 
 QueryEvaluator::QueryEvaluator(PKB* p) {
 	pkb = p;
+	callNodes = pkb->getNodes(call);
 }
 
 //method called to evaluate a PQL query
@@ -958,7 +959,6 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		callNodes = pkb->getNodes(call);
 		vector<vector<string>> empty;
 		formFinalResult(empty);
 	}
@@ -990,7 +990,7 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 		if(valSet.empty()) {
 			vector<Node*> result = pkb->getNodes(node->getType());
 
-			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
 				for(unsigned int i = 0; i < result.size(); i++) {
 					valSet.insert(result[i]->getValue());
 				}
