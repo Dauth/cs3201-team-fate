@@ -18,6 +18,7 @@ class QueryEvaluator {
 	vector<QueryPart*> queryWithTwoResults;
 	vector<SynonymValues*> synonymVec;
 	vector<vector<pair<string, string>>> resultTuples;
+	vector<Node*> callNodes;
 	list<string> finalResult;
 
 	void optimise();
@@ -39,7 +40,9 @@ class QueryEvaluator {
 	void QueryEvaluator::updateRightSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void updateRelatedSynVal(SynonymValues*);
 	void evalFinalResult();
-	void formFinalResult(vector<string>);
+	void formFinalResult(vector<vector<string>>);
+	vector<vector<string>> formRows(vector<vector<string>>);
+	void formStringResult(vector<vector<string>>);
 	bool existsInSynVec(string);
 	SynonymValues* getSynVal(string);
 

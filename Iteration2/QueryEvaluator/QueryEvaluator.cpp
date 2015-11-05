@@ -55,19 +55,19 @@ void QueryEvaluator::optimise() {
 		ParamNode* left = queryParts[i]->getLeftParam();
 		ParamNode* right = queryParts[i]->getRightParam();
 
-		//filters QueryParts such as "Next(s,s)" that guarantees empty result
+		//filter QueryParts such as "Next(s,s)" that guarantees empty result
 		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 			hasResult = false;
 			return;
 		}
 
-		//filters QueryParts such as "Affects(w,a)" that guarantees empty result
+		//filter QueryParts such as "Affects(w,a)" that guarantees empty result
 		if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 			hasResult = false;
 			return;
 		}
 
-		//filters QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
+		//filter QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
 		if(queryType == with && left->getType() == right->getType()) {
 			if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 				hasResult = false;
@@ -79,7 +79,7 @@ void QueryEvaluator::optimise() {
 			}
 		}
 
-		//Ensures QueryParts with 2 synonyms in queryWithNoResult vector to be at the back
+		//ensure QueryParts with 2 synonyms in queryWithNoResult vector to be at the back
 		if(left->getType() != integer && left->getType() != expression && right->getType() != integer && right->getType() != expression) {
 			queryWithNoResult.push_back(queryParts[i]);
 		}
@@ -94,7 +94,8 @@ void QueryEvaluator::optimise() {
 	orderQueryParts(&queryWithTwoResults);
 }
 
-//QueryParts are sorted into 3 groups depending on the number of useful synonyms they have
+//sorts all the QueryParts into 3 groups depending on the number of useful synonyms they have
+//useful synonyms are synonyms in the query that contributes to the final result
 void QueryEvaluator::sortQueryParts() {
 	int initSize = 1;
 	int currSize = 0;
@@ -107,19 +108,19 @@ void QueryEvaluator::sortQueryParts() {
 			ParamNode* left = queryParts[i]->getLeftParam();
 			ParamNode* right = queryParts[i]->getRightParam();
 
-			//filters QueryParts such as "Next(s,s)" that guarantees empty result
+			//filter QueryParts such as "Next(s,s)" that guarantees empty result
 			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 				hasResult = false;
 				return;
 			}
 
-			//filters QueryParts such as "Affects(w,a)" that guarantees empty result
+			//filter QueryParts such as "Affects(w,a)" that guarantees empty result
 			if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 				hasResult = false;
 				return;
 			}
 
-			//filters QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
+			//filter QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
 			if(queryType == with && left->getType() == right->getType()) {
 				if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 					hasResult = false;
@@ -209,7 +210,7 @@ bool QueryEvaluator::existsInSynVec(string name) {
 	return false;
 }
 
-//QueryParts in a group are ordered by their types in the order (front)others->nxt->nxtStar->affects->affectsStar(end)
+//orders QueryParts in a group by their types in the order (front)others->next->next*->affects->affects*(end)
 void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
 	for(int i = 10; i < 14; i++) {
 		for(unsigned int j = 0; j < qVec->size(); j++) {
@@ -263,7 +264,7 @@ void QueryEvaluator::evalQueryWithTwoResults() {
 	}
 }
 
-//get result for a QueryPart
+//gets result for a QueryPart
 vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	if(qp->getType() == with) {
 		return evalWithQuery(qp);
@@ -327,7 +328,7 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	}
 }
 
-//get the appropriate SyntType that represents "_" in a QueryPart
+//gets the appropriate SyntType that represents "_" in a QueryPart
 SyntType QueryEvaluator::getSyntType(QueryType qType) {
 	if(qType == calls || qType == callsStar) {
 		return procedure;
@@ -340,7 +341,7 @@ SyntType QueryEvaluator::getSyntType(QueryType qType) {
 	}
 }
 
-//QueryParts of type "with" are evaluated in QueryEvaluator with the help of PKB
+//evaluates QueryParts of type "with" in QueryEvaluator with the help of PKB
 vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
@@ -650,7 +651,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 	}
 }
 
-//results of evaluated QueryParts are filtered and values of synonyms are updated
+//filters results of evaluated QueryParts and updates values of synonyms
 void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	if(lNode != NULL && rNode != NULL && lNode->getParam() != rNode->getParam()) {
 		updateTwoSynVal(lNode, rNode, vec);
@@ -877,7 +878,7 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 	}
 }
 
-//values of related synonyms are re-filtered and updated
+//re-filters and updates values of related synonyms
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 	set<string> valSet = synVal->getValues();
 
@@ -957,90 +958,58 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		vector<string> empty;
+		callNodes = pkb->getNodes(call);
+		vector<vector<string>> empty;
 		formFinalResult(empty);
 	}
 }
 
 //forms the list of strings for the final result
-void QueryEvaluator::formFinalResult(vector<string> parentRow) {
-	if(parentRow.empty()) {
-		vector<string> currentRow;
-
-		for(unsigned int i = 0; i < resultTuples.size(); i++) {
-			if(resultTuples[i][0].first == resultSynonyms[0]->getParam() && resultTuples[i][0].second == resultSynonyms[1]->getParam()) {
-				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-					currentRow.clear();
-					currentRow.push_back(resultTuples[i][j].first);
-					currentRow.push_back(resultTuples[i][j].second);
-					formFinalResult(currentRow);
-				}
-
-				break;
-			}
-			else if(resultTuples[i][0].first == resultSynonyms[1]->getParam() && resultTuples[i][0].second == resultSynonyms[0]->getParam()) {
-				for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-					currentRow.clear();
-					currentRow.push_back(resultTuples[i][j].second);
-					currentRow.push_back(resultTuples[i][j].first);
-					formFinalResult(currentRow);
-				}
-
-				break;
-			}
+void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
+	vector<vector<string>> rows = formRows(parentRows);
+	
+	if(!rows.empty()) {
+		if(rows[0].size() < resultSynonyms.size()) {
+			formFinalResult(rows);
 		}
-
-		if(currentRow.empty()) {
-			ParamNode* lNode = resultSynonyms[0];
-			ParamNode* rNode = resultSynonyms[1];
-			SynonymValues* lSynVal = getSynVal(lNode->getParam());
-			SynonymValues* rSynVal = getSynVal(rNode->getParam());
-			set<string> lValSet = lSynVal->getValues();
-			set<string> rValSet = rSynVal->getValues();
-
-			if(lValSet.empty()) {
-				vector<Node*> result = pkb->getNodes(lNode->getType());
-
-				if(lNode->getType() == procedure || lNode->getType() == variable || lNode->getType() == constant || lNode->getType() == statementList) {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						lValSet.insert(result[i]->getValue());
-					}
-				}
-				else {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						lValSet.insert(result[i]->getLine());
-					}
-				}
-			}
-			
-			if(rValSet.empty()) {
-				vector<Node*> result = pkb->getNodes(rNode->getType());
-
-				if(rNode->getType() == procedure || rNode->getType() == variable || rNode->getType() == constant || rNode->getType() == statementList) {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						rValSet.insert(result[i]->getValue());
-					}
-				}
-				else {
-					for(unsigned int i = 0; i < result.size(); i++) {
-						rValSet.insert(result[i]->getLine());
-					}
-				}
-			}
-
-			for(set<string>::iterator i = lValSet.begin(); i != lValSet.end(); i++) {
-				for(set<string>::iterator j = rValSet.begin(); j != rValSet.end(); j++) {
-					currentRow.clear();
-					currentRow.push_back(*i);
-					currentRow.push_back(*j);
-					formFinalResult(currentRow);
-				}
-			}
+		else {
+			formStringResult(rows);
 		}
 	}
-	else if(parentRow.size() < resultSynonyms.size()) {
-		vector<vector<string>> rows;
-		int curIndex = parentRow.size();
+}
+
+//joins the values of the result synonyms
+vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRows) {
+	vector<vector<string>> rows;
+
+	if(parentRows.empty()) {
+		ParamNode* node = resultSynonyms[0];
+		SynonymValues* synVal = getSynVal(node->getParam());
+		set<string> valSet = synVal->getValues();
+
+		if(valSet.empty()) {
+			vector<Node*> result = pkb->getNodes(node->getType());
+
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getValue());
+				}
+			}
+			else {
+				for(unsigned int i = 0; i < result.size(); i++) {
+					valSet.insert(result[i]->getLine());
+				}
+			}
+		}
+
+		for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+			vector<string> currentRow;
+			currentRow.push_back(*i);
+			rows.push_back(currentRow);
+		}
+	}
+	else {
+		int curIndex = parentRows[0].size();
 		bool tuplesExist = false;
 
 		for(unsigned int h = 0; h < curIndex; h++) {
@@ -1052,11 +1021,13 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 					if(rows.empty()) {
 						tuplesExist = true;
 
-						for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-							if(parentRow[h] == resultTuples[i][j].first) {
-								vector<string> currentRow (parentRow);
-								currentRow.push_back(resultTuples[i][j].second);
-								rows.push_back(currentRow);
+						for(unsigned int j = 0; j < parentRows.size(); j++) {
+							for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+								if(parentRows[j][h] == resultTuples[i][k].first) {
+									vector<string> currentRow (parentRows[j]);
+									currentRow.push_back(resultTuples[i][k].second);
+									rows.push_back(currentRow);
+								}
 							}
 						}
 					}
@@ -1085,11 +1056,15 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 					//else, compare corresponding 2 values in each "row" of rows with every pair values in current resultTuples
 					//if the 2 values does not exist in current resultTuples, remove the "row"
 					if(rows.empty()) {
-						for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
-							if(parentRow[h] == resultTuples[i][j].second) {
-								vector<string> currentRow (parentRow);
-								currentRow.push_back(resultTuples[i][j].first);
-								rows.push_back(currentRow);
+						tuplesExist = true;
+
+						for(unsigned int j = 0; j < parentRows.size(); j++) {
+							for(unsigned int k = 1; k < resultTuples[i].size(); k++) {
+								if(parentRows[j][h] == resultTuples[i][k].second) {
+									vector<string> currentRow (parentRows[j]);
+									currentRow.push_back(resultTuples[i][k].first);
+									rows.push_back(currentRow);
+								}
 							}
 						}
 					}
@@ -1136,35 +1111,44 @@ void QueryEvaluator::formFinalResult(vector<string> parentRow) {
 				}
 			}
 
-			for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
-				vector<string> currentRow (parentRow);
-				currentRow.push_back(*i);
-				rows.push_back(currentRow);
+			for(unsigned int i = 0; i < parentRows.size(); i++) {
+				for(set<string>::iterator j = valSet.begin(); j != valSet.end(); j++) {
+					vector<string> currentRow (parentRows[i]);
+					currentRow.push_back(*j);
+					rows.push_back(currentRow);
+				}
 			}
 		}
-
-		for(unsigned int i = 0; i < rows.size(); i++) {
-			formFinalResult(rows[i]);
-		}
 	}
-	else {
-		string tuple;
 
-		for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
-			if(resultSynonyms[i]->getType() == call && resultSynonyms[i]->getAttrType() == stringType) {
-				vector<Node*> result = pkb->getNodes(call);
+	return rows;
+}
 
-				for(unsigned int j = 0; j < result.size(); j++) {
-					if(parentRow[i] == result[j]->getLine()) {
-						parentRow.erase(parentRow.begin() + i);
-						parentRow.insert(parentRow.begin() + i, result[j]->getValue());
+//converts individual values to strings of final result
+void QueryEvaluator::formStringResult(vector<vector<string>> rows) {
+	//if final result requires call.procName, change values of call to call.procName values
+	for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
+		if(resultSynonyms[i]->getType() == call && resultSynonyms[i]->getAttrType() == stringType) {
+			for(unsigned int j = 0; j < rows.size(); j++) {
+				for(unsigned int k = 0; k < callNodes.size(); k++) {
+					if(rows[j][i] == callNodes[k]->getLine()) {
+						rows[j].erase(rows[j].begin() + i);
+						rows[j].insert(rows[j].begin() + i, callNodes[k]->getValue());
+						break;
 					}
 				}
 			}
+		}
+	}
 
-			tuple.append(parentRow[i]);
+	//convert individual values to strings
+	for(unsigned int i = 0; i < rows.size(); i++) {
+		string tuple;
 
-			if(i < resultSynonyms.size() - 1) {
+		for(unsigned int j = 0; j < resultSynonyms.size(); j++) {
+			tuple.append(rows[i][j]);
+
+			if(j + 1 < resultSynonyms.size()) {
 				tuple.append(" ");
 			}
 		}
