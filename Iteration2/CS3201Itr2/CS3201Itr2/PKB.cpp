@@ -619,7 +619,7 @@ vector<pair<string, string>> PKB::getFollows(string stmtNum1, string stmtNum2) {
 	Node* leftNode = statementTable.getStatement(stmtNum1);
 	if (leftNode != nullptr) {
 		Node* rightNode = getFollowee(leftNode);
-		if (rightNode->getLine().compare(stmtNum2) == 0) {
+		if (rightNode != nullptr && rightNode->getLine().compare(stmtNum2) == 0) {
 			pair<string, string> follows ( leftNode->getLine(), rightNode->getLine() );
 			results.push_back(follows);
 		}
