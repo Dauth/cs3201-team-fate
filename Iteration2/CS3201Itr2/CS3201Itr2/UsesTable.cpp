@@ -28,11 +28,11 @@ vector<pair<string, string>> UsesTable::getByLeftKey(SyntType st) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> UsesTable::getByRightKey(string ident) {
+vector<pair<string, string>> UsesTable::getByRightKey(string ident, SyntType st) {
 	if (rightKeyTable.find(ident) == rightKeyTable.end()) {
 		return vector<pair<string, string>>();
 	}
-	set<pair<string, string>> results = rightKeyTable[ident];
+	set<pair<string, string>> results = rightKeyTable[ident][st];
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
@@ -49,17 +49,22 @@ void UsesTable::addUses(Node* nodeLeft, string varName) {
 		leftKeyTable[left] = nodes;
 	}
 	if ( rightKeyTable.find(right) == rightKeyTable.end() ) {
-		 set<pair<string, string>> nodes;
+		unordered_map<SyntType, set<pair<string, string>>> nodes;
+		nodes[statement] = set<pair<string, string>>();
+		nodes[assignment] = set<pair<string, string>>();
+		nodes[call] = set<pair<string, string>>();
+		nodes[ifelse] = set<pair<string, string>>();
+		nodes[whileLoop] = set<pair<string, string>>();
+		nodes[procedure] = set<pair<string, string>>();
 		rightKeyTable[right] = nodes;
 	}
-
 	leftKeyTable[left].insert(modifies);
-	rightKeyTable[right].insert(modifies);
-
 	SyntType st = nodeLeft->getType();
 	leftTypeKeyTable[st].insert(modifies);
+	rightKeyTable[right][st].insert(modifies);
 	if ( nodeLeft->isStatement() ) {
 		leftTypeKeyTable[statement].insert(modifies);
+		rightKeyTable[right][statement].insert(modifies);
 	}
 }
 

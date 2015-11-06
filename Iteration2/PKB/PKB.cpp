@@ -233,36 +233,7 @@ vector<pair<string, string>> PKB::getModifies(SyntType st1, SyntType st2) {
 
 vector<pair<string, string>> PKB::getModifies(SyntType st, string varName) {
 	if (st == progline) st = statement;
-	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = modifiesTable.getByLeftKey(st);
-	vector<pair<string, string>> temp2 = modifiesTable.getByRightKey(varName);
-	
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			if (right.compare(varName) == 0) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for (int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			if (st == procedure) {
-				Node* procNode = procedureTable.getProcedure(left);
-				if (procNode != nullptr) {
-					results.push_back(temp2[i]);
-				}
-			} else {
-				Node* stmtNode = statementTable.getStatement(left);
-				if (stmtNode != nullptr && ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType())) {
-					results.push_back(temp2[i]);
-				}
-			}
-		}
-	}
-	return results;
+	return modifiesTable.getByRightKey(varName, st);
 }
 
 vector<pair<string, string>> PKB::getModifies(string ident, SyntType st) {
@@ -284,36 +255,7 @@ vector<pair<string, string>> PKB::getUses(SyntType st1, SyntType st2) {
 
 vector<pair<string, string>> PKB::getUses(SyntType st, string varName) {
 	if (st == progline) st = statement;
-	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = usesTable.getByLeftKey(st);
-	vector<pair<string, string>> temp2 = usesTable.getByRightKey(varName);
-	
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			if (right.compare(varName) == 0) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for(int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			if (st == procedure) {
-				Node* procNode = procedureTable.getProcedure(left);
-				if (procNode != nullptr) {
-					results.push_back(temp2[i]);
-				}
-			} else {
-				Node* stmtNode = statementTable.getStatement(left);
-				if (stmtNode != nullptr && ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType())) {
-					results.push_back(temp2[i]);
-				}
-			}
-		}
-	}
-	return results;
+	return usesTable.getByRightKey(varName, st);
 }
 
 vector<pair<string, string>> PKB::getUses(string ident, SyntType st) {
