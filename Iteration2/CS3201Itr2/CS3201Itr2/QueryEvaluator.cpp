@@ -250,18 +250,6 @@ void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
 			}
 		}
 	}
-	
-	if(AbstractWrapper::GlobalStop) {
-		queryWithNoResult.clear();
-		queryWithOneResult.clear();
-		queryWithTwoResults.clear();
-		synonymVec.clear();
-		resultTuples.clear();
-		finalResult.clear();
-		hasResult = false;
-		timedOut = true;
-		return;
-	}
 }
 
 void QueryEvaluator::evalQueryWithNoResult() {
