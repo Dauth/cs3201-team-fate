@@ -11,6 +11,7 @@ using namespace std;
 class QueryEvaluator {
 	PKBFacade* pkb;
 	bool hasResult;
+	bool timedOut;
 	vector<ParamNode*> resultSynonyms;
 	vector<QueryPart*> queryParts;
 	vector<QueryPart*> queryWithNoResult;
@@ -29,10 +30,10 @@ class QueryEvaluator {
 	void evalQueryWithTwoResults();
 	vector<pair<string, string>> evalWithQuery(QueryPart*);
 	vector<pair<string, string>> getResult(QueryPart*);
-	vector<pair<string, string>> getResultFromPKBFacade(QueryType, string, string);
-	vector<pair<string, string>> getResultFromPKBFacade(QueryType, string, SyntType);
-	vector<pair<string, string>> getResultFromPKBFacade(QueryType, SyntType, string);
-	vector<pair<string, string>> getResultFromPKBFacade(QueryType, SyntType, SyntType);
+	vector<pair<string, string>> getResultFromPKB(QueryType, string, string);
+	vector<pair<string, string>> getResultFromPKB(QueryType, string, SyntType);
+	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, string);
+	vector<pair<string, string>> getResultFromPKB(QueryType, SyntType, SyntType);
 	SyntType getSyntType(QueryType);
 	void updateSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);
 	void QueryEvaluator::updateTwoSynVal(ParamNode*, ParamNode*, vector<pair<string, string>>);

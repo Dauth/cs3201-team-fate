@@ -3,6 +3,7 @@
 
 QueryEvaluator::QueryEvaluator(PKBFacade* p) {
 	pkb = p;
+	callNodes = pkb->getNodes(call);
 }
 
 //method called to evaluate a PQL query
@@ -10,6 +11,7 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	resultSynonyms = rVec;
 	queryParts = qVec;
 	hasResult = true;
+	timedOut = false;
 	
 	queryWithNoResult.clear();
 	queryWithOneResult.clear();
@@ -30,8 +32,11 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	if(hasResult && !queryWithTwoResults.empty()) {
 			evalQueryWithTwoResults();
 	}
-		
-	evalFinalResult();
+	
+	if(!timedOut) {
+		evalFinalResult();
+	}
+
 	return finalResult;
 }
 
@@ -88,6 +93,18 @@ void QueryEvaluator::optimise() {
 		}
 	}
 
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
+
 	//further order QueryParts in groups to improve optimisation
 	orderQueryParts(&queryWithNoResult);
 	orderQueryParts(&queryWithOneResult);
@@ -101,6 +118,19 @@ void QueryEvaluator::sortQueryParts() {
 	int currSize = 0;
 
 	while(currSize < initSize) {
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
+
 		initSize = queryParts.size();
 
 		for(unsigned int i = 0; i < queryParts.size(); i++) {
@@ -226,6 +256,18 @@ void QueryEvaluator::evalQueryWithNoResult() {
 	for(unsigned int i = 0; i < queryWithNoResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithNoResult[i]);
 
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
+
 		if(result.empty()) {
 			hasResult = false;
 			return;
@@ -236,6 +278,18 @@ void QueryEvaluator::evalQueryWithNoResult() {
 void QueryEvaluator::evalQueryWithOneResult() {
 	for(unsigned int i = 0; i < queryWithOneResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithOneResult[i]);
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
 
 		if(result.empty()) {
 			hasResult = false;
@@ -254,6 +308,18 @@ void QueryEvaluator::evalQueryWithOneResult() {
 void QueryEvaluator::evalQueryWithTwoResults() {
 	for(unsigned int i = 0; i < queryWithTwoResults.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithTwoResults[i]);
+
+		if(AbstractWrapper::GlobalStop) {
+			queryWithNoResult.clear();
+			queryWithOneResult.clear();
+			queryWithTwoResults.clear();
+			synonymVec.clear();
+			resultTuples.clear();
+			finalResult.clear();
+			hasResult = false;
+			timedOut = true;
+			return;
+		}
 		
 		if(result.empty()) {
 			hasResult = false;
@@ -279,28 +345,28 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
 					SyntType rightType = getSyntType(qp->getType());
-					return getResultFromPKBFacade(qp->getType(), leftType, rightType);
+					return getResultFromPKB(qp->getType(), leftType, rightType);
 				}
 				else {
-					return getResultFromPKBFacade(qp->getType(), leftType, right->getParam());
+					return getResultFromPKB(qp->getType(), leftType, right->getParam());
 				}
 			}
 			else {
-				return getResultFromPKBFacade(qp->getType(), leftType, right->getType());
+				return getResultFromPKB(qp->getType(), leftType, right->getType());
 			}
 		}
 		else {
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
 					SyntType rightType = getSyntType(qp->getType());
-					return getResultFromPKBFacade(qp->getType(), left->getParam(), rightType);
+					return getResultFromPKB(qp->getType(), left->getParam(), rightType);
 				}
 				else {
-					return getResultFromPKBFacade(qp->getType(), left->getParam(), right->getParam());
+					return getResultFromPKB(qp->getType(), left->getParam(), right->getParam());
 				}
 			}
 			else {
-				return getResultFromPKBFacade(qp->getType(), left->getParam(), right->getType());
+				return getResultFromPKB(qp->getType(), left->getParam(), right->getType());
 			}
 		}
 	}
@@ -311,10 +377,10 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 		else {
 			if(right->getParam() == "_") {
 				SyntType rightType = getSyntType(qp->getType());
-				return getResultFromPKBFacade(qp->getType(), left->getType(), rightType);
+				return getResultFromPKB(qp->getType(), left->getType(), rightType);
 			}
 			else {
-				return getResultFromPKBFacade(qp->getType(), left->getType(), right->getParam());
+				return getResultFromPKB(qp->getType(), left->getType(), right->getParam());
 			}
 		}
 	}
@@ -323,7 +389,7 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 			return pkb->searchWithPattern(left->getType(), "_", qp->getLastParam()->getParam());
 		}
 		else {
-			return getResultFromPKBFacade(qp->getType(), left->getType(), right->getType());
+			return getResultFromPKB(qp->getType(), left->getType(), right->getType());
 		}
 	}
 }
@@ -341,7 +407,7 @@ SyntType QueryEvaluator::getSyntType(QueryType qType) {
 	}
 }
 
-//evaluates QueryParts of type "with" in QueryEvaluator with the help of PKBFacade
+//evaluates QueryParts of type "with" in QueryEvaluator with the help of PKB
 vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
@@ -523,7 +589,7 @@ vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	return result;
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, string left, string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -555,7 +621,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType ty
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, string left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -587,7 +653,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType ty
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, SyntType left, string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -619,7 +685,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType ty
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, SyntType left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -880,6 +946,18 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 
 //re-filters and updates values of related synonyms
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
+
 	set<string> valSet = synVal->getValues();
 
 	for(unsigned int i = 0; i < resultTuples.size(); i++) {
@@ -958,7 +1036,6 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		callNodes = pkb->getNodes(call);
 		vector<vector<string>> empty;
 		formFinalResult(empty);
 	}
@@ -967,6 +1044,18 @@ void QueryEvaluator::evalFinalResult() {
 //forms the list of strings for the final result
 void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
 	vector<vector<string>> rows = formRows(parentRows);
+
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
 	
 	if(!rows.empty()) {
 		if(rows[0].size() < resultSynonyms.size()) {
@@ -990,7 +1079,7 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 		if(valSet.empty()) {
 			vector<Node*> result = pkb->getNodes(node->getType());
 
-			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
 				for(unsigned int i = 0; i < result.size(); i++) {
 					valSet.insert(result[i]->getValue());
 				}
@@ -1099,7 +1188,7 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 			if(valSet.empty()) {
 				vector<Node*> result = pkb->getNodes(node->getType());
 
-				if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
+				if(node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
 					for(unsigned int i = 0; i < result.size(); i++) {
 						valSet.insert(result[i]->getValue());
 					}
