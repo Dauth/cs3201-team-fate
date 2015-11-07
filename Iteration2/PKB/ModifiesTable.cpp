@@ -7,7 +7,7 @@ ModifiesTable::ModifiesTable () {
 	leftTypeKeyTable[whileLoop] = set<pair<string, string>>();
 	leftTypeKeyTable[ifelse] = set<pair<string, string>>();
 	leftTypeKeyTable[assignment] = set<pair<string, string>>();
-	//leftTypeKeyTable[call] = set<pair<string, string>>();
+	leftTypeKeyTable[call] = set<pair<string, string>>();
 	leftTypeKeyTable[statement] = set<pair<string, string>>();
 	leftTypeKeyTable[procedure] = set<pair<string, string>>();
 }

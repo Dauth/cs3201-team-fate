@@ -273,107 +273,23 @@ vector<pair<string, string>> PKB::getUses(string ident, string varName) {
 vector<pair<string, string>> PKB::getParents(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	if (st2 == progline) st2 = statement;
-	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st1);
-	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st2);
-	
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			Node* stmtNode = statementTable.getStatement(right);
-			if ((stmtNode->isStatement() && st2 == statement) || st2 == stmtNode->getType()) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for (int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			Node* stmtNode = statementTable.getStatement(left);
-			if ((stmtNode->isStatement() && st1 == statement) || st1 == stmtNode->getType()) {
-				results.push_back(temp2[i]);
-			}
-		}
-	}
-	return results;
+	return parentsTable.getByLeftKey(st1, st2);
 }
 
 vector<pair<string, string>> PKB::getParents(SyntType st, string stmtNum) {
 	if (st == progline) st = statement;
-	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(st);
-	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(stmtNum);
-	
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			if (right.compare(stmtNum) == 0) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for (int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			Node* stmtNode = statementTable.getStatement(left);
-			if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
-				results.push_back(temp2[i]);
-			}
-		}
-	}
-	return results;
+	return parentsTable.getByRightKey(stmtNum, st);
 }
 
 vector<pair<string, string>> PKB::getParents(string stmtNum, SyntType st) {
 	if (st == progline) st = statement;
-	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(stmtNum);
-	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(st);
-	
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			Node* stmtNode = statementTable.getStatement(right);
-			if ((stmtNode->isStatement() && st == statement) || st == stmtNode->getType()) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for (int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			if (left.compare(stmtNum) == 0) {
-				results.push_back(temp2[i]);
-			}
-		}
-	}
-	return results;
+	return parentsTable.getByLeftKey(stmtNum, st);
 }
 
 vector<pair<string, string>> PKB::getParents(string stmtNum1, string stmtNum2) {
 	vector<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = parentsTable.getByLeftKey(stmtNum1);
-	vector<pair<string, string>> temp2 = parentsTable.getByRightKey(stmtNum2);
-
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return results;
-	} else if (temp1.size() < temp2.size()) {
-		for (int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			if (right.compare(stmtNum2) == 0) {
-				results.push_back(temp1[i]);
-			}
-		}
-	} else {
-		for (int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			if (left.compare(stmtNum1) == 0) {
-				results.push_back(temp2[i]);
-			}
-		}
+	if(parentsTable.isParent(stmtNum1, stmtNum2)) {
+		results.push_back(make_pair(stmtNum1, stmtNum2));
 	}
 	return results;
 }
@@ -694,28 +610,11 @@ vector<pair<string, string>> PKB::getCalls(string stmtNum, SyntType st) {
 }
 
 vector<pair<string, string>> PKB::getCalls(string stmtNum1, string stmtNum2) {
-	set<pair<string, string>> results;
-	vector<pair<string, string>> temp1 = callsTable.getByLeftKey(stmtNum1);
-	vector<pair<string, string>> temp2 = callsTable.getByRightKey(stmtNum2);
-
-	if (temp1.size() == 0 || temp2.size() == 0) {
-		return vector<pair<string, string>>(results.begin(), results.end());
-	} else if (temp1.size() < temp2.size()) {
-		for(int i=0; i<temp1.size(); i++) {
-			string right = temp1[i].second;
-			if (right.compare(stmtNum2) == 0) {
-				results.insert(temp1[i]);
-			}
-		}
-	} else {
-		for(int i=0; i<temp2.size(); i++) {
-			string left = temp2[i].first;
-			if (left.compare(stmtNum1) == 0) {
-				results.insert(temp2[i]);
-			}
-		}
+	vector<pair<string, string>> results;
+	if(callsTable.isCalled(stmtNum1, stmtNum2)) {
+		results.push_back(make_pair(stmtNum1, stmtNum2));
 	}
-	return vector<pair<string, string>>(results.begin(), results.end());
+	return results;
 }
 
 vector<pair<string, string>> PKB::getCallsStar(SyntType st1, SyntType st2) {

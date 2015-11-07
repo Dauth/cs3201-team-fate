@@ -20,6 +20,7 @@ public:
 	vector<pair<string, string>> getAll();
 	vector<string> getCallingStatement(string);
 	bool isCalled(string);
+	bool isCalled(string, string);
 	void addCalls(Node*, Node*);
 };
 
