@@ -691,7 +691,7 @@ void ProcessEachToken(char *currentToken)
 				int startBracket = 0;
 				int endBracket = 0;
 				//regex fullPattern("([^\\(]+\\(([^\\)]+|[^\,]+)(\,([^\\)]+|[^\,]+)\\))+)");
-				regex fullPattern("[^\\(]+\\([^\,]+\,[^\,]+");
+				regex fullPattern("[^\\(]+\\([^\,]+(\,[^\,]+)+");
 
 				concatStmt.append(currentToken);
 				// 1) Check brackets are opened and closed correctly
