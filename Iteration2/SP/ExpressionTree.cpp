@@ -7,7 +7,7 @@ using std::regex;
 using std::string;
 using std::sregex_token_iterator;
 #include <locale>
-#include "PKB.h"
+#include "PKBFacade.h"
 
 const int LEFT = 1;
 const int RIGHT = 2;
@@ -36,8 +36,8 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
 		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
-			catchInvalidNameException(tempStr);
 			if(!tempStr.empty()){
+				catchInvalidNameException(tempStr);
 				splittedString.push_back(tempStr);
 				tempStr.clear();
 			}
@@ -219,9 +219,10 @@ SyntType ExpressionTree::getSyntType(std::string expressionStr){
 		return expressionCharType;
 }
 
-Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+Node* ExpressionTree::exptreeSetup(PKBFacade* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
+	std::stack<int> graphStack;//for graph drawing purposes
 
 	for(int i = 0; i < postflixExp.size(); i++){
 		std::string expressionChar = postflixExp[i];
@@ -230,6 +231,10 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 		if(isOperand(postflixExp[i])){
 			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
 			operandStack.push(tNode);
+			/*Graph drawing*/
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ expressionChar +"\" shape=box];\n");
+			graphStack.push(counter - 1);
+			//////////////////////////
 		}else if (isOperator(postflixExp[i])){
 			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
 			tNode->setRightChild(operandStack.top());
@@ -239,6 +244,17 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 			operandStack.pop();
 
 			operandStack.push(tNode);
+
+			/*Graph drawing*/
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ expressionChar +"\" shape=box];\n");
+			int rightChild = graphStack.top();
+			graphStack.pop();
+			int leftChild = graphStack.top();
+			graphStack.pop();
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << leftChild) )->str()+'\n');
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << rightChild) )->str()+'\n');
+			graphStack.push(counter - 1);
+			//////////////////////////
 		}
 	}
 

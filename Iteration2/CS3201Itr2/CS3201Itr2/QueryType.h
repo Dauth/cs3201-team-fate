@@ -1,6 +1,5 @@
 enum QueryType {
 	pattern,
-	with,
 	modifies,
 	uses,
 	follows,
@@ -13,5 +12,6 @@ enum QueryType {
 	nxtStar,
 	affects,
 	affectsStar,
+	with,
 	error
 };

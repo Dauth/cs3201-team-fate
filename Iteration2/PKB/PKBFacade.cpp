@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "PKB.h"
+#include "PKBFacade.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -8,19 +8,19 @@
 
 using namespace std;
 
-PKB::PKB(ExpressionTree* _et) {
+PKBFacade::PKBFacade(ExpressionTree* _et) {
 	LIST_INDEX_OFFSET = 1;
 	et = _et;
 }
 
-void PKB::buildCFG() {
+void PKBFacade::buildCFG() {
 	vector<Node*> procedures = procedureTable.getAllProcedures();
 	for (int i=0; i<procedures.size(); i++) {
 		cfg.buildCFG(procedures.at(i));
 	}
 }
 
-vector<Node*> PKB::getNodes(SyntType st) {
+vector<Node*> PKBFacade::getNodes(SyntType st) {
 	if(st == variable) {
 		return variableTable.getNodes();
 	} else if(st == constant) {
@@ -37,7 +37,7 @@ vector<Node*> PKB::getNodes(SyntType st) {
 	return statementTable.getStatements(st);
 }
 
-int PKB::getCount(SyntType st) {
+int PKBFacade::getCount(SyntType st) {
 	if(st == variable) {
 		return variableTable.getVariableCount();
 	}
@@ -45,11 +45,11 @@ int PKB::getCount(SyntType st) {
 }
 
 // if returns nullpt procedure already exists
-Node* PKB::createProcedure(string procName) {
+Node* PKBFacade::createProcedure(string procName) {
 	return procedureTable.createProcedure(procName);
 }
 
-Node* PKB::createNode(SyntType st, int line, string value, 
+Node* PKBFacade::createNode(SyntType st, int line, string value, 
 	Node* usedBy, Node* modifiedBy, Node* parent, Node* procedure) {
 	ostringstream oss;
 	oss << line;
@@ -90,7 +90,7 @@ Node* PKB::createNode(SyntType st, int line, string value,
 	return node;
 }
 
-void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* usedBy) {
+void PKBFacade::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* usedBy) {
 	if (procNode != nullptr && callsTable.isCalled(procNode->getValue())) {
 		vector<pair<string, string>> calls = getCallsStar(procedure, procNode->getValue());
 		for (int i=0; i<calls.size(); i++) {
@@ -133,7 +133,7 @@ void PKB::handleInheritance(Node* procNode, Node* node, Node* modifiedBy, Node* 
 	}
 }
 
-void PKB::handleCalls(Node* callingProc, Node* node, Node* parent) {
+void PKBFacade::handleCalls(Node* callingProc, Node* node, Node* parent) {
 	callsTable.addCalls(callingProc, node);
 	Node* targetProc = procedureTable.getProcedure(node->getValue());
 	if (targetProc != nullptr ) {
@@ -193,7 +193,7 @@ void PKB::handleCalls(Node* callingProc, Node* node, Node* parent) {
 	}
 }
 
-void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
+void PKBFacade::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* parent) {
 	modifiesTable.addModifies(modifiedBy, node->getValue());
 	modifiesTable.addModifies(procedure, node->getValue());
 	while (parent != nullptr) {
@@ -207,7 +207,7 @@ void PKB::handleModifiedBy(Node* node, Node* modifiedBy, Node* procedure, Node* 
 	}
 }
 
-void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
+void PKBFacade::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) {
 	usesTable.addUses(usedBy, node->getValue());
 	usesTable.addUses(procedure, node->getValue());
 	while (parent != nullptr) {
@@ -221,26 +221,26 @@ void PKB::handleUsedBy(Node* node, Node* usedBy, Node* procedure, Node* parent) 
 	}
 }
 
-void PKB::handleParent(Node* child, Node* parent) {
+void PKBFacade::handleParent(Node* child, Node* parent) {
 	parentsTable.addChild(parent, child);
 }
 
 
-vector<pair<string, string>> PKB::getModifies(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getModifies(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	return modifiesTable.getByLeftKey(st1);
 }
 
-vector<pair<string, string>> PKB::getModifies(SyntType st, string varName) {
+vector<pair<string, string>> PKBFacade::getModifies(SyntType st, string varName) {
 	if (st == progline) st = statement;
 	return modifiesTable.getByRightKey(varName, st);
 }
 
-vector<pair<string, string>> PKB::getModifies(string ident, SyntType st) {
+vector<pair<string, string>> PKBFacade::getModifies(string ident, SyntType st) {
 	return modifiesTable.getByLeftKey(ident);
 }
 
-vector<pair<string, string>> PKB::getModifies(string ident, string varName) {
+vector<pair<string, string>> PKBFacade::getModifies(string ident, string varName) {
 	vector<pair<string, string>> results;
 	if(modifiesTable.isModified(ident, varName)) {
 		results.push_back(make_pair(ident, varName));
@@ -248,21 +248,21 @@ vector<pair<string, string>> PKB::getModifies(string ident, string varName) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getUses(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getUses(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	return usesTable.getByLeftKey(st1);
 }
 
-vector<pair<string, string>> PKB::getUses(SyntType st, string varName) {
+vector<pair<string, string>> PKBFacade::getUses(SyntType st, string varName) {
 	if (st == progline) st = statement;
 	return usesTable.getByRightKey(varName, st);
 }
 
-vector<pair<string, string>> PKB::getUses(string ident, SyntType st) {
+vector<pair<string, string>> PKBFacade::getUses(string ident, SyntType st) {
 	return usesTable.getByLeftKey(ident);
 }
 
-vector<pair<string, string>> PKB::getUses(string ident, string varName) {
+vector<pair<string, string>> PKBFacade::getUses(string ident, string varName) {
 	vector<pair<string, string>> results;
 	if(usesTable.isUsed(ident, varName)) {
 		results.push_back(make_pair(ident, varName));
@@ -270,23 +270,23 @@ vector<pair<string, string>> PKB::getUses(string ident, string varName) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getParents(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getParents(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	if (st2 == progline) st2 = statement;
 	return parentsTable.getByLeftKey(st1, st2);
 }
 
-vector<pair<string, string>> PKB::getParents(SyntType st, string stmtNum) {
+vector<pair<string, string>> PKBFacade::getParents(SyntType st, string stmtNum) {
 	if (st == progline) st = statement;
 	return parentsTable.getByRightKey(stmtNum, st);
 }
 
-vector<pair<string, string>> PKB::getParents(string stmtNum, SyntType st) {
+vector<pair<string, string>> PKBFacade::getParents(string stmtNum, SyntType st) {
 	if (st == progline) st = statement;
 	return parentsTable.getByLeftKey(stmtNum, st);
 }
 
-vector<pair<string, string>> PKB::getParents(string stmtNum1, string stmtNum2) {
+vector<pair<string, string>> PKBFacade::getParents(string stmtNum1, string stmtNum2) {
 	vector<pair<string, string>> results;
 	if(parentsTable.isParent(stmtNum1, stmtNum2)) {
 		results.push_back(make_pair(stmtNum1, stmtNum2));
@@ -294,7 +294,7 @@ vector<pair<string, string>> PKB::getParents(string stmtNum1, string stmtNum2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getParentsStar(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getParentsStar(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	if (st2 == progline) st2 = statement;
 	set<pair<string, string>> results;
@@ -325,7 +325,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st1, SyntType st2) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
+vector<pair<string, string>> PKBFacade::getParentsStar(SyntType st, string stmtNum) {
 	if (st == progline) st = statement;
 	set<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(st, stmtNum);
@@ -353,7 +353,7 @@ vector<pair<string, string>> PKB::getParentsStar(SyntType st, string stmtNum) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getParentsStar(string stmtNum, SyntType st) {
+vector<pair<string, string>> PKBFacade::getParentsStar(string stmtNum, SyntType st) {
 	if (st == progline) st = statement;
 	set<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(stmtNum, statement);
@@ -383,7 +383,7 @@ vector<pair<string, string>> PKB::getParentsStar(string stmtNum, SyntType st) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getParentsStar(string stmtNum1, string stmtNum2) {
+vector<pair<string, string>> PKBFacade::getParentsStar(string stmtNum1, string stmtNum2) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> parents = getParents(stmtNum1, statement);
 	if (parents.empty()){
@@ -411,7 +411,7 @@ vector<pair<string, string>> PKB::getParentsStar(string stmtNum1, string stmtNum
 }
 
 
-vector<pair<string, string>> PKB::getFollows(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getFollows(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	if (st2 == progline) st2 = statement;
 	vector<pair<string, string>> results;
@@ -444,7 +444,7 @@ vector<pair<string, string>> PKB::getFollows(SyntType st1, SyntType st2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getFollows(SyntType st, string stmtNum) {
+vector<pair<string, string>> PKBFacade::getFollows(SyntType st, string stmtNum) {
 	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	Node* rightNode = statementTable.getStatement(stmtNum);
@@ -458,7 +458,7 @@ vector<pair<string, string>> PKB::getFollows(SyntType st, string stmtNum) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getFollows(string stmtNum, SyntType st) {
+vector<pair<string, string>> PKBFacade::getFollows(string stmtNum, SyntType st) {
 	if (st == progline) st = statement;
 	vector<pair<string, string>> results;
 	Node* leftNode = statementTable.getStatement(stmtNum);
@@ -472,7 +472,7 @@ vector<pair<string, string>> PKB::getFollows(string stmtNum, SyntType st) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getFollows(string stmtNum1, string stmtNum2) {
+vector<pair<string, string>> PKBFacade::getFollows(string stmtNum1, string stmtNum2) {
 	vector<pair<string, string>> results;
 	Node* leftNode = statementTable.getStatement(stmtNum1);
 	if (leftNode != nullptr) {
@@ -485,7 +485,7 @@ vector<pair<string, string>> PKB::getFollows(string stmtNum1, string stmtNum2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getFollowsStar(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getFollowsStar(SyntType st1, SyntType st2) {
 	if (st1 == progline) st1 = statement;
 	if (st2 == progline) st2 = statement;
 	set<pair<string, string>> results;
@@ -514,7 +514,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st1, SyntType st2) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
+vector<pair<string, string>> PKBFacade::getFollowsStar(SyntType st, string stmtNum) {
 	if (st == progline) st = statement;
 	set<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(statement, stmtNum);
@@ -542,7 +542,7 @@ vector<pair<string, string>> PKB::getFollowsStar(SyntType st, string stmtNum) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getFollowsStar(string stmtNum, SyntType st) {
+vector<pair<string, string>> PKBFacade::getFollowsStar(string stmtNum, SyntType st) {
 	if (st == progline) st = statement;
 	set<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(stmtNum, statement);
@@ -570,7 +570,7 @@ vector<pair<string, string>> PKB::getFollowsStar(string stmtNum, SyntType st) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getFollowsStar(string stmtNum1, string stmtNum2) {
+vector<pair<string, string>> PKBFacade::getFollowsStar(string stmtNum1, string stmtNum2) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> follows = getFollows(stmtNum1, statement);
 	if (follows.empty()){
@@ -597,19 +597,19 @@ vector<pair<string, string>> PKB::getFollowsStar(string stmtNum1, string stmtNum
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getCalls(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getCalls(SyntType st1, SyntType st2) {
 	return callsTable.getAll();
 }
 
-vector<pair<string, string>> PKB::getCalls(SyntType st, string stmtNum) {
+vector<pair<string, string>> PKBFacade::getCalls(SyntType st, string stmtNum) {
 	return callsTable.getByRightKey(stmtNum);
 }
 
-vector<pair<string, string>> PKB::getCalls(string stmtNum, SyntType st) {
+vector<pair<string, string>> PKBFacade::getCalls(string stmtNum, SyntType st) {
 	return callsTable.getByLeftKey(stmtNum);
 }
 
-vector<pair<string, string>> PKB::getCalls(string stmtNum1, string stmtNum2) {
+vector<pair<string, string>> PKBFacade::getCalls(string stmtNum1, string stmtNum2) {
 	vector<pair<string, string>> results;
 	if(callsTable.isCalled(stmtNum1, stmtNum2)) {
 		results.push_back(make_pair(stmtNum1, stmtNum2));
@@ -617,7 +617,7 @@ vector<pair<string, string>> PKB::getCalls(string stmtNum1, string stmtNum2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getCallsStar(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getCallsStar(SyntType st1, SyntType st2) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> calls = getCalls(st1, st2);
 	if (calls.empty()){
@@ -638,7 +638,7 @@ vector<pair<string, string>> PKB::getCallsStar(SyntType st1, SyntType st2) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getCallsStar(SyntType st, string procName) {
+vector<pair<string, string>> PKBFacade::getCallsStar(SyntType st, string procName) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> calls = getCalls(st, procName);
 	if (calls.empty()){
@@ -659,7 +659,7 @@ vector<pair<string, string>> PKB::getCallsStar(SyntType st, string procName) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getCallsStar(string procName, SyntType st) {
+vector<pair<string, string>> PKBFacade::getCallsStar(string procName, SyntType st) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> calls = getCalls(procName, st);
 	if (calls.empty()){
@@ -680,7 +680,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName, SyntType st) {
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getCallsStar(string procName1, string procName2) {
+vector<pair<string, string>> PKBFacade::getCallsStar(string procName1, string procName2) {
 	set<pair<string, string>> results;
 	vector<pair<string, string>> calls = getCalls(procName1, procedure);
 	if (calls.empty()){
@@ -707,7 +707,7 @@ vector<pair<string, string>> PKB::getCallsStar(string procName1, string procName
 }
 
 //private
-Node* PKB::getFollowee(Node* statement) {
+Node* PKBFacade::getFollowee(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
 	if(index < (stmtLstNode->getIndexLst().size())) {
@@ -717,7 +717,7 @@ Node* PKB::getFollowee(Node* statement) {
 }
 
 //private
-Node* PKB::getFollowedBy(Node* statement) {
+Node* PKBFacade::getFollowedBy(Node* statement) {
 	Node* stmtLstNode = statement->getParent();
 	int index = stmtLstNode->getIndexLst()[statement];
 	if(index > 0) {
@@ -726,15 +726,15 @@ Node* PKB::getFollowedBy(Node* statement) {
 	return nullptr;
 }
 
-vector<Node*> PKB::getExpressions(string expr) {
+vector<Node*> PKBFacade::getExpressions(string expr) {
 	return expressionTable.getExpressions(expr);
 }
 
-vector<Node*> PKB::getRootExpressions(string expr) {
+vector<Node*> PKBFacade::getRootExpressions(string expr) {
 	return expressionTable.getRootExpressions(expr);
 }
 
-vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,string right){
+vector<pair<string, string>> PKBFacade::searchWithPattern(SyntType type,string left,string right){
 	vector<pair<string, string>> results;
 	string firstChar = right.substr(0,1);
 	//if the pattern is for a while loop
@@ -877,11 +877,11 @@ vector<pair<string, string>> PKB::searchWithPattern(SyntType type,string left,st
 	return results;
 }
 
-vector<pair<string, string>> PKB::getNext(SyntType s1, SyntType s2){
+vector<pair<string, string>> PKBFacade::getNext(SyntType s1, SyntType s2){
 	return cfg.getAllPairs();
 }
 
-vector<pair<string, string>> PKB::getNext(SyntType s1, string sNum2){
+vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2){
 	vector<pair<string, string>> nextList;
 	vector<CFGNode*> prevList = statementTable.getStatement(sNum2)->getCfgNode()->getPrevNode();
 	for(unsigned i = 0; i < prevList.size(); i++){
@@ -893,7 +893,7 @@ vector<pair<string, string>> PKB::getNext(SyntType s1, string sNum2){
 	return nextList;
 }
 
-vector<pair<string, string>> PKB::getNext(string sNum1, SyntType s2){
+vector<pair<string, string>> PKBFacade::getNext(string sNum1, SyntType s2){
 	vector<pair<string, string>> nextList;
 	Node* temp = statementTable.getStatement(sNum1);
 	if(temp->getType() == whileLoop || temp->getType() == ifelse){
@@ -923,7 +923,7 @@ vector<pair<string, string>> PKB::getNext(string sNum1, SyntType s2){
 	return nextList;
 }
 
-vector<pair<string, string>> PKB::getNext(string sNum1, string sNum2){
+vector<pair<string, string>> PKBFacade::getNext(string sNum1, string sNum2){
 	vector<pair<string, string>> nextList;
 	Node* temp = statementTable.getStatement(sNum1);
 	if(temp->getType() == whileLoop || temp->getType() == ifelse){
@@ -949,7 +949,7 @@ vector<pair<string, string>> PKB::getNext(string sNum1, string sNum2){
 	return nextList;
 }
 
-vector<pair<string, string>> PKB::getNextStar(SyntType s1, SyntType s2){
+vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, SyntType s2){
 	vector<pair<string, string>> results;
 	for(int i = 1; i <= statementTable.getStatementCount(statement);i++){
 		ostringstream oss ;
@@ -961,7 +961,7 @@ vector<pair<string, string>> PKB::getNextStar(SyntType s1, SyntType s2){
 
 	return results;
 }
-vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
+vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2){
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num2);
 	if ( tempNode->getType() == whileLoop){
@@ -992,7 +992,7 @@ vector<pair<string, string>> PKB::getNextStar(SyntType s1, string num2){
 	results.assign(s.begin(),s.end());
 	return results;
 }
-vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
+vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2){
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num1);
 	if( tempNode->getType() == whileLoop || tempNode->getType() == ifelse){
@@ -1038,7 +1038,7 @@ vector<pair<string, string>> PKB::getNextStar(string num1, SyntType s2){
 	results.assign(s.begin(),s.end());
 	return results;
 }
-vector<pair<string, string>> PKB::getNextStar(string num1, string num2){
+vector<pair<string, string>> PKBFacade::getNextStar(string num1, string num2){
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> nextStar = getNextStar(num1,statement);
 	for( int i = 0; i < nextStar.size(); i++){
@@ -1052,7 +1052,7 @@ vector<pair<string, string>> PKB::getNextStar(string num1, string num2){
 	return results;
 }
 
-vector<pair<string, string>> PKB::getAffects(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getAffects(SyntType st1, SyntType st2) {
 	vector<pair<string, string>> results;
 	vector<Node*> assignments = statementTable.getStatements(assignment);
 	for (int i=0; i<assignments.size(); i++) {
@@ -1062,7 +1062,7 @@ vector<pair<string, string>> PKB::getAffects(SyntType st1, SyntType st2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getAffects(SyntType st, string assign) {
+vector<pair<string, string>> PKBFacade::getAffects(SyntType st, string assign) {
 	set<pair<string, string>> results;
 	Node* assignnode = statementTable.getStatement(assign);
 	if(assignnode->getType() != assignment) {
@@ -1078,7 +1078,7 @@ vector<pair<string, string>> PKB::getAffects(SyntType st, string assign) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getAffects(string assign, SyntType st) {
+vector<pair<string, string>> PKBFacade::getAffects(string assign, SyntType st) {
 	set<pair<string, string>> results;
 	Node* assignnode = statementTable.getStatement(assign);
 	if(assignnode->getType() != assignment) {
@@ -1093,7 +1093,7 @@ vector<pair<string, string>> PKB::getAffects(string assign, SyntType st) {
 	return vector<pair<string, string>> (results.begin(), results.end()); 
 }
 
-vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
+vector<pair<string, string>> PKBFacade::getAffects(string assign1, string assign2) {
 	set<pair<string, string>> results;
 	Node* assign1node = statementTable.getStatement(assign1);
 	Node* assign2node = statementTable.getStatement(assign2);
@@ -1112,7 +1112,7 @@ vector<pair<string, string>> PKB::getAffects(string assign1, string assign2) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getAffectsStar(SyntType st1, SyntType st2) {
+vector<pair<string, string>> PKBFacade::getAffectsStar(SyntType st1, SyntType st2) {
 	vector<pair<string, string>> results;
 	vector<Node*> assignments = statementTable.getStatements(assignment);
 	for (int i=0; i<assignments.size(); i++) {
@@ -1122,7 +1122,7 @@ vector<pair<string, string>> PKB::getAffectsStar(SyntType st1, SyntType st2) {
 	return results;
 }
 
-vector<pair<string, string>> PKB::getAffectsStar(SyntType st, string assign) {
+vector<pair<string, string>> PKBFacade::getAffectsStar(SyntType st, string assign) {
 	set<pair<string, string>> results;
 	Node* assignnode = statementTable.getStatement(assign);
 	if(assignnode->getType() != assignment) {
@@ -1138,7 +1138,7 @@ vector<pair<string, string>> PKB::getAffectsStar(SyntType st, string assign) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getAffectsStar(string assign, SyntType st) {
+vector<pair<string, string>> PKBFacade::getAffectsStar(string assign, SyntType st) {
 	set<pair<string, string>> results;
 	Node* assignnode = statementTable.getStatement(assign);
 	if(assignnode->getType() != assignment) {
@@ -1153,7 +1153,7 @@ vector<pair<string, string>> PKB::getAffectsStar(string assign, SyntType st) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> PKB::getAffectsStar(string assign1, string assign2) {
+vector<pair<string, string>> PKBFacade::getAffectsStar(string assign1, string assign2) {
 	set<pair<string, string>> results;
 	Node* assign1node = statementTable.getStatement(assign1);
 	Node* assign2node = statementTable.getStatement(assign2);
@@ -1172,7 +1172,7 @@ vector<pair<string, string>> PKB::getAffectsStar(string assign1, string assign2)
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-void PKB::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<string, Node*>>* searched, Node* node, string origin, string varName, string stop, bool indirect) {
+void PKBFacade::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<string, Node*>>* searched, Node* node, string origin, string varName, string stop, bool indirect) {
 	vector<pair<string, string>> next = getNext(node->getLine(), progline);
 	for(int i=0; i<next.size(); i++) {
 		Node* stmt = statementTable.getStatement(next[i].second);
@@ -1197,7 +1197,7 @@ void PKB::forwardAffectsSearch(set<pair<string, string>>* results, set<pair<stri
 	}
 }
 
-void PKB::reverseAffectsSearch(set<pair<string, string>>* results, set<pair<string, Node*>>* searched, Node* node, string origin, string varName, bool indirect) {
+void PKBFacade::reverseAffectsSearch(set<pair<string, string>>* results, set<pair<string, Node*>>* searched, Node* node, string origin, string varName, bool indirect) {
 	vector<pair<string, string>> prev = getNext(progline, node->getLine());
 	for(int i=0; i<prev.size(); i++) {
 		Node* stmt = statementTable.getStatement(prev[i].first);
@@ -1220,7 +1220,7 @@ void PKB::reverseAffectsSearch(set<pair<string, string>>* results, set<pair<stri
 	}
 }
 
-int PKB::compare(Node* p,Node* q){
+int PKBFacade::compare(Node* p,Node* q){
    if(p == NULL && q == NULL){
 	   return 1;
    }
@@ -1235,7 +1235,7 @@ int PKB::compare(Node* p,Node* q){
    else
 		return 0;
 }
-bool PKB::isExpression(string s){
+bool PKBFacade::isExpression(string s){
 	if(s.find("+") != string::npos || s.find("*") != string::npos || s.find("-") != string::npos){
 		return true;
 	}

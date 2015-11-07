@@ -34,14 +34,6 @@ vector<string> CallsTable::getCallingStatement(string procName) {
 	return vector<string> (callingStatements.begin(), callingStatements.end());
 }
 
- 
-bool CallsTable::isCalled(string procName) {
-	if (rightKeyTable.find(procName) == rightKeyTable.end()) {
-		return false;
-	}
-	return true;
-}
-
 void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getValue();
 	string right = nodeRight->getValue();
@@ -64,4 +56,22 @@ void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	rightKeyTable[right].insert(calls);
 	callingStatement[right].insert(nodeRight->getLine());
 	allCalls.insert(calls);
+}
+
+bool CallsTable::isCalled(string procName) {
+	if (rightKeyTable.find(procName) == rightKeyTable.end()) {
+		return false;
+	}
+	return true;
+}
+
+bool CallsTable::isCalled(string proc1, string proc2) {
+	if (leftKeyTable.find(proc1) == leftKeyTable.end()) {
+		return false;
+	}
+	set<pair<string, string>> calls = leftKeyTable[proc1];
+	if (calls.find(make_pair(proc1, proc2)) == calls.end()) {
+		return false;
+	}
+	return true;
 }

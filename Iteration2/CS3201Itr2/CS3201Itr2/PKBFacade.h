@@ -18,7 +18,7 @@ using namespace std;
 
 class ExpressionTree;
 
-class PKB {
+class PKBFacade {
 
 	ExpressionTree *et;
 	VariableTable variableTable;
@@ -49,7 +49,7 @@ class PKB {
 	void forwardAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, string, bool);
 	void reverseAffectsSearch(set<pair<string, string>>*, set<pair<string, Node*>>*, Node*, string, string, bool);
 public:
-	PKB(ExpressionTree*);
+	PKBFacade(ExpressionTree*);
 
 
 	Node* createProcedure(string);

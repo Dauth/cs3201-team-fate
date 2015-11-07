@@ -3,20 +3,20 @@
 
 #include "stdafx.h"
 #include "Node.h"
-#include "PKB.h"
+#include "PKBFacade.h"
 #include "ExpressionTree.h"
 #include <string>
 #include "Twin.h"
 #include <stack>
 
 class AST {
-	PKB* pkb;
+	PKBFacade* pkb;
 	ExpressionTree* expTree;
 private:
 
 
 public:
-	AST(PKB*, ExpressionTree*);
+	AST(PKBFacade*, ExpressionTree*);
 	void catchParamProcException(std::string line, unsigned i);
 	void isCharABrace(bool& isBraces, char cChar);
 	void catchMissingStmNameException(std::string& stmString, std::string& stmNameString, unsigned i);

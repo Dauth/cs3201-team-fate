@@ -8,7 +8,7 @@ using namespace std;
 
 PKB_test::PKB_test() {
 	ExpressionTree* et = new ExpressionTree();
-	pkb = new PKB(et);
+	pkb = new PKBFacade(et);
 }
 
 
@@ -369,10 +369,10 @@ void PKB_test::runTests() {
 	printResults(pkb->getCallsStar("test", "test3"));
 
 	cout << "\n\nQuery is Pattern assignment(variable, _\"z + y\"_) \n"; 
-	printResults(pkb->searchWithPattern(assignment, "_", "_z + y_"));
+	printResults(pkb->searchWithPattern(assignment, "_", "_z+y_"));
 
 	cout << "\n\nQuery is Pattern assignment(variable, \"g + h\") \n"; 
-	printResults(pkb->searchWithPattern(assignment, "_", "g + h"));
+	printResults(pkb->searchWithPattern(assignment, "_", "g+h"));
 
 	cout << "\n\nQuery is Pattern whileLoop(variable, \"_\") \n"; 
 	printResults(pkb->searchWithPattern(whileLoop, "_", "_"));

@@ -3,7 +3,7 @@
 
 SPA::SPA() {
 	et = new ExpressionTree();
-	pkb = new PKB(et);
+	pkb = new PKBFacade(et);
 	ast = new AST(pkb, et);
 	sp = new SimpleParser(ast);
 	qe = new QueryEvaluator(pkb);

@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "QueryEvaluator.h"
 
-QueryEvaluator::QueryEvaluator(PKB* p) {
+QueryEvaluator::QueryEvaluator(PKBFacade* p) {
 	pkb = p;
-	callNodes = pkb->getNodes(call);
 }
 
 //method called to evaluate a PQL query
@@ -280,28 +279,28 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
 					SyntType rightType = getSyntType(qp->getType());
-					return getResultFromPKB(qp->getType(), leftType, rightType);
+					return getResultFromPKBFacade(qp->getType(), leftType, rightType);
 				}
 				else {
-					return getResultFromPKB(qp->getType(), leftType, right->getParam());
+					return getResultFromPKBFacade(qp->getType(), leftType, right->getParam());
 				}
 			}
 			else {
-				return getResultFromPKB(qp->getType(), leftType, right->getType());
+				return getResultFromPKBFacade(qp->getType(), leftType, right->getType());
 			}
 		}
 		else {
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
 					SyntType rightType = getSyntType(qp->getType());
-					return getResultFromPKB(qp->getType(), left->getParam(), rightType);
+					return getResultFromPKBFacade(qp->getType(), left->getParam(), rightType);
 				}
 				else {
-					return getResultFromPKB(qp->getType(), left->getParam(), right->getParam());
+					return getResultFromPKBFacade(qp->getType(), left->getParam(), right->getParam());
 				}
 			}
 			else {
-				return getResultFromPKB(qp->getType(), left->getParam(), right->getType());
+				return getResultFromPKBFacade(qp->getType(), left->getParam(), right->getType());
 			}
 		}
 	}
@@ -312,10 +311,10 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 		else {
 			if(right->getParam() == "_") {
 				SyntType rightType = getSyntType(qp->getType());
-				return getResultFromPKB(qp->getType(), left->getType(), rightType);
+				return getResultFromPKBFacade(qp->getType(), left->getType(), rightType);
 			}
 			else {
-				return getResultFromPKB(qp->getType(), left->getType(), right->getParam());
+				return getResultFromPKBFacade(qp->getType(), left->getType(), right->getParam());
 			}
 		}
 	}
@@ -324,7 +323,7 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 			return pkb->searchWithPattern(left->getType(), "_", qp->getLastParam()->getParam());
 		}
 		else {
-			return getResultFromPKB(qp->getType(), left->getType(), right->getType());
+			return getResultFromPKBFacade(qp->getType(), left->getType(), right->getType());
 		}
 	}
 }
@@ -342,7 +341,7 @@ SyntType QueryEvaluator::getSyntType(QueryType qType) {
 	}
 }
 
-//evaluates QueryParts of type "with" in QueryEvaluator with the help of PKB
+//evaluates QueryParts of type "with" in QueryEvaluator with the help of PKBFacade
 vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
@@ -524,7 +523,7 @@ vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	return result;
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, string left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -556,7 +555,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, string left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -588,7 +587,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, string right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, SyntType left, string right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -620,7 +619,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 	}
 }
 
-vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, SyntType right) {
+vector<pair<string, string>> QueryEvaluator::getResultFromPKBFacade(QueryType type, SyntType left, SyntType right) {
 	switch(type) {
 		case modifies	:
 			return pkb->getModifies(left, right);
@@ -959,6 +958,7 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
+		callNodes = pkb->getNodes(call);
 		vector<vector<string>> empty;
 		formFinalResult(empty);
 	}
@@ -990,7 +990,7 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 		if(valSet.empty()) {
 			vector<Node*> result = pkb->getNodes(node->getType());
 
-			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
+			if(node->getType() == procedure || node->getType() == variable || node->getType() == constant || node->getType() == statementList) {
 				for(unsigned int i = 0; i < result.size(); i++) {
 					valSet.insert(result[i]->getValue());
 				}
