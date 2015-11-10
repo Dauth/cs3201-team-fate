@@ -251,14 +251,14 @@ bool verifyCorrectParameters(QueryType queryClause,string firstParam, string sec
 	}
 	else if (queryClause == QueryType::affects)
 	{
-		if ((firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
+		if ((firstSyn == SyntType::progline||firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || firstSyn == SyntType::statement || firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::whileLoop || secondSyn == SyntType::progline || secondSyn == SyntType::ifelse || secondSyn == SyntType::statement || secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
 	}
 	else if (queryClause == QueryType::affectsStar)
 	{
-		if ((firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
+		if ((firstSyn == SyntType::progline || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || firstSyn == SyntType::statement || firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::whileLoop || secondSyn == SyntType::progline || secondSyn == SyntType::ifelse || secondSyn == SyntType::statement ||secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
@@ -646,10 +646,6 @@ void ProcessEachToken(char *currentToken)
 		}
 		currToken = TOKEN::PATTERN_CL;
 		existClauses = true;
-	}
-	else if (strcmp(currentToken, "pattern") == 0 &&  currToken == TOKEN::PATTERN_CL)
-	{
-		nonQueryToken = true;
 	}
 	else if (strcmp(currentToken,"such") == 0 && currToken == TOKEN::AND_END)
 	{
@@ -1292,6 +1288,8 @@ Query_Object QueryParser::getQueryObject(std::string i){
 	synonymError = false;
 	completeSelectStmt = false;
 	invalidWith = false;
+	previousToken = TOKEN::SELECT;
+	currToken = TOKEN::SELECT;
 
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
@@ -1336,6 +1334,7 @@ int main ()
 	}
 }
 */
+
 
 
 
