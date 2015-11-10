@@ -23,19 +23,25 @@ ExpressionTree::ExpressionTree() {
 
 }
 
+//This method is used to catch an unknown operator in expression
+//PRE: line number
+//POST: none
 void ExpressionTree::catchUnknownOperatorException(int i){
 	std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<i + 1<<std::endl;
 	std::terminate();
 }
 
-void ExpressionTree::splitString(std::string inflixString, std::vector<std::string>& splittedString){
+//This method is used to split a string into chracters
+//PRE: string of infix, address vector of string
+//POST: none
+void ExpressionTree::splitString(std::string infixString, std::vector<std::string>& splittedString){
 	std::string tempStr = "";
-	for(int i = 0; i < inflixString.size(); i++){
-		std::string expStr(1, inflixString[i]);
+	for(int i = 0; i < infixString.size(); i++){
+		std::string expStr(1, infixString[i]);
 
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
-		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
+		}else if(isOperator(expStr) || infixString[i] == '(' || infixString[i] == ')'){
 			if(!tempStr.empty()){
 				catchInvalidNameException(tempStr);
 				splittedString.push_back(tempStr);
@@ -206,7 +212,9 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	return result;//if it is false here, there are more opening then closing brackets
 }
 
-
+//This method is used to get the syntype of a character
+//PRE: string of expression
+//POST: none
 SyntType ExpressionTree::getSyntType(std::string expressionStr){
 	SyntType expressionCharType;
 	if(isAlpha(expressionStr)){
@@ -219,6 +227,9 @@ SyntType ExpressionTree::getSyntType(std::string expressionStr){
 		return expressionCharType;
 }
 
+//This method is used to create an assign node
+//PRE: line, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
@@ -261,18 +272,21 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 	return operandStack.top();
 }
 
-Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
+//This method is used to setup a expression tree for pattern matching
+//PRE: vecotr of string for postfix 
+//POST: none
+Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postfixExp){
 	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
 
-	for(int i = 0; i < postflixExp.size(); i++){
-		std::string expressionStr= postflixExp[i];
-		expressionCharType = getSyntType(postflixExp[i]);
+	for(int i = 0; i < postfixExp.size(); i++){
+		std::string expressionStr= postfixExp[i];
+		expressionCharType = getSyntType(postfixExp[i]);
 		Node* tNode = new Node(expressionCharType, "0", expressionStr);
 
-		if(isOperand(postflixExp[i])){
+		if(isOperand(postfixExp[i])){
 			operandStack.push(tNode);
-		}else if (isOperator(postflixExp[i])){
+		}else if (isOperator(postfixExp[i])){
 			operandStack.top()->setParent(tNode);
 			tNode->setRightChild(operandStack.top());
 			operandStack.pop();
@@ -288,7 +302,9 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 	return operandStack.top();
 }
 
-//check first letter is a alphabet and subsequet letters are alphanumeric
+//This method is used to check first letter is a alphabet and subsequet letters are alphanumeric
+//PRE: line, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 bool ExpressionTree::isNameValid(std::string input){
 	bool result = false;
 	bool isAlphaPresent = false;
@@ -318,6 +334,9 @@ bool ExpressionTree::isNameValid(std::string input){
 	return result;
 }
 
+//This method is used to check if the name is invalid
+//PRE: line
+//POST: none
 void ExpressionTree::catchInvalidNameException(std::string line){
 	try{
 		if(!isNameValid(line)){

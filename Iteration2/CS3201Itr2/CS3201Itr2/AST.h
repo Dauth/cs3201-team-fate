@@ -22,7 +22,7 @@ public:
 	void catchMissingStmNameException(std::string& stmString, std::string& stmNameString, unsigned i);
 	void catchIllegalOpenBraceException(unsigned i);
 	bool isEqualSignPresent(std::string line);
-	void getStatementTypeNew(std::string& stmString, int& statementType, char cChar, bool isSpace);
+	void getStatementTypeNew(std::string& stmString, int& statementType, char cChar, bool isSpace, std::string line);
 	void appendStmTokens(std::string& stmString, std::string& stmNameString, int statementType, bool isBraces, char cChar, bool isSpace, bool isSemiColon);
 	void isCharAColon(bool& isSemiColon, char cChar);
 	void clearStmHolder(std::string& stmString, std::string& stmNameString, int& statementType);

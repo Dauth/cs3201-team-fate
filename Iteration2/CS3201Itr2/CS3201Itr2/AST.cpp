@@ -35,6 +35,9 @@ AST::AST(PKB* p, ExpressionTree* e){
 	expTree = e;
 }
 
+//This method is used to catch procedures with parameters
+//PRE: source line and line number
+//POST: none
 void AST::catchParamProcException(std::string line, unsigned i){
 	try{
 		if(isParamProcedure(line)){
@@ -46,6 +49,9 @@ void AST::catchParamProcException(std::string line, unsigned i){
 	}
 }
 
+//This method is used to check if a character is an opening or close brace
+//PRE: boolean isBraces and character
+//POST: none
 void AST::isCharABrace(bool& isBraces, char cChar)
 {
 	if(cChar == '{' || cChar == '}'){
@@ -53,6 +59,9 @@ void AST::isCharABrace(bool& isBraces, char cChar)
 	}
 }
 
+//This method is used to catch missing statement name
+//PRE: statementstring, statementNamestring and line number
+//POST: none
 void AST::catchMissingStmNameException(std::string& stmString, std::string& stmNameString, unsigned i)
 {
 	try{
@@ -65,12 +74,18 @@ void AST::catchMissingStmNameException(std::string& stmString, std::string& stmN
 	}
 }
 
+//This method is used to catch for open braces for call/assign
+//PRE: linenumber
+//POST: none
 void AST::catchIllegalOpenBraceException(unsigned i)
 {
 	std::cout<<"ILLEGAL OPEN BRACES OPERATION FOR CALL/ASSIGN STMT:"<<i + 1<<std::endl;
 	std::terminate();
 }
 
+//This method is used to check if an equal sign is present for assignment
+//PRE: source line
+//POST: none
 bool AST::isEqualSignPresent(std::string line)
 {
 	bool result = false;
@@ -81,7 +96,11 @@ bool AST::isEqualSignPresent(std::string line)
 	return result;
 }
 
-void AST::getStatementTypeNew(std::string& stmString, int& statementType, char cChar, bool isSpace)
+
+//This method is used to check the statement type of a string
+//PRE: statement string, statementtype, current character, a boolean to see if current character is space or not,source line
+//POST: none
+void AST::getStatementTypeNew(std::string& stmString, int& statementType, char cChar, bool isSpace, std::string line)
 {
 	if(statementType == EMPTY && 
 		(!isSpace)){
@@ -104,6 +123,11 @@ void AST::getStatementTypeNew(std::string& stmString, int& statementType, char c
 	}
 }
 
+
+//This method is used append characters to a string
+//PRE: statement string, statement name string, statement type, boolean to check if current character is a brace or not, current character, 
+//boolean to check if current character is a space, boolean to check if a current character is a semicolon
+//POST: none
 void AST::appendStmTokens(std::string& stmString, std::string& stmNameString, int statementType, bool isBraces, char cChar, bool isSpace, bool isSemiColon)
 {
 	if(!isSpace && statementType == EMPTY && !isBraces && !isSemiColon){
@@ -113,6 +137,9 @@ void AST::appendStmTokens(std::string& stmString, std::string& stmNameString, in
 	}
 }
 
+//This method is used check if a character is a semi colon
+//PRE: boolean pointer, character
+//POST: none
 void AST::isCharAColon(bool& isSemiColon, char cChar)
 {
 	if(cChar == SEMICOLON){
@@ -120,13 +147,18 @@ void AST::isCharAColon(bool& isSemiColon, char cChar)
 	}
 }
 
-
+//This method is used to clear statement and statement name string
+//PRE: statement string, statement name string, statement type
+//POST: none
 void AST::clearStmHolder(std::string& stmString, std::string& stmNameString, int& statementType){
 	stmString.clear();
 	stmNameString.clear();
 	statementType = -1;
 }
 
+//This method is used to check for the index of 'then' in a string
+//PRE: statement string, int pointer for index of then
+//POST: none
 bool AST::getIndexOfThen(std::string& stmNameString, int& indexOfThen){
 	bool result = false;
 	std::string::size_type n = stmNameString.find("then");
@@ -137,6 +169,10 @@ bool AST::getIndexOfThen(std::string& stmNameString, int& indexOfThen){
 	return result;
 }
 
+
+//This method is catch for missing 'then' in a if statement
+//PRE: line number, boolean 
+//POST: none
 void AST::catchThenException(unsigned i, bool isThenPresent){
 	try{
 		if(!isThenPresent){
@@ -148,6 +184,9 @@ void AST::catchThenException(unsigned i, bool isThenPresent){
 	}
 }
 
+//This method is used to catch if an 'else' appear before an 'if'
+//PRE: line number, SyntType
+//POST: none
 void AST::catchElseBeforeIfStmException(unsigned i, SyntType prevSynType){
 	try{
 		if(prevSynType != SyntType::ifelse){
@@ -192,7 +231,7 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 			isCharAColon(isSemiColon, cChar);
 			appendStmTokens(stmString, stmNameString, statementType, 
 				isBraces, cChar, isSpace, isSemiColon);
-			getStatementTypeNew(stmString, statementType, cChar, isSpace);
+			getStatementTypeNew(stmString, statementType, cChar, isSpace, line);
 
 
 			if(isSemiColon){
@@ -270,6 +309,9 @@ std::vector<Node*> AST::buildAST(std::vector<std::string> sourceVector){
 
 }
 
+//This method is used to catch procedures within a procedure
+//PRE: vector of twin, line number, int of statement type
+//POST: none
 void AST::catchProcedureInceptionException(std::vector<Twin*>twinVector, unsigned i, int statementType){
 	try{
 		if(statementType == PROCEDURESTM && !twinVector.empty()){
@@ -281,6 +323,9 @@ void AST::catchProcedureInceptionException(std::vector<Twin*>twinVector, unsigne
 	}
 }
 
+//This method is used to catch for duplicated procedures in a simple source
+//PRE: line number, Node* 
+//POST: none
 void AST::catchDupProcedureException(unsigned i, Node* procStm){
 	try{
 		if(procStm == nullptr){
@@ -292,6 +337,9 @@ void AST::catchDupProcedureException(unsigned i, Node* procStm){
 	}
 }
 
+//This method is used to catch for a procedure calling itself
+//PRE: string pointer of current procedure name, line number, string name of the procedure to be string
+//POST: none
 void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, std::string& callProcName){
 	try{
 		if(callProcName.compare(currentProcName) == 0){
@@ -303,6 +351,9 @@ void AST::catchRecursiveCallException(std::string& currentProcName, unsigned i, 
 	}
 }
 
+//This method is used to catch if an infix expression is not balanced
+//PRE: line number, boolean 
+//POST: none
 void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance){
 	try{
 		if(!isInflixBalance){
@@ -314,6 +365,9 @@ void AST::catchUnbalancedInfixException(unsigned i, bool isInflixBalance){
 	}
 }
 
+//This method is used to catch if there are either more opening or closing braces
+//PRE: stack, line number
+//POST: none
 void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsigned i){
 	try{
 		if(bracesStack.empty()){
@@ -325,6 +379,9 @@ void AST::catchUnequalBracesException(std::stack<std::string>& bracesStack, unsi
 	}
 }
 
+//This method is used to catch if there are no statements in a container
+//PRE: vector of twin, line number
+//POST: none
 void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned i){
 	try{
 		int test = twinVector[twinVector.size() - 1]->getStmListNode()->getStmtLst().size();
@@ -337,6 +394,9 @@ void AST::catchEmptyContainerException(std::vector<Twin*>& twinVector, unsigned 
 	}
 }
 
+//This method is used to check if there is either a '(' or ')' in a procedure statement
+//PRE: input string
+//POST: none
 bool AST::isParamProcedure(std::string input){
 	bool result = false;
 	std::string::size_type n = -1;
@@ -349,6 +409,9 @@ bool AST::isParamProcedure(std::string input){
 	return result;
 }
 
+//This method is used to create if else node
+//PRE: variable name, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 void AST::createIfElseNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* ifStm = nullptr;
@@ -386,6 +449,9 @@ void AST::createIfElseNode(std::string varName, int lineNumber, std::vector<Twin
 	graphVector.push_back(counter - 2);
 }
 
+//This method is used to setup the childs of an if else node
+//PRE: line number, vector of twin, variable name, Node* if, Node* proc, Node*& then statementlist, Node*& else statementlist
+//POST: none
 void AST::setupIfThenListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& ifStm, Node* procNode, Node*& thenStmLst, Node*& elseStmLst){
 	Node* ifVar = nullptr;
 	Node* parentNode = nullptr;
@@ -407,6 +473,9 @@ void AST::setupIfThenListNode(int lineNumber, std::vector<Twin*>& twinVector, st
 	ifStm->setThirdChild(elseStmLst);
 }
 
+//This method is used to create the while Node
+//PRE: variable name, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 void AST::createWhileNode(std::string varName, int lineNumber, std::vector<Twin*>& twinVector, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* whileStm = nullptr;
@@ -436,6 +505,9 @@ void AST::createWhileNode(std::string varName, int lineNumber, std::vector<Twin*
 
 }
 
+//This method is used to setup the child of  the while Node
+//PRE: line number, vector of twin, variable name, Node* while, Node* proc, Node*& while statementlist
+//POST: none
 void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, std::string varName, Node*& whileStm, Node* procNode, Node*& whileStmLst){
 	Node* whileVar = nullptr;
 	Node* parentNode = nullptr;
@@ -455,6 +527,9 @@ void AST::setupWhileVarListNode(int lineNumber, std::vector<Twin*>& twinVector, 
 	whileStm->setRightChild(whileStmLst);
 }
 
+//This method is used to extract the expression of a variable
+//PRE: address of line, address vector of string
+//POST: none
 void AST::extractExpressionVar(std::string& line, std::vector<std::string>& assignVector){
 	int cIndex = 0;
 	char tChar;
@@ -474,6 +549,9 @@ void AST::extractExpressionVar(std::string& line, std::vector<std::string>& assi
 	}
 }
 
+//This method is used to catch if there are multiple '=' in an expression
+//PRE: line number, address of vector of string
+//POST: none
 void AST::catchExpressionException(unsigned i, std::vector<std::string>& assignVector){
 	try{
 		if(assignVector.size() != 2){
@@ -485,6 +563,9 @@ void AST::catchExpressionException(unsigned i, std::vector<std::string>& assignV
 	}
 }
 
+//This method is used to create an assign node
+//PRE: line, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	std::vector<std::string> assignVector;// should have size of 2 only. Left and Right side without the equal
 	extractExpressionVar(line, assignVector);
@@ -504,6 +585,9 @@ void AST::createAssignNode(std::string line, int lineNumber, std::vector<Twin*>&
 
 }
 
+//This method is used to create setup the childs of an assign node
+//PRE: line, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
+//POST: none
 void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<Twin*>& twinVector, unsigned i, std::string varName, Node* procNode, Node*& assignStm, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 
 	Node* parentNode = nullptr;
@@ -544,11 +628,17 @@ void AST::setupAssignVarListNode(std::string line, int lineNumber, std::vector<T
 
 }
 
+//This method is used to pop the current parent out of a stack
+//PRE: address stack of a string, address vecotr of twin
+//POST: none
 void AST::popImmediateParent(std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector){
 	bracesStack.pop();
 	twinVector.erase(twinVector.end() - 1);
 }
 
+//This method is used to create a call node
+//PRE: statement name string, line number, current procedure name string, address vector or twin, line number, address string of graph, addres int, vector of int for graph drwaing
+//POST: none
 void AST::createCallNode(std::string stmName, int lineNumber, std::string& currentProcName, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	catchRecursiveCallException(currentProcName, i, stmName);
 
@@ -570,6 +660,9 @@ void AST::createCallNode(std::string stmName, int lineNumber, std::string& curre
 	dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << graphVector[graphVector.size()-1]) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+'\n');
 }
 
+//This method is used to create a procedure node
+//PRE: proc name string, vecotr of main program, address stack of strings, address vector of twin, line number, address string of graph, address int, address vector of int 
+//POST: none
 void AST::createProcNode(std::string& currentProcName, std::vector<Node*>& mainProg, std::stack<std::string>& bracesStack, std::vector<Twin*>& twinVector, unsigned i, std::string& dotGraph, int& counter, std::vector<int>& graphVector){	
 	Node* procStm = nullptr;
 	Node* stmLst = nullptr;
