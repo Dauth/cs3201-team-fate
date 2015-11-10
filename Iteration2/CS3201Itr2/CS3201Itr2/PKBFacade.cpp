@@ -765,6 +765,9 @@ vector<pair<string, string>> PKBFacade::getNext(SyntType s1, SyntType s2){
 	if(s2 == progline){
 		s2 = statement;
 	}
+	if(s1 == statement && s2 == statement){
+		return cfg.getAllPairs();
+	}
 	vector<pair<string,string>> results;
 	std::vector<Node*> stmtVector = statementTable.getStatements(s1);
 	for ( int i = 0; i < stmtVector.size(); i++){
