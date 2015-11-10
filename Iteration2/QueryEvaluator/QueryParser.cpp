@@ -657,6 +657,10 @@ void ProcessEachToken(char *currentToken)
 		case TOKEN::WITH_CL:
 			{
 				concatStmt.append(currentToken);
+				if (strcmp(currentToken,"with")==0)
+				{
+					invalidWith = true;
+				}
 				regex leftHand ("[^\.]+\.[^\.]+=[^\.]+\.[^\.]+");
 				regex withClause ("[^=]+=[^=]+");
 
@@ -761,8 +765,9 @@ void ProcessEachToken(char *currentToken)
 
 							if (!isSynonymExist)
 							{
-								//TODO THROW ERROR because no such synonym in symbol table
+								// ERROR because no such synonym in symbol table
 								nonExistantSyn = true;
+								patternSyn = newSymbol->getSyntType(supposedSynonym);
 								break;
 							}
 							else
@@ -770,7 +775,7 @@ void ProcessEachToken(char *currentToken)
 								patternSyn = newSymbol->getSyntType(supposedSynonym);
 								if (patternSyn != SyntType::assignment || patternSyn != SyntType::whileLoop || patternSyn != SyntType::ifelse )
 								{
-									// TODO THROW ERROR because pattern only accepts three types of synonyms
+									// ERROR because pattern only accepts three types of synonyms
 								}
 								if (patternSyn == SyntType::ifelse)
 								{
@@ -877,7 +882,7 @@ void ProcessEachToken(char *currentToken)
 				}
 				else
 				{
-					// TODO THROW ERROR because pattern is in the wrong syntax (doesn't match regex)
+					// ERROR because pattern is in the wrong syntax (doesn't match regex)
 				}
 
 
@@ -914,7 +919,7 @@ void ProcessEachToken(char *currentToken)
 					{
 						if (!newSymbol->exists(*i)) {
 							tupleError = true; break;
-						} // TODO THROW ERROR because variable doesn't exist
+						} // ERROR because variable doesn't exist
 						else {
 							SyntType newSyntSymbol = newSymbol->getSyntType(*i);
 							if (newSyntSymbol != SyntType::synError)
@@ -1037,7 +1042,7 @@ void ProcessEachToken(char *currentToken)
 						nonExistantSyn = true; 
 						concatStmt = "";
 						errorMsg += ("- Synonym \"%s\" after Select statement is not declared." , currentToken);
-					} //TODO THROW ERROR because variable doesn't exist
+					} // ERROR because variable doesn't exist
 					else
 					{	
 						if (!tupleExist)
@@ -1085,7 +1090,7 @@ void ProcessEachToken(char *currentToken)
 							queryClause = getType(&writable[0]);
 							if (queryClause == QueryType::error)
 							{
-								//TODO THROW ERROR because no such such that clause (e.g. Modifies/Calls mispelled)
+								// ERROR because no such such that clause (e.g. Modifies/Calls mispelled)
 								break;
 							}
 							inParameters = true;
@@ -1141,7 +1146,7 @@ void ProcessEachToken(char *currentToken)
 				// Else the such that clause doesn't match the regex, thus THROW ERROR
 				else
 				{
-					//TODO THROW ERROR because the such that clause doesn't match the regex
+					// ERROR because the such that clause doesn't match the regex
 				}
 
 			}break;
@@ -1306,7 +1311,7 @@ Query_Object QueryParser::getQueryObject(std::string i){
 
 }
 
-/*
+
 int main ()
 {
 	QueryParser qp;
@@ -1318,6 +1323,6 @@ int main ()
 		Query_Object qs = qp.getQueryObject(query);
 	}
 }
-*/
+
 
 
