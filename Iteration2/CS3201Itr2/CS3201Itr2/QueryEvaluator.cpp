@@ -10,6 +10,14 @@ QueryEvaluator::QueryEvaluator(PKBFacade* p) {
 list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*> qVec) {
 	resultSynonyms = rVec;
 	queryParts = qVec;
+
+	if(queryParts.empty()) {
+		hasQuery = true;
+	}
+	else {
+		hasQuery = false;
+	}
+
 	hasResult = true;
 	timedOut = false;
 	
@@ -1087,12 +1095,12 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		if(queryParts.empty()) {
-			formFinalResultWithoutQuery("", 0);
-		}
-		else {
+		if(hasQuery) {
 			vector<vector<string>> empty;
 			formFinalResultWithQuery(empty);
+		}
+		else {
+			formFinalResultWithoutQuery("", 0);
 		}
 	}
 }
