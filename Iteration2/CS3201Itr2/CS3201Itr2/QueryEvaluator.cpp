@@ -13,6 +13,7 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	hasResult = true;
 	timedOut = false;
 	
+	//clean up anything left by previous query
 	queryWithNoResult.clear();
 	queryWithOneResult.clear();
 	queryWithTwoResults.clear();
@@ -42,6 +43,8 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 
 //optimises evaluation process by filtering, sorting and ordering QueryParts
 void QueryEvaluator::optimise() {
+	//if final result requires value of synonym, i.e. not "Select BOOLEAN",
+	//find useful synonyms and sort QueryParts accordingly
 	if(!resultSynonyms.empty()) {
 		for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
 			synonymVec.push_back(new SynonymValues(resultSynonyms[i]->getParam()));
@@ -60,19 +63,19 @@ void QueryEvaluator::optimise() {
 		ParamNode* left = queryParts[i]->getLeftParam();
 		ParamNode* right = queryParts[i]->getRightParam();
 
-		//filter QueryParts such as "Next(s,s)" that guarantees empty result
+		//filter QueryParts that guarantees empty result, e.g. "Next(s,s)"
 		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 			hasResult = false;
 			return;
 		}
 
-		//filter QueryParts such as "Affects(w,a)" that guarantees empty result
+		//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(w,a)"
 		if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 			hasResult = false;
 			return;
 		}
 
-		//filter QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
+		//filter QueryParts that guarantees true, e.g. "with a.stmt#=a.stmt#" and QueryParts that guarantees false, e.g. "with 1=2"
 		if(queryType == with && left->getType() == right->getType()) {
 			if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 				hasResult = false;
@@ -93,6 +96,7 @@ void QueryEvaluator::optimise() {
 		}
 	}
 
+	//clean up and end query evaluation if time out
 	if(AbstractWrapper::GlobalStop) {
 		queryWithNoResult.clear();
 		queryWithOneResult.clear();
@@ -112,13 +116,14 @@ void QueryEvaluator::optimise() {
 }
 
 //sorts all the QueryParts into 3 groups depending on the number of useful synonyms they have
-//useful synonyms are synonyms in the query that contributes to the final result
+//useful synonyms are synonyms in the query that contribute to the final result
 void QueryEvaluator::sortQueryParts() {
 	int initSize = 1;
 	int currSize = 0;
 
 	while(currSize < initSize) {
 
+		//clean up and end query evaluation if time out
 		if(AbstractWrapper::GlobalStop) {
 			queryWithNoResult.clear();
 			queryWithOneResult.clear();
@@ -138,19 +143,19 @@ void QueryEvaluator::sortQueryParts() {
 			ParamNode* left = queryParts[i]->getLeftParam();
 			ParamNode* right = queryParts[i]->getRightParam();
 
-			//filter QueryParts such as "Next(s,s)" that guarantees empty result
+			//filter QueryParts that guarantees empty result, e.g. "Next(s,s)"
 			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
 				hasResult = false;
 				return;
 			}
 
-			//filter QueryParts such as "Affects(w,a)" that guarantees empty result
+			//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(w,a)"
 			if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 				hasResult = false;
 				return;
 			}
 
-			//filter QueryParts such as "a.stmt#=a.stmt#" that guarantees true and QueryParts such as "1=2" that guarantees false
+			//filter QueryParts that guarantees true, e.g. "with a.stmt#=a.stmt#" and QueryParts that guarantees false, e.g. "with 1=2"
 			if(queryType == with && left->getType() == right->getType()) {
 				if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
 					hasResult = false;
@@ -170,7 +175,7 @@ void QueryEvaluator::sortQueryParts() {
 					i--;
 				}
 				else if(existsInSynVec(right->getParam())) {
-					//QueryParts that takes shorter time to evaluate is inserted into the front of the group
+					//QueryParts that takes less time to evaluate is inserted into the front of the group
 					if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
 						queryWithOneResult.insert(queryWithOneResult.begin(), queryParts[i]);
 					}
@@ -230,7 +235,7 @@ void QueryEvaluator::sortQueryParts() {
 	}
 }
 
-//checks if a synonym exists in synonymVec
+//checks if a synonym exists in synonymVec, synonymVec contains the useful synonyms and their values
 bool QueryEvaluator::existsInSynVec(string name) {
 	for(unsigned int i = 0; i < synonymVec.size(); i++) {
 		if(name == synonymVec[i]->getName()) {
@@ -240,7 +245,7 @@ bool QueryEvaluator::existsInSynVec(string name) {
 	return false;
 }
 
-//orders QueryParts in a group by their types in the order (front)others->next->next*->affects->affects*(end)
+//orders QueryParts in a group by their types in the order (front)others->Next->Next*->Affects->Affects*(end)
 void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
 	for(int i = 10; i < 14; i++) {
 		for(unsigned int j = 0; j < qVec->size(); j++) {
@@ -252,10 +257,12 @@ void QueryEvaluator::orderQueryParts(vector<QueryPart*>* qVec) {
 	}
 }
 
+//evaluates QueryParts in queryWithNoResult vector
 void QueryEvaluator::evalQueryWithNoResult() {
 	for(unsigned int i = 0; i < queryWithNoResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithNoResult[i]);
 
+		//clean up and end query evaluation if time out
 		if(AbstractWrapper::GlobalStop) {
 			queryWithNoResult.clear();
 			queryWithOneResult.clear();
@@ -268,6 +275,7 @@ void QueryEvaluator::evalQueryWithNoResult() {
 			return;
 		}
 
+		//end query evaluation if result is empty
 		if(result.empty()) {
 			hasResult = false;
 			return;
@@ -275,10 +283,12 @@ void QueryEvaluator::evalQueryWithNoResult() {
 	}
 }
 
+//evaluates QueryParts in queryWithOneResult vector
 void QueryEvaluator::evalQueryWithOneResult() {
 	for(unsigned int i = 0; i < queryWithOneResult.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithOneResult[i]);
 
+		//clean up and end query evaluation if time out
 		if(AbstractWrapper::GlobalStop) {
 			queryWithNoResult.clear();
 			queryWithOneResult.clear();
@@ -291,6 +301,7 @@ void QueryEvaluator::evalQueryWithOneResult() {
 			return;
 		}
 
+		//end query evaluation if result is empty
 		if(result.empty()) {
 			hasResult = false;
 			return;
@@ -305,10 +316,12 @@ void QueryEvaluator::evalQueryWithOneResult() {
 	}
 }
 
+//evaluates QueryParts in queryWithTwoResults vector
 void QueryEvaluator::evalQueryWithTwoResults() {
 	for(unsigned int i = 0; i < queryWithTwoResults.size(); i++) {
 		vector<pair<string, string>> result = getResult(queryWithTwoResults[i]);
 
+		//clean up and end query evaluation if time out
 		if(AbstractWrapper::GlobalStop) {
 			queryWithNoResult.clear();
 			queryWithOneResult.clear();
@@ -321,6 +334,7 @@ void QueryEvaluator::evalQueryWithTwoResults() {
 			return;
 		}
 		
+		//end query evaluation if result is empty
 		if(result.empty()) {
 			hasResult = false;
 			return;
@@ -339,11 +353,17 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 	ParamNode* left = qp->getLeftParam();
 	ParamNode* right = qp->getRightParam();
 
+	//call different functions depending on the type of arguments used in the QueryPart
 	if(left->getType() == integer || left->getType() == expression) {
 		if(left->getParam() == "_") {
+			//as all methods, except "searchWithPattern()", in PKB used by QueryEvaluator do not accept "_" as an argument,
+			//"_" has to be changed into the appropriate SyntType
 			SyntType leftType = getSyntType(qp->getType());
+
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
+					//as all methods, except "searchWithPattern()", in PKB used by QueryEvaluator do not accept "_" as an argument,
+					//"_" has to be changed into the appropriate SyntType
 					SyntType rightType = getSyntType(qp->getType());
 					return getResultFromPKB(qp->getType(), leftType, rightType);
 				}
@@ -358,6 +378,8 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 		else {
 			if(right->getType() == integer || right->getType() == expression) {
 				if(right->getParam() == "_") {
+					//as all methods, except "searchWithPattern()", in PKB used by QueryEvaluator do not accept "_" as an argument,
+					//"_" has to be changed into the appropriate SyntType
 					SyntType rightType = getSyntType(qp->getType());
 					return getResultFromPKB(qp->getType(), left->getParam(), rightType);
 				}
@@ -376,6 +398,8 @@ vector<pair<string, string>> QueryEvaluator::getResult(QueryPart* qp) {
 		}
 		else {
 			if(right->getParam() == "_") {
+				//as all methods, except "searchWithPattern()", in PKB used by QueryEvaluator do not accept "_" as an argument,
+				//"_" has to be changed into the appropriate SyntType
 				SyntType rightType = getSyntType(qp->getType());
 				return getResultFromPKB(qp->getType(), left->getType(), rightType);
 			}
@@ -589,6 +613,7 @@ vector<pair<string, string>> QueryEvaluator::evalWithQuery(QueryPart* qp) {
 	return result;
 }
 
+//calls the appropriate method in PKB depending on the query type, with strings as both arguments
 vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, string right) {
 	switch(type) {
 		case modifies	:
@@ -621,6 +646,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 	}
 }
 
+//calls the appropriate method in PKB depending on the query type, with string as left argument and SyntType as right argument
 vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, string left, SyntType right) {
 	switch(type) {
 		case modifies	:
@@ -653,6 +679,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, st
 	}
 }
 
+//calls the appropriate method in PKB depending on the query type, with SyntType as left argument and string as right argument
 vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, string right) {
 	switch(type) {
 		case modifies	:
@@ -685,6 +712,7 @@ vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, Sy
 	}
 }
 
+//calls the appropriate method in PKB depending on the query type, with SyntType as both arguments
 vector<pair<string, string>> QueryEvaluator::getResultFromPKB(QueryType type, SyntType left, SyntType right) {
 	switch(type) {
 		case modifies	:
@@ -730,13 +758,14 @@ void QueryEvaluator::updateSynVal(ParamNode* lNode, ParamNode* rNode, vector<pai
 	}
 }
 
+//filters and updates values for 2 synonyms
 void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	SynonymValues* leftSyn = getSynVal(lNode->getParam());
 	SynonymValues* rightSyn = getSynVal(rNode->getParam());
 	set<string> leftVal = leftSyn->getValues();
 	set<string> rightVal = rightSyn->getValues();
 
-	//filter pairs of results with existing pairs of values that belong to the same synonyms
+	//filter pairs of results with pairs of values of existing relationship that belongs to the same synonyms
 	for(unsigned int i = 0; i < resultTuples.size(); i++) {
 		if(resultTuples[i][0].first == lNode->getParam() && resultTuples[i][0].second == rNode->getParam()) {
 			for(unsigned int j = 0; j < vec.size(); j++) {
@@ -749,12 +778,14 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 					}
 				}
 
+				//if pair of results does not exist in existing relationship, remove pair
 				if(!pairExists) {
 					vec.erase(vec.begin() + j);
 					j--;
 				}
 			}
 
+			//remove existing relationship as it will later be replaced by the pairs of results
 			resultTuples.erase(resultTuples.begin() + i);
 			break;
 		}
@@ -769,17 +800,20 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 					}
 				}
 
+				//if pair of results does not exist in existing relationship, remove pair
 				if(!pairExists) {
 					vec.erase(vec.begin() + j);
 					j--;
 				}
 			}
 
+			//remove existing relationship as it will later be replaced by the pairs of results
 			resultTuples.erase(resultTuples.begin() + i);
 			break;
 		}
 	}
 
+	//end query evaluation if vec becomes empty
 	if(vec.empty()) {
 		hasResult = false;
 		return;
@@ -795,6 +829,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 		}
 	}
 
+	//end query evaluation if vec becomes empty
 	if(vec.empty()) {
 		hasResult = false;
 		return;
@@ -810,6 +845,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 		}
 	}
 
+	//end query evaluation if vec becomes empty
 	if(vec.empty()) {
 		hasResult = false;
 		return;
@@ -823,7 +859,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 		newRightVal.insert(vec[i].second);
 	}
 
-	//update values of left synonym
+	//update values of left synonym in synonymVec and update related synonym if necessary
 	if(leftVal.empty()) {
 		leftSyn->setValues(newLeftVal);
 	}
@@ -832,7 +868,7 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 		updateRelatedSynVal(leftSyn);
 	}
 
-	//update values of right synonym
+	//update values of right synonym in synonymVec and update related synonym if necessary
 	if(rightVal.empty()) {
 		rightSyn->setValues(newRightVal);
 	}
@@ -855,9 +891,11 @@ void QueryEvaluator::updateTwoSynVal(ParamNode* lNode, ParamNode* rNode, vector<
 		tuples.push_back(vec[i]);
 	}
 
+	//add relationship to resultTuples
 	resultTuples.push_back(tuples);
 }
 
+//filters and updates values for left synonym
 void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	//if both sides of results are values of the same synonym
 	//filter pairs that have different values on both sides
@@ -869,6 +907,7 @@ void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector
 			}
 		}
 
+		//end query evaluation if vec becomes empty
 		if(vec.empty()) {
 			hasResult = false;
 			return;
@@ -888,6 +927,7 @@ void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector
 		}
 	}
 
+	//end query evaluation if vec becomes empty
 	if(vec.empty()) {
 		hasResult = false;
 		return;
@@ -899,7 +939,7 @@ void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector
 		newLeftVal.insert(vec[i].first);
 	}
 
-	//update values of left synonym
+	//update values of left synonym in synonymVec and update related synonym if necessary
 	if(leftVal.empty()) {
 		leftSyn->setValues(newLeftVal);
 	}
@@ -909,11 +949,12 @@ void QueryEvaluator::updateLeftSynVal(ParamNode* lNode, ParamNode* rNode, vector
 	}
 }
 
+//filters and updates values for right synonym
 void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vector<pair<string, string>> vec) {
 	SynonymValues* rightSyn = getSynVal(rNode->getParam());
 	set<string> rightVal = rightSyn->getValues();
 
-	//filter left of results with existing values of the same synonym
+	//filter right of results with existing values of the same synonym
 	if(!rightVal.empty()) {
 		for(unsigned int i = 0; i < vec.size(); i++) {
 			if(rightVal.find(vec[i].second) == rightVal.end()) {
@@ -923,6 +964,7 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 		}
 	}
 
+	//end query evaluation if vec becomes empty
 	if(vec.empty()) {
 		hasResult = false;
 		return;
@@ -934,7 +976,7 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 		newRightVal.insert(vec[i].second);
 	}
 
-	//update values of left synonym
+	//update values of right synonym in synonymVec and update related synonym if necessary
 	if(rightVal.empty()) {
 		rightSyn->setValues(newRightVal);
 	}
@@ -946,6 +988,7 @@ void QueryEvaluator::updateRightSynVal(ParamNode* lNode, ParamNode* rNode, vecto
 
 //re-filters and updates values of related synonyms
 void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
+	//clean up and end query evaluation if time out
 	if(AbstractWrapper::GlobalStop) {
 		queryWithNoResult.clear();
 		queryWithOneResult.clear();
@@ -960,10 +1003,13 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 
 	set<string> valSet = synVal->getValues();
 
+	//find and filter pairs of values of any relationship with synonym and update related synonym
 	for(unsigned int i = 0; i < resultTuples.size(); i++) {
 		unsigned int initSize = resultTuples[i].size();
 
 		if(resultTuples[i][0].first == synVal->getName()) {
+			//if value of synonym in any pair does not exist in the set of values of synonym in synonymVec,
+			//remove pair of values from relationship
 			for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
 				if(valSet.find(resultTuples[i][j].first) == valSet.end()) {
 					resultTuples[i].erase(resultTuples[i].begin() + j);
@@ -971,6 +1017,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 				}
 			}
 
+			//end query evaluation if relationship no longer contains any pair of values
 			if(resultTuples[i].size() == 1) {
 				hasResult = false;
 				return;
@@ -983,7 +1030,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 					rightVal.insert(resultTuples[i][j].second);
 				}
 
-				//update values of synonym
+				//update values of synonym in synonymVec and update related synonym
 				SynonymValues* rightSyn = getSynVal(resultTuples[i][0].second);
 				if(rightSyn->getValues().size() > rightVal.size()) {
 					rightSyn->setValues(rightVal);
@@ -992,6 +1039,8 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 			}
 		}
 		else if(resultTuples[i][0].second == synVal->getName()) {
+			//if value of synonym in any pair does not exist in the set of values of synonym in synonymVec,
+			//remove pair of values from relationship
 			for(unsigned int j = 1; j < resultTuples[i].size(); j++) {
 				if(valSet.find(resultTuples[i][j].second) == valSet.end()) {
 					resultTuples[i].erase(resultTuples[i].begin() + j);
@@ -999,6 +1048,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 				}
 			}
 
+			//end query evaluation if relationship no longer contains any pair of values
 			if(resultTuples[i].size() == 1) {
 				hasResult = false;
 				return;
@@ -1011,7 +1061,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 					leftVal.insert(resultTuples[i][j].first);
 				}
 
-				//update values of synonym
+				//update values of synonym in synonymVec and update related synonym
 				SynonymValues* leftSyn = getSynVal(resultTuples[i][0].first);
 				if(leftSyn->getValues().size() > leftVal.size()) {
 					leftSyn->setValues(leftVal);
@@ -1027,6 +1077,7 @@ void QueryEvaluator::updateRelatedSynVal(SynonymValues* synVal) {
 }
 
 void QueryEvaluator::evalFinalResult() {
+	//if resultSynonyms is empty, that means the final result requires on a BOOLEAN value
 	if(resultSynonyms.empty()) {
 		if(hasResult) {
 			finalResult.push_back("true");
@@ -1043,8 +1094,10 @@ void QueryEvaluator::evalFinalResult() {
 
 //forms the list of strings for the final result
 void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
+	//rows represent the result tuples and each "row" in rows contains values in a single result tuple
 	vector<vector<string>> rows = formRows(parentRows);
 
+	//clean up and end query evaluation if time out
 	if(AbstractWrapper::GlobalStop) {
 		queryWithNoResult.clear();
 		queryWithOneResult.clear();
@@ -1071,11 +1124,13 @@ void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
 vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRows) {
 	vector<vector<string>> rows;
 
+	//if parentRows is empty, that means current synonym is the first synonym so there is no previous synonym to check relationship with
 	if(parentRows.empty()) {
 		ParamNode* node = resultSynonyms[0];
 		SynonymValues* synVal = getSynVal(node->getParam());
 		set<string> valSet = synVal->getValues();
 
+		//if synonym has no existing values, get values from PKB
 		if(valSet.empty()) {
 			vector<Node*> result = pkb->getNodes(node->getType());
 
@@ -1101,6 +1156,8 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 		int curIndex = parentRows[0].size();
 		bool tuplesExist = false;
 
+		//find all relationships between current synonym and previous synonyms
+		//for all relationships of current synonym, add/check values in rows
 		for(unsigned int h = 0; h < curIndex; h++) {
 			for(unsigned int i = 0; i < resultTuples.size(); i++) {
 				if(resultTuples[i][0].first == resultSynonyms[h]->getParam() && resultTuples[i][0].second == resultSynonyms[curIndex]->getParam()) {
@@ -1180,11 +1237,13 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 			}
 		}
 
+		//if synonym has no relationship, get existing values of synonym
 		if(!tuplesExist) {
 			ParamNode* node = resultSynonyms[curIndex];
 			SynonymValues* synVal = getSynVal(node->getParam());
 			set<string> valSet = synVal->getValues();
 
+			//if synonym has no existing values, get values from PKB
 			if(valSet.empty()) {
 				vector<Node*> result = pkb->getNodes(node->getType());
 
@@ -1215,7 +1274,7 @@ vector<vector<string>> QueryEvaluator::formRows(vector<vector<string>> parentRow
 
 //converts individual values to strings of final result
 void QueryEvaluator::formStringResult(vector<vector<string>> rows) {
-	//if final result requires call.procName, change values of call to call.procName values
+	//check if final result requires call.procName, change values of call to call.procName values
 	for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
 		if(resultSynonyms[i]->getType() == call && resultSynonyms[i]->getAttrType() == stringType) {
 			for(unsigned int j = 0; j < rows.size(); j++) {
@@ -1230,7 +1289,7 @@ void QueryEvaluator::formStringResult(vector<vector<string>> rows) {
 		}
 	}
 
-	//convert individual values to strings
+	//convert individual values to strings each representing a result tuple
 	for(unsigned int i = 0; i < rows.size(); i++) {
 		string tuple;
 
@@ -1246,7 +1305,7 @@ void QueryEvaluator::formStringResult(vector<vector<string>> rows) {
 	}
 }
 
-//returns the set of values for a synonym
+//returns the existing set of values of a synonym
 SynonymValues* QueryEvaluator::getSynVal(string name) {
 
 	for(unsigned int i = 0; i < synonymVec.size(); i++) {
