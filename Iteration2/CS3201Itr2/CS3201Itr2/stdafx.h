@@ -20,5 +20,4 @@
 #include <ctype.h>
 #include "..\AutoTester\source\AbstractWrapper.h"
 
-
 // TODO: reference additional headers your program requires here
