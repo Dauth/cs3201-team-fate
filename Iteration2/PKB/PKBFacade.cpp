@@ -759,7 +759,46 @@ vector<pair<string, string>> PKBFacade::getCallsStar(string procName1, string pr
 //This equivalent to getting all Next pair in the program. Returns
 //a vector contains pairs with Next relationship.
 vector<pair<string, string>> PKBFacade::getNext(SyntType s1, SyntType s2){
-	return cfg.getAllPairs();
+	if(s1 == progline){
+		s1 = statement;
+	}
+	if(s2 == progline){
+		s2 = statement;
+	}
+	vector<pair<string,string>> results;
+	std::vector<Node*> stmtVector = statementTable.getStatements(s1);
+	for ( int i = 0; i < stmtVector.size(); i++){
+		Node* temp = stmtVector.at(i);
+		if(temp->getType() == whileLoop || temp->getType() == ifelse){
+			CFGNode* nextCFG1 = temp->getCfgNode()->getNextNode();
+			CFGNode* nextCFG2 = temp->getCfgNode()->getExNextNode();
+			if(nextCFG1){
+				Node* stmt = nextCFG1->getStatement();
+				if(stmt->getType() == s2 || (stmt->isStatement() && s2 == statement)){
+					pair<string, string> nextPair (temp->getLine(),stmt->getLine());
+					results.push_back(nextPair);
+				}
+			}
+			if(nextCFG2){
+				Node* stmt = nextCFG2->getStatement();
+				if(stmt->getType() == s2 || (stmt->isStatement() && s2 == statement)){
+					pair<string, string> nextPair (temp->getLine(),stmt->getLine());
+					results.push_back(nextPair);
+				}
+			}
+		}
+		else{
+			CFGNode* nextCFG = temp->getCfgNode()->getNextNode();
+			if(nextCFG){
+				Node* stmt = nextCFG->getStatement();
+				if(stmt->getType() == s2 || (stmt->isStatement() && s2 == statement)){
+					pair<string, string> nextPair (temp->getLine(),stmt->getLine());
+					results.push_back(nextPair);
+				}
+			}
+		}
+	}
+	return results;
 }
 
 //The method used to get Next relationship between 1 unknown and 1 known
@@ -770,12 +809,17 @@ vector<pair<string, string>> PKBFacade::getNext(SyntType s1, SyntType s2){
 //	 sNum2 - the known argument
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2) {
+	if ( s1 == progline){
+		s1 = statement;
+	}
 	vector<pair<string, string>> results;
 	vector<CFGNode*> prevList = statementTable.getStatement(sNum2)->getCfgNode()->getPrevNode();
 	for (unsigned int i=0; i<prevList.size(); i++) {
 		Node* temp = prevList.at(i)->getStatement();
-		pair<string, string> nextPair (temp->getLine(),sNum2);
-		results.push_back(nextPair);
+		if ( temp->getType() == s1 || (temp->isStatement() && s1 == statement)){
+			pair<string, string> nextPair (temp->getLine(),sNum2);
+			results.push_back(nextPair);
+		}
 	}
 	return results;
 }
@@ -788,6 +832,9 @@ vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2) {
 //	 s2 - the unknown argument
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNext(string sNum1, SyntType s2) {
+	if(s2 == progline){
+		s2 = statement;
+	}
 	vector<pair<string, string>> results;
 	Node* temp = statementTable.getStatement(sNum1);
 	if (temp->getType() == whileLoop || temp->getType() == ifelse) {
@@ -795,21 +842,27 @@ vector<pair<string, string>> PKBFacade::getNext(string sNum1, SyntType s2) {
 		CFGNode* nextCFG2 = temp->getCfgNode()->getExNextNode();
 		if (nextCFG1) {
 			Node* next = nextCFG1->getStatement();
-			pair<string, string> pair1 (sNum1, next->getLine());
-			results.push_back(pair1);
+			if(next->getType() == s2 || (next->isStatement() && s2 == statement)){
+				pair<string, string> pair1 (sNum1, next->getLine());
+				results.push_back(pair1);
+			}
 		}
 
 		if (nextCFG2) {
 			Node* next = nextCFG2->getStatement();
-			pair<string, string> pair2 (sNum1, next->getLine());
-			results.push_back(pair2);
+			if(next->getType() == s2 || (next->isStatement() && s2 == statement)){
+				pair<string, string> pair2 (sNum1, next->getLine());
+				results.push_back(pair2);
+			}
 		}
 	} else {
 		CFGNode* nextCFG = temp->getCfgNode()->getNextNode();
 		if (nextCFG) {
 			Node* next = nextCFG->getStatement();
-			pair<string, string> pair (sNum1, next->getLine());
-			results.push_back(pair);
+			if(next->getType() == s2 || (next->isStatement() && s2 == statement)){
+				pair<string, string> pair (sNum1, next->getLine());
+				results.push_back(pair);
+			}
 		}
 	}
 	
@@ -854,12 +907,17 @@ vector<pair<string, string>> PKBFacade::getNext(string sNum1, string sNum2) {
 //	 s2 - the right unknown argument
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, SyntType s2) {
+	if(s1 == progline){
+		s1 = statement;
+	}
+	if(s2 == progline){
+		s2 = statement;
+	}
 	vector<pair<string, string>> results;
-	for (int i=1; i<=statementTable.getStatementCount(statement); i++) {
-		ostringstream oss ;
-		oss << i;
-		string lineNum = oss.str();
-		vector<pair<string, string>> temp = getNextStar(lineNum,statement);
+	std::vector<Node*> stmtVector = statementTable.getStatements(s1);
+	for (int i = 0 ; i < stmtVector.size() ; i++) {
+		Node* stmt = stmtVector.at(i);
+		vector<pair<string, string>> temp = getNextStar(stmt->getLine(),s2);
 		results.insert(results.end(),temp.begin(),temp.end());
 	}
 
@@ -874,12 +932,17 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, SyntType s2) {
 //	 sNum2 - the known argument
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
+	if(s1 == progline){
+		s1 = statement;
+	}
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num2);
 	if (tempNode->getType() == whileLoop) {
-		pair<string, string> nextPair (num2,num2);
-		results.push_back(nextPair);
-		vector<pair<string, string>> children = getParentsStar(num2,statement);
+		if(s1 == statement || s1 == whileLoop){
+			pair<string, string> nextPair (num2,num2);
+			results.push_back(nextPair);
+		}
+		vector<pair<string, string>> children = getParentsStar(num2,s1);
 		for (unsigned int j=0; j<children.size(); j++) {
 			pair<string, string> nextPair (children[j].second,num2);
 			results.push_back(nextPair);
@@ -889,8 +952,10 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
 	vector<CFGNode*> prevNodes = tempNode->getCfgNode()->getPrevNode();
 	for (unsigned int j = 0; j < prevNodes.size(); j++) {
 		Node* pNode = prevNodes[j]->getStatement();
-		pair<string, string> prevPair (pNode->getLine(),num2);
-		results.push_back(prevPair);
+		if( pNode->getType() == s1 || (pNode->isStatement() && s1 == statement)){
+			pair<string, string> prevPair (pNode->getLine(),num2);
+			results.push_back(prevPair);
+		}
 		if (atoi(pNode->getLine().c_str()) < atoi(num2.c_str())) {
 			vector<pair<string, string>> prevResults = getNextStar(s1,pNode->getLine());
 			for (unsigned int i = 0; i < prevResults.size(); i++) {
@@ -912,26 +977,34 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
 //	 s2 - the unknown argument
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
+	if(s2 == progline){
+		s2 = statement;
+	}
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num1);
 	if (tempNode->getType() == whileLoop || tempNode->getType() == ifelse) {
-		vector<pair<string, string>> childrens = getParentsStar(tempNode->getLine(),statement);
+		vector<pair<string, string>> childrens = getParentsStar(tempNode->getLine(),s2);
 		for (unsigned int j=0; j<childrens.size(); j++) {
 			pair<string, string> nextPair (num1,childrens[j].second);
 			results.push_back(nextPair);
 		}
 		CFGNode* nextNode;
 		if (tempNode->getType() == whileLoop) {
-			pair<string, string> nextPair (num1,tempNode->getLine());
-			results.push_back(nextPair);
+			if( s2 == statement || s2 == whileLoop){
+				pair<string, string> nextPair (num1,tempNode->getLine());
+				results.push_back(nextPair);
+			}
 			nextNode = tempNode->getCfgNode()->getNextNode();
 		} else {
 			nextNode = tempNode->getCfgNode()->getEndLeft()->getNextNode();
 		}
 		if (nextNode) {
-			pair<string, string> nextPair (num1,nextNode->getStatement()->getLine());
-			results.push_back(nextPair);
-			vector<pair<string,string>> tempResults = getNextStar(nextNode->getStatement()->getLine(),s2);
+			Node* stmt = nextNode->getStatement();
+			if( stmt->getType() == s2 || ( stmt->isStatement() && s2 == statement)){
+				pair<string, string> nextPair (num1,stmt->getLine());
+				results.push_back(nextPair);
+			}
+			vector<pair<string,string>> tempResults = getNextStar(stmt->getLine(),s2);
 			for (unsigned int i = 0; i<tempResults.size(); i++) {
 				pair<string, string> nextPair (num1,tempResults[i].second);
 				results.push_back(nextPair);
@@ -940,9 +1013,12 @@ vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
 	} else {
 		CFGNode* nextNode = tempNode->getCfgNode()->getNextNode();
 		if (nextNode) {
-			pair<string, string> nextPair (num1,nextNode->getStatement()->getLine());
-			results.push_back(nextPair);
-			vector<pair<string,string>> tempResults = getNextStar(nextNode->getStatement()->getLine(),s2);
+			Node* stmt = nextNode->getStatement();
+			if( stmt->getType() == s2 || ( stmt->isStatement() && s2 == statement)){
+				pair<string, string> nextPair (num1,stmt->getLine());
+				results.push_back(nextPair);
+			}
+			vector<pair<string,string>> tempResults = getNextStar(stmt->getLine(),s2);
 			for (unsigned int i=0; i<tempResults.size(); i++) {
 				pair<string, string> nextPair (num1,tempResults[i].second);
 				results.push_back(nextPair);
