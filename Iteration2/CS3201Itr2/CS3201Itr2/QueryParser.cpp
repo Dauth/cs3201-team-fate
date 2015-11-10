@@ -638,10 +638,6 @@ void ProcessEachToken(char *currentToken)
 	}
 	else if (strcmp(currentToken,"pattern") == 0 && currToken == TOKEN::AND_END)
 	{
-		if (currToken != TOKEN::RESULT_CL)
-		{
-			concatStmt = "";
-		}
 		currToken = TOKEN::PATTERN_CL;
 		existClauses = true;
 	}
@@ -695,6 +691,10 @@ void ProcessEachToken(char *currentToken)
 				else if (strcmp(currentToken,"with")==0)
 				{
 					currToken = TOKEN::WITH_CL;
+				}
+				else if (strcmp(currentToken, "pattern") == 0)
+				{
+					currToken = TOKEN::PATTERN_CL;
 				}
 				else
 				{
