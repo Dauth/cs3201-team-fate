@@ -76,8 +76,14 @@ void QueryEvaluator::optimise() {
 			hasResult = false;
 			return;
 		}
+			
+		//filter QueryParts with query type "Parent" or "Parent*" that guarantees empty result, e.g. "Parent(assignment,_)"
+		if((queryType == parent || queryType == parentStar) && (left->getType() == call || left->getType() == assignment)) {
+			hasResult = false;
+			return;
+		}
 
-		//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(w,a)"
+		//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(while,a)"
 		if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 			hasResult = false;
 			return;
@@ -156,8 +162,14 @@ void QueryEvaluator::sortQueryParts() {
 				hasResult = false;
 				return;
 			}
+			
+			//filter QueryParts with query type "Parent" or "Parent*" that guarantees empty result, e.g. "Parent(assignment,_)"
+			if((queryType == parent || queryType == parentStar) && (left->getType() == call || left->getType() == assignment)) {
+				hasResult = false;
+				return;
+			}
 
-			//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(w,a)"
+			//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(while,a)"
 			if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
 				hasResult = false;
 				return;
