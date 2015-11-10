@@ -72,7 +72,7 @@ void QueryEvaluator::optimise() {
 		ParamNode* right = queryParts[i]->getRightParam();
 
 		//filter QueryParts that guarantees empty result, e.g. "Next(s,s)"
-		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
+		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam() && left->getParam() != "_") {
 			hasResult = false;
 			return;
 		}
@@ -152,7 +152,7 @@ void QueryEvaluator::sortQueryParts() {
 			ParamNode* right = queryParts[i]->getRightParam();
 
 			//filter QueryParts that guarantees empty result, e.g. "Next(s,s)"
-			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam()) {
+			if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam() && left->getParam() != "_") {
 				hasResult = false;
 				return;
 			}
