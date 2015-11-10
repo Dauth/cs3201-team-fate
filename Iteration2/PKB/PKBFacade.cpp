@@ -755,22 +755,20 @@ vector<pair<string, string>> PKBFacade::getCallsStar(string procName1, string pr
 	return vector<pair<string, string>>(results.begin(), results.end());
 }
 
-/** The mehod used to get Next relationship of 2 unknown argument. 
-This equivalent to getting all Next pair in the program. Returns
-a vector contains pairs with Next relationship.
-*/
+// The mehod used to get Next relationship of 2 unknown argument. 
+//This equivalent to getting all Next pair in the program. Returns
+//a vector contains pairs with Next relationship.
 vector<pair<string, string>> PKBFacade::getNext(SyntType s1, SyntType s2){
 	return cfg.getAllPairs();
 }
 
-/** The method used to get Next relationship between 1 unknown and 1 known
-argument. The known argument is the right argument, meaning this method is to 
-get the previous statement of the known argument. Return vector contains
-the pair of statements that has the Next relationship required
-Pre: s1 - the unknown argument
-	 sNum2 - the known argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next relationship between 1 unknown and 1 known
+//argument. The known argument is the right argument, meaning this method is to 
+//get the previous statement of the known argument. Return vector contains
+//the pair of statements that has the Next relationship required
+//Pre: s1 - the unknown argument
+//	 sNum2 - the known argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2) {
 	vector<pair<string, string>> results;
 	vector<CFGNode*> prevList = statementTable.getStatement(sNum2)->getCfgNode()->getPrevNode();
@@ -782,14 +780,13 @@ vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2) {
 	return results;
 }
 
-/** The method used to get Next relationship between 1 unknown and 1 known
-argument. The known argument is the left argument, meaning this method is to 
-get the next statement of the known argument. Return vector contains
-the pair of statements that has the Next relationship required
-Pre: sNum1 - the known argument
-	 s2 - the unknown argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next relationship between 1 unknown and 1 known
+//argument. The known argument is the left argument, meaning this method is to 
+//get the next statement of the known argument. Return vector contains
+//the pair of statements that has the Next relationship required
+//Pre: sNum1 - the known argument
+//	 s2 - the unknown argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNext(string sNum1, SyntType s2) {
 	vector<pair<string, string>> results;
 	Node* temp = statementTable.getStatement(sNum1);
@@ -819,13 +816,12 @@ vector<pair<string, string>> PKBFacade::getNext(string sNum1, SyntType s2) {
 	return results;
 }
 
-/** The method used to get Next relationship between 2 known argument. The
-method search for all Next of left argument and then compare with right argument.
-If matched, it is the result we need. Return the vector contains the result.
-Pre: sNum1 - the left known argument
-	 sNum2 - the right known argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next relationship between 2 known argument. The
+//method search for all Next of left argument and then compare with right argument.
+//If matched, it is the result we need. Return the vector contains the result.
+//Pre: sNum1 - the left known argument
+//	 sNum2 - the right known argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNext(string sNum1, string sNum2) {
 	vector<pair<string, string>> results;
 	Node* temp = statementTable.getStatement(sNum1);
@@ -850,14 +846,13 @@ vector<pair<string, string>> PKBFacade::getNext(string sNum1, string sNum2) {
 	return results;
 }
 
-/** The method used to get Next* relationship of 2 unknwons argument.
-The method recursively call getNextStar with the left argument to be every
-statement of the program and every pair of statements will be included in the
-result. Return the vector contains all results
-Pre: s1 - the left unknown argument
-	 s2 - the right unknown argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next* relationship of 2 unknwons argument.
+//The method recursively call getNextStar with the left argument to be every
+//statement of the program and every pair of statements will be included in the
+//result. Return the vector contains all results
+//Pre: s1 - the left unknown argument
+//	 s2 - the right unknown argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, SyntType s2) {
 	vector<pair<string, string>> results;
 	for (int i=1; i<=statementTable.getStatementCount(statement); i++) {
@@ -871,14 +866,13 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, SyntType s2) {
 	return results;
 }
 
-/** The method used to get Next* relationship between 1 unknown and 1 known
-argument. The known argument is the right argument, meaning this method is to 
-get all statement before the known argument that can reach it. Return vector contains
-all results
-Pre: s1 - the unknown argument
-	 sNum2 - the known argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next* relationship between 1 unknown and 1 known
+//argument. The known argument is the right argument, meaning this method is to 
+//get all statement before the known argument that can reach it. Return vector contains
+//all results
+//Pre: s1 - the unknown argument
+//	 sNum2 - the known argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num2);
@@ -910,14 +904,13 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
 	return results;
 }
 
-/** The method used to get Next relationship between 1 unknown and 1 known
-argument. The known argument is the left argument, meaning this method is to 
-get the all statements that the known argument can reach. Return vector contains
-all results
-Pre: sNum1 - the known argument
-	 s2 - the unknown argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next relationship between 1 unknown and 1 known
+//argument. The known argument is the left argument, meaning this method is to 
+//get the all statements that the known argument can reach. Return vector contains
+//all results
+//Pre: sNum1 - the known argument
+//	 s2 - the unknown argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
 	vector<pair<string, string>> results;
 	Node* tempNode = statementTable.getStatement(num1);
@@ -962,13 +955,12 @@ vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
 	return results;
 }
 
-/** The method used to get Next* relationship between 2 knowns argument.
-This is to check if the left argument can reach the right argument. Return 
-the vector that contains the pair if the pair exist.
-Pre: sNum1 - the left known argument
-	 sNum2 - the right known argument
-Post: results - the vector contains pairs of statements
-*/
+//The method used to get Next* relationship between 2 knowns argument.
+//This is to check if the left argument can reach the right argument. Return 
+//the vector that contains the pair if the pair exist.
+//Pre: sNum1 - the left known argument
+//	 sNum2 - the right known argument
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(string num1, string num2) {
 	vector<pair<string, string>> results;
 	vector<pair<string, string>> nextStar = getNextStar(num1,statement);
@@ -1145,16 +1137,15 @@ vector<pair<string, string>> PKBFacade::getAffectsStar(string assign1, string as
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-/** The method used get a statement that has a specific pattern. It takes in the type of 
-statement we are searching for,a left string in the query and the right string of the query. 
-Left represent control variable if type is "while" of "if". It represents the modified statement
-if the type is "assignment". The right string represents the pattern of the right side of the
-assignment if the type is "assignment".
-Pre: type - type of statement
-	 left - the left string
-	 right - the right string
-Post: results - the vector contains pairs of statements
-*/
+//The method used get a statement that has a specific pattern. It takes in the type of 
+//statement we are searching for,a left string in the query and the right string of the query. 
+//Left represent control variable if type is "while" of "if". It represents the modified statement
+//if the type is "assignment". The right string represents the pattern of the right side of the
+//assignment if the type is "assignment".
+//Pre: type - type of statement
+//	 left - the left string
+//	 right - the right string
+//Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::searchWithPattern(SyntType type,string left,string right) {
 	vector<pair<string, string>> results;
 	string firstChar = right.substr(0,1);
