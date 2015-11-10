@@ -7,7 +7,7 @@
 #include "QueryParser.h"
 
 class SPA {
-	PKB* pkb;
+	PKBFacade* pkb;
 	ExpressionTree* et;
 	AST* ast;
 	SimpleParser* sp;

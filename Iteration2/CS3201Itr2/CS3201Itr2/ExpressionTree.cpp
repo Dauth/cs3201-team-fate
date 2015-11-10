@@ -7,7 +7,7 @@ using std::regex;
 using std::string;
 using std::sregex_token_iterator;
 #include <locale>
-#include "PKB.h"
+#include "PKBFacade.h"
 
 const int LEFT = 1;
 const int RIGHT = 2;
@@ -227,10 +227,11 @@ SyntType ExpressionTree::getSyntType(std::string expressionStr){
 		return expressionCharType;
 }
 
+
 //This method is used to create an assign node
 //PRE: line, line number, vector of twin, string pointer for graph drawing, int, vector of int for graph drawing
 //POST: none
-Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
+Node* ExpressionTree::exptreeSetup(PKBFacade* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
 	std::stack<int> graphStack;//for graph drawing purposes

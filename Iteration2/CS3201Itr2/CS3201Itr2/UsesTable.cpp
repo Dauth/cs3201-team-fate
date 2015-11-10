@@ -3,15 +3,11 @@
 
 using namespace std;
 
+// keeps track of Uses abstractions
 UsesTable::UsesTable () {
-	leftTypeKeyTable[whileLoop] = set<pair<string, string>>();
-	leftTypeKeyTable[ifelse] = set<pair<string, string>>();
-	leftTypeKeyTable[assignment] = set<pair<string, string>>();
-	//leftTypeKeyTable[call] = set<pair<string, string>>();
-	leftTypeKeyTable[statement] = set<pair<string, string>>();
-	leftTypeKeyTable[procedure] = set<pair<string, string>>();
 }
 
+// retrieves Uses abstractions based on the statement number or procedure name
 vector<pair<string, string>> UsesTable::getByLeftKey(string ident) {
 	if (leftKeyTable.find(ident) == leftKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -20,6 +16,7 @@ vector<pair<string, string>> UsesTable::getByLeftKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// retrieves Uses abstraction based on the statement type or procedure
 vector<pair<string, string>> UsesTable::getByLeftKey(SyntType st) {
 	if (leftTypeKeyTable.find(st) == leftTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -28,14 +25,20 @@ vector<pair<string, string>> UsesTable::getByLeftKey(SyntType st) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-vector<pair<string, string>> UsesTable::getByRightKey(string ident) {
+// retrieves Uses abstraction based on variable name and statement type or procedure
+vector<pair<string, string>> UsesTable::getByRightKey(string ident, SyntType st) {
 	if (rightKeyTable.find(ident) == rightKeyTable.end()) {
 		return vector<pair<string, string>>();
 	}
-	set<pair<string, string>> results = rightKeyTable[ident];
+	set<pair<string, string>> results = rightKeyTable[ident][st];
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// adds a uses abstraction
+// adds an entry based on statement type or procedure
+// adds an entry based on statement number or procedure name
+// adds an entry based on variable name and statement type or procedure
+// adds an entry based on variable name and general statement type if statement
 void UsesTable::addUses(Node* nodeLeft, string varName) {
 	string left = nodeLeft->getLine();
 	if (nodeLeft->getType() == procedure) {
@@ -49,20 +52,20 @@ void UsesTable::addUses(Node* nodeLeft, string varName) {
 		leftKeyTable[left] = nodes;
 	}
 	if ( rightKeyTable.find(right) == rightKeyTable.end() ) {
-		 set<pair<string, string>> nodes;
+		unordered_map<SyntType, set<pair<string, string>>> nodes;
 		rightKeyTable[right] = nodes;
 	}
-
 	leftKeyTable[left].insert(modifies);
-	rightKeyTable[right].insert(modifies);
-
 	SyntType st = nodeLeft->getType();
 	leftTypeKeyTable[st].insert(modifies);
+	rightKeyTable[right][st].insert(modifies);
 	if ( nodeLeft->isStatement() ) {
 		leftTypeKeyTable[statement].insert(modifies);
+		rightKeyTable[right][statement].insert(modifies);
 	}
 }
 
+// checks if the Uses abstraction holds
 bool UsesTable::isUsed(string stmt, string varname) {
 	if (leftKeyTable.find(stmt) == leftKeyTable.end()) {
 		return false;

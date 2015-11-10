@@ -1,10 +1,10 @@
 #ifndef PKB_TEST_H
 #define PKB_TEST_H
 
-#include "PKB.h"
+#include "PKBFacade.h"
 
 class PKB_test {
-	PKB* pkb;
+	PKBFacade* pkb;
 
 public:
 	PKB_test();

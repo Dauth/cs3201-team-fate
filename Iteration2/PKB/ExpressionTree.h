@@ -2,9 +2,9 @@
 #define EXPRESSIONTREE_H
 
 #include "stdafx.h"
-#include "PKB.h"
+#include "PKBFacade.h"
 
-class PKB;
+class PKBFacade;
 
 class ExpressionTree{
 
@@ -18,13 +18,14 @@ private:
 
 public:
 	ExpressionTree();
+	void catchUnknownOperatorException(int i);
 	void splitString(std::string inflixString, std::vector<std::string>& splittedString);
 	bool ExpressionTree::isInflixBalanced(std::string);
 	std::vector <std::string> ExpressionTree::expressionConverter(std::string);
-	Node* ExpressionTree::exptreeSetup(PKB*, std::vector<std::string>, int, Node*, Node*, Node*);
+	Node* ExpressionTree::exptreeSetup(PKBFacade*, std::vector<std::string>, int, Node*, Node*, Node*, std::string& dotGraph, int& counter, std::vector<int>& graphVector);
 	Node* ExpressionTree::exptreeSetupSON(std::vector<std::string>);
-	bool ExpressionTree::isNameStartWithLetter(std::string);
-	void ExpressionTree::catchNameStartsLetterException(std::string line);
+	bool ExpressionTree::isNameValid(std::string);
+	void ExpressionTree::catchInvalidNameException(std::string line);
 
 	
 };

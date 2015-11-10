@@ -7,7 +7,7 @@ using std::regex;
 using std::string;
 using std::sregex_token_iterator;
 #include <locale>
-#include "PKB.h"
+#include "PKBFacade.h"
 
 const int LEFT = 1;
 const int RIGHT = 2;
@@ -23,6 +23,11 @@ ExpressionTree::ExpressionTree() {
 
 }
 
+void ExpressionTree::catchUnknownOperatorException(int i){
+	std::cout<<"UNKNOWN OPERATOR DETECTED IN ASSIGNMENT AT LINE NO:"<<i + 1<<std::endl;
+	std::terminate();
+}
+
 void ExpressionTree::splitString(std::string inflixString, std::vector<std::string>& splittedString){
 	std::string tempStr = "";
 	for(int i = 0; i < inflixString.size(); i++){
@@ -31,18 +36,20 @@ void ExpressionTree::splitString(std::string inflixString, std::vector<std::stri
 		if(isOperand(expStr)){
 			tempStr.append(expStr);
 		}else if(isOperator(expStr) || inflixString[i] == '(' || inflixString[i] == ')'){
-			catchNameStartsLetterException(tempStr);
 			if(!tempStr.empty()){
+				catchInvalidNameException(tempStr);
 				splittedString.push_back(tempStr);
 				tempStr.clear();
 			}
 			tempStr.append(expStr);
 			splittedString.push_back(tempStr);
 			tempStr.clear();
+		}else{
+			catchUnknownOperatorException(i);
 		}
 	}
 	if(!tempStr.empty()){
-		catchNameStartsLetterException(tempStr);
+		catchInvalidNameException(tempStr);
 		splittedString.push_back(tempStr);
 	}
 }
@@ -123,27 +130,11 @@ bool ExpressionTree::isOperand(std::string sString){
 }
 
 bool ExpressionTree::isAlpha(std::string sString){
-	bool result = true;
-
-	for(int i = 0; i < sString.length(); i++){
-		if(!isalpha(sString[i])){
-			result = false;
-			return result;
-		}
-	}
-	return result;
+	return isalpha(sString[0]);
 }
 
 bool ExpressionTree::isDigit(std::string sString){
-	bool result = true;
-	
-	for(int i = 0; i < sString.length(); i++){
-		if(!isdigit(sString[i])){
-			result = false;
-			return result;
-		}
-	}
-	return result;
+	return isdigit(sString[0]);
 }
 
 /*
@@ -215,6 +206,7 @@ bool ExpressionTree::isInflixBalanced(std::string inflixString){
 	return result;//if it is false here, there are more opening then closing brackets
 }
 
+
 SyntType ExpressionTree::getSyntType(std::string expressionStr){
 	SyntType expressionCharType;
 	if(isAlpha(expressionStr)){
@@ -227,9 +219,10 @@ SyntType ExpressionTree::getSyntType(std::string expressionStr){
 		return expressionCharType;
 }
 
-Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode){
+Node* ExpressionTree::exptreeSetup(PKBFacade* pkb, std::vector<std::string> postflixExp, int lineNo, Node* assignStmNode, Node* procNode, Node* parentNode, std::string& dotGraph, int& counter, std::vector<int>& graphVector){
 	SyntType expressionCharType;
 	std::stack<Node*> operandStack;
+	std::stack<int> graphStack;//for graph drawing purposes
 
 	for(int i = 0; i < postflixExp.size(); i++){
 		std::string expressionChar = postflixExp[i];
@@ -238,6 +231,10 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 		if(isOperand(postflixExp[i])){
 			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
 			operandStack.push(tNode);
+			/*Graph drawing*/
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ expressionChar +"\" shape=box];\n");
+			graphStack.push(counter - 1);
+			//////////////////////////
 		}else if (isOperator(postflixExp[i])){
 			Node* tNode = pkb->createNode(expressionCharType, lineNo, expressionChar, assignStmNode, nullptr, parentNode, procNode);
 			tNode->setRightChild(operandStack.top());
@@ -247,6 +244,17 @@ Node* ExpressionTree::exptreeSetup(PKB* pkb, std::vector<std::string> postflixEx
 			operandStack.pop();
 
 			operandStack.push(tNode);
+
+			/*Graph drawing*/
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter++) )->str() + "[label=\""+ expressionChar +"\" shape=box];\n");
+			int rightChild = graphStack.top();
+			graphStack.pop();
+			int leftChild = graphStack.top();
+			graphStack.pop();
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << leftChild) )->str()+'\n');
+			dotGraph.append(static_cast<ostringstream*>( &(ostringstream() << counter - 1) )->str()+"->"+static_cast<ostringstream*>( &(ostringstream() << rightChild) )->str()+'\n');
+			graphStack.push(counter - 1);
+			//////////////////////////
 		}
 	}
 
@@ -280,25 +288,43 @@ Node* ExpressionTree::exptreeSetupSON(std::vector<std::string> postflixExp){
 	return operandStack.top();
 }
 
-bool ExpressionTree::isNameStartWithLetter(std::string input){
-	std::regex assignStm("\\s*\\t*^[A-Za-z]");
-	std::smatch match;
+//check first letter is a alphabet and subsequet letters are alphanumeric
+bool ExpressionTree::isNameValid(std::string input){
+	bool result = false;
+	bool isAlphaPresent = false;
+	bool isDigitPresent = false;
 
-	int result = false;
+	for(int i = 0; i < input.length(); i++){
+		char cChar = input[i];
+		if(isalpha(cChar)){
+			isAlphaPresent = true;
+		}else if(isdigit(cChar)){
+			isDigitPresent = true;
+		}else{
+			result = false;
+			return result;
+		}
+	}
 
-	if (std::regex_search(input, match, assignStm) || isDigit(input)){
-		result = true;
+	if(isDigitPresent && isAlphaPresent){	//a56pple123  not  344apple
+		if(isalpha(input[0])){
+			result = true;
+		}
+	}else if(!isDigitPresent && isAlphaPresent){	//apple
+			result = true;
+	}else if(isDigitPresent && !isAlphaPresent){	//123
+			result = true;
 	}
 	return result;
 }
 
-void ExpressionTree::catchNameStartsLetterException(std::string line){
+void ExpressionTree::catchInvalidNameException(std::string line){
 	try{
-		if(!isNameStartWithLetter(line)){
+		if(!isNameValid(line)){
 			throw line;
 		}
 	}catch(std::string e){
-		std::cout<<"NAME DOES NOT START WITH A LETTER: "<<e<<std::endl;
+		std::cout<<"FIRST LETTER MUST BE ALPHABELT ONLY AND SUBSEQUENT CHARACTERS CAN BE ALPHANUMERIC: "<<e<<std::endl;
 		std::terminate();
 	}
 }

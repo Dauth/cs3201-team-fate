@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <stack>
-#include "PKB.h"
+#include "PKBFacade.h"
 #include "Node.h"
 #include "ExpressionTree.h"
 #include "AST.h"
@@ -30,7 +30,7 @@ const char EQUAL = '=';
 using namespace std;
 
 
-AST::AST(PKB* p, ExpressionTree* e){
+AST::AST(PKBFacade* p, ExpressionTree* e){
 	pkb = p;
 	expTree = e;
 }
