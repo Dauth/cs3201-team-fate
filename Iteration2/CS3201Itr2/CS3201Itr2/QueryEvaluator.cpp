@@ -12,10 +12,10 @@ list<string> QueryEvaluator::evaluate(vector<ParamNode*> rVec, vector<QueryPart*
 	queryParts = qVec;
 
 	if(queryParts.empty()) {
-		hasQuery = true;
+		hasQuery = false;
 	}
 	else {
-		hasQuery = false;
+		hasQuery = true;
 	}
 
 	hasResult = true;
