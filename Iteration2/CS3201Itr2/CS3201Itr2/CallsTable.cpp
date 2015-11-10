@@ -3,9 +3,12 @@
 
 using namespace std;
 
+// calls table keeps track of procedures calling another procedure
 CallsTable::CallsTable () {
 }
 
+// retrieves a call abstraction based on the left argument of
+// a calls abstraction as the key in a hashtable
 vector<pair<string, string>> CallsTable::getByLeftKey(string ident) {
 	if (leftKeyTable.find(ident) == leftKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -14,6 +17,8 @@ vector<pair<string, string>> CallsTable::getByLeftKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// retrieves a call abstraction based on right argument of
+// a calls abstraction as the key in a hashtable
 vector<pair<string, string>> CallsTable::getByRightKey(string ident) {
 	if (rightKeyTable.find(ident) == rightKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -22,10 +27,12 @@ vector<pair<string, string>> CallsTable::getByRightKey(string ident) {
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// get all calls abstractions
 vector<pair<string, string>> CallsTable::getAll() {
 	return vector<pair<string, string>> (allCalls.begin(), allCalls.end());
 }
 
+// find the statements that call the provided procedure name
 vector<string> CallsTable::getCallingStatement(string procName) {
 	if (callingStatement.find(procName) == callingStatement.end()) {
 		return vector<string>();
@@ -34,6 +41,9 @@ vector<string> CallsTable::getCallingStatement(string procName) {
 	return vector<string> (callingStatements.begin(), callingStatements.end());
 }
 
+// add a calls abstraction 
+// adds entries in a hashtable and inverted hashtable
+// adds an entry in a calling statement table
 void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getValue();
 	string right = nodeRight->getValue();
@@ -58,6 +68,7 @@ void CallsTable::addCalls(Node* nodeLeft, Node* nodeRight) {
 	allCalls.insert(calls);
 }
 
+// checks to see if the provided procedure is called by any procedure
 bool CallsTable::isCalled(string procName) {
 	if (rightKeyTable.find(procName) == rightKeyTable.end()) {
 		return false;
@@ -65,6 +76,7 @@ bool CallsTable::isCalled(string procName) {
 	return true;
 }
 
+// checks if the input calls abstraction holds.
 bool CallsTable::isCalled(string proc1, string proc2) {
 	if (leftKeyTable.find(proc1) == leftKeyTable.end()) {
 		return false;

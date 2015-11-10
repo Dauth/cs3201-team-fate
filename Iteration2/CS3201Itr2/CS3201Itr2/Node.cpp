@@ -2,6 +2,8 @@
 #include "Node.h"
 #include "CFGNode.h"
 
+const int LIST_INDEX_OFFSET = 1;
+// Node component that makes up the Abstract Syntax Tree
 Node::Node (SyntType st, std::string l, std::string v) {
 	syntType = st;
 	value = v;
@@ -27,6 +29,7 @@ std::string Node::getLine() {
 	return line;
 }
 
+// if node type is of statement type
 bool Node::isStatement() {
 	if ( syntType == whileLoop || syntType == ifelse || syntType == assignment || syntType == call) {
 		return true;
@@ -109,15 +112,11 @@ void Node::setThirdChild(Node* node) {
 }
 
 void Node::addStmt(Node* node) {
-	indexLst[node] = stmtLst.size() + 1;
-	stmtLst[stmtLst.size() + 1] = node; //magic number!!
+	indexLst[node] = stmtLst.size() + LIST_INDEX_OFFSET;
+	stmtLst[stmtLst.size() + LIST_INDEX_OFFSET] = node;
 	node->setParent(this);
 }
 
 void Node::setCfgNode(CFGNode* cfg){
 	cfgNode = cfg;
-}
-
-void Node::debug() {
-	std::cout << "Node Type: " << syntType << ", line: " << line << "\n";
 }

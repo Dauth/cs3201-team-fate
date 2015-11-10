@@ -4,17 +4,10 @@
 using namespace std;
 
 ParentsTable::ParentsTable () {
-	leftTypeKeyTable[whileLoop] = unordered_map<SyntType, set<pair<string, string>>>();
-	leftTypeKeyTable[ifelse] = unordered_map<SyntType, set<pair<string, string>>>();
-	leftTypeKeyTable[statement] = unordered_map<SyntType, set<pair<string, string>>>();
-
-	rightTypeKeyTable[whileLoop] = unordered_map<SyntType, set<pair<string, string>>>();
-	rightTypeKeyTable[ifelse] = unordered_map<SyntType, set<pair<string, string>>>();
-	rightTypeKeyTable[assignment] = unordered_map<SyntType, set<pair<string, string>>>();
-	rightTypeKeyTable[call] = unordered_map<SyntType, set<pair<string, string>>>();
-	rightTypeKeyTable[statement] = unordered_map<SyntType, set<pair<string, string>>>();
 }
 
+// retrieves a Parents abstraction based on the parent statement number
+// and the statement type of the child
 vector<pair<string, string>> ParentsTable::getByLeftKey(string ident, SyntType st) {
 	if (leftKeyTable.find(ident) == leftKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -23,6 +16,8 @@ vector<pair<string, string>> ParentsTable::getByLeftKey(string ident, SyntType s
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// retrieves a Parents abstraction based on the Parent statement type
+// and the child statement type
 vector<pair<string, string>> ParentsTable::getByLeftKey(SyntType st1, SyntType st2) {
 	if (leftTypeKeyTable.find(st1) == leftTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -31,6 +26,8 @@ vector<pair<string, string>> ParentsTable::getByLeftKey(SyntType st1, SyntType s
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// retrieves a Parents abstraction based on the Child statement number
+// and the Parent statement type
 vector<pair<string, string>> ParentsTable::getByRightKey(string ident, SyntType st) {
 	if (rightKeyTable.find(ident) == rightKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -39,6 +36,8 @@ vector<pair<string, string>> ParentsTable::getByRightKey(string ident, SyntType 
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
+// retrieves a Parents abstraction based on the child statement type 
+// and the Parent statement type
 vector<pair<string, string>> ParentsTable::getByRightKey(SyntType st1, SyntType st2) {
 	if (rightTypeKeyTable.find(st1) == rightTypeKeyTable.end()) {
 		return vector<pair<string, string>>();
@@ -47,7 +46,17 @@ vector<pair<string, string>> ParentsTable::getByRightKey(SyntType st1, SyntType 
 	return vector<pair<string, string>> (results.begin(), results.end());
 }
 
-
+// adds a Parents abstraction
+// Adds a parent child entry for
+// Parent statement number and child statement type 
+// Parent statement number and child of statement type
+// parent statement type and child statement type
+// parent statement type and child of statement type
+// parent of statement type and child statement type
+// parent of statement type and child of statement type
+// 
+// and entries of the above but inverted
+// allows direct access of any Parent abstraction
 void ParentsTable::addChild(Node* nodeLeft, Node* nodeRight) {
 	string left = nodeLeft->getLine();
 	string right = nodeRight->getLine();
@@ -79,6 +88,7 @@ void ParentsTable::addChild(Node* nodeLeft, Node* nodeRight) {
 	rightTypeKeyTable[statement][statement].insert(parent);
 }
 
+// checks if the Parent abstraction holds
 bool ParentsTable::isParent(string stmt, string varname) {
 	if (leftKeyTable.find(stmt) == leftKeyTable.end()) {
 		return false;

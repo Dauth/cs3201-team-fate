@@ -5,14 +5,17 @@
 #include "Node.h"
 
 class ExpressionTable {
-	std::map<std::string, std::vector<Node*>> table;
 	
-public:
-	ExpressionTable();
-	std::vector<Node*> getExpressions(std::string);
-	std::vector<Node*> getRootExpressions(std::string);
+	public:
 
-	void addExpression(Node*);
+		ExpressionTable();
+		std::vector<Node*> getExpressions(std::string);
+		std::vector<Node*> getRootExpressions(std::string);
+		void addExpression(Node*);
+
+	private:
+
+		std::map<std::string, std::vector<Node*>> table;
 };
 
 #endif

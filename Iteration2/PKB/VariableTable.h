@@ -5,16 +5,20 @@
 #include "Node.h"
 
 class VariableTable {
-	std::unordered_map<std::string, std::vector<Node*>> table;
-	
-public:
-	VariableTable();
-	std::vector<Node*> getNode(std::string);
-	std::vector<Node*> getNodes();
-	int getVariableCount();
-	int getVariableCount(std::string);
 
-	void addNode(Node*);
+	public:
+
+		VariableTable();
+		std::vector<Node*> getNode(std::string);
+		std::vector<Node*> getNodes();
+		int getVariableCount();
+		int getVariableCount(std::string);
+		void addNode(Node*);
+
+	private:
+
+		std::unordered_map<std::string, std::vector<Node*>> table;
+
 };
 
 #endif
