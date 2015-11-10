@@ -1087,13 +1087,84 @@ void QueryEvaluator::evalFinalResult() {
 		}
 	}
 	else if(hasResult) {
-		vector<vector<string>> empty;
-		formFinalResult(empty);
+		if(queryParts.empty()) {
+			formFinalResultWithoutQuery("", 0);
+		}
+		else {
+			vector<vector<string>> empty;
+			formFinalResultWithQuery(empty);
+		}
 	}
 }
 
-//forms the list of strings for the final result
-void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
+//forms the list of strings for the final result for query that contains no query part
+//this method forms final result faster as there is no checking of values in relationships
+void QueryEvaluator::formFinalResultWithoutQuery(string s, int index) {
+	//clean up and end query evaluation if time out
+	if(AbstractWrapper::GlobalStop) {
+		queryWithNoResult.clear();
+		queryWithOneResult.clear();
+		queryWithTwoResults.clear();
+		synonymVec.clear();
+		resultTuples.clear();
+		finalResult.clear();
+		hasResult = false;
+		timedOut = true;
+		return;
+	}
+
+	ParamNode* node = resultSynonyms[index];
+	SynonymValues* synVal = getSynVal(node->getParam());
+	set<string> valSet = synVal->getValues();
+	
+	//if synonym has no existing values, get values from PKB
+	//else if synonym is call.procName, change values of call to call.procName values
+	if(valSet.empty()) {
+		vector<Node*> result = pkb->getNodes(resultSynonyms[index]->getType());
+
+		if((node->getType() == call && node->getAttrType() == stringType) || node->getType() == procedure || node->getType() == variable || node->getType() == constant) {
+			for(unsigned int i = 0; i < result.size(); i++) {
+				valSet.insert(result[i]->getValue());
+			}
+		}
+		else {
+			for(unsigned int i = 0; i < result.size(); i++) {
+				valSet.insert(result[i]->getLine());
+			}
+		}
+	}
+	else if(resultSynonyms[index]->getType() == call && resultSynonyms[index]->getAttrType() == stringType) {
+		for(unsigned int i = 0; i < callNodes.size(); i++) {
+			string stmtLine = callNodes[i]->getLine();
+
+			if(valSet.find(stmtLine) != valSet.end()) {
+				valSet.insert(callNodes[i]->getValue());
+				valSet.erase(stmtLine);		
+ 			}
+		}
+	}		
+ 		 
+	index++;
+
+	//for each value of synonym, appends value to string
+	for(set<string>::iterator i = valSet.begin(); i != valSet.end(); i++) {
+		string singleResult = s;
+		singleResult.append(*i);		
+ 		
+		//if current synonym is not last synonym of result tuples, recursively call formFinalResultWithoutQuery()
+		//else, add string to finalResult
+		if(index < resultSynonyms.size()) {
+			singleResult.append(" ");
+			formFinalResultWithoutQuery(singleResult, index);
+		}
+		else {
+			finalResult.push_back(singleResult);
+		}
+	}
+}
+
+//forms the list of strings for the final result for query that contains query part
+void QueryEvaluator::formFinalResultWithQuery(vector<vector<string>> parentRows) {
 	//rows represent the result tuples and each "row" in rows contains values in a single result tuple
 	vector<vector<string>> rows = formRows(parentRows);
 
@@ -1112,7 +1183,7 @@ void QueryEvaluator::formFinalResult(vector<vector<string>> parentRows) {
 	
 	if(!rows.empty()) {
 		if(rows[0].size() < resultSynonyms.size()) {
-			formFinalResult(rows);
+			formFinalResultWithQuery(rows);
 		}
 		else {
 			formStringResult(rows);
