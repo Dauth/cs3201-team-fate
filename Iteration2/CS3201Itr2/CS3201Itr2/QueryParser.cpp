@@ -1311,19 +1311,8 @@ Query_Object QueryParser::getQueryObject(std::string i){
 
 }
 
-/*
-int main ()
-{
-	QueryParser qp;
-	string query;
-	while (query!= "1")
-	{
-		getline (cin,query);
 
-		Query_Object qs = qp.getQueryObject(query);
-	}
-}
-*/
+
 
 
 
