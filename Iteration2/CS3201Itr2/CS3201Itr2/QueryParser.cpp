@@ -1323,7 +1323,7 @@ Query_Object QueryParser::getQueryObject(std::string i){
 
 }
 
-
+/*
 int main ()
 {
 	QueryParser qp;
@@ -1335,6 +1335,7 @@ int main ()
 		Query_Object qs = qp.getQueryObject(query);
 	}
 }
+*/
 
 
 
