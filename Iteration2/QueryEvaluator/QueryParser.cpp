@@ -129,8 +129,6 @@ bool verifyCorrectParameters(SyntType currentSyn, string firstParam, string seco
 
 				valid = true;
 			}
-
-
 			else
 			{
 				errorMsg += "- Invalid second parameter of the pattern.";
@@ -258,7 +256,7 @@ bool verifyCorrectParameters(QueryType queryClause,string firstParam, string sec
 	}
 	else if (queryClause == QueryType::affectsStar)
 	{
-		if ((firstSyn == SyntType::progline || firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || firstSyn == SyntType::statement || firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::whileLoop || secondSyn == SyntType::progline || secondSyn == SyntType::ifelse || secondSyn == SyntType::statement ||secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
+		if ((firstSyn == SyntType::progline||firstSyn == SyntType::whileLoop || firstSyn == SyntType::ifelse || firstSyn == SyntType::statement || firstSyn == SyntType::assignment || regex_match(firstParam,stmtRef)) && (secondSyn == SyntType::whileLoop || secondSyn == SyntType::progline || secondSyn == SyntType::ifelse || secondSyn == SyntType::statement || secondSyn == SyntType::assignment || regex_match(secondParam,stmtRef)))
 		{
 			valid = true;
 		}
@@ -286,7 +284,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		if(newSymbol->exists(attrVariables[0]))
 		{
 			leftSynt =  newSymbol->getSyntType(attrVariables[0]);
-
+			
 			const char * leftHandChar = attrVariables[1].c_str();
 			// 1aii. Check if leftHand's synonym is a statement, then check if leftHand attribute is stmt#
 			if (strcmp(leftHandChar,"stmt#") == 0)
@@ -302,7 +300,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides stmt#)
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			// 1aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
@@ -318,7 +316,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides value)
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			else if (strcmp(leftHandChar, "procName") == 0) 
@@ -332,7 +330,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides procName
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			else if (strcmp(leftHandChar, "varName") == 0)
@@ -347,7 +345,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides procName
-					invalidWith =true;
+					invalidWith = true;
 				}
 
 			}
@@ -375,7 +373,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 		else 
 		{
 			// fail
-			invalidWith =true;
+
 		}
 	}
 	// 1c)
@@ -420,7 +418,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 			if (strcmp(rightHandChar,"stmt#") == 0) 
 			{
 				// right hand pass
-
+				
 				if (rightSynt == SyntType::statementList||rightSynt == SyntType::statement || rightSynt == SyntType::assignment || rightSynt == SyntType::call || rightSynt == SyntType::whileLoop || rightSynt == SyntType::ifelse)
 				{
 					// pass ( .stmt#) and set AttrType to integer
@@ -431,7 +429,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides stmt#)
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			// 2aiii. Check if leftHand's synonym is constant/variable, then check if leftHand attribute is value
@@ -447,12 +445,12 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides value)
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			else if (strcmp(rightHandChar, "procName") == 0) 
 			{
-
+				
 				if (rightSynt == SyntType::procedure || rightSynt == SyntType::call)
 				{
 					rightParam = attrVariables[0];
@@ -462,12 +460,12 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides procName
-					invalidWith =true;
+					invalidWith = true;
 				}
 			}
 			else if (strcmp(rightHandChar, "varName") == 0) 
 			{				
-
+				
 				if (rightSynt == SyntType::variable)
 				{
 					rightParam = attrVariables[0];
@@ -477,7 +475,7 @@ bool isCorrectWithClause(string leftString, string rightString)
 				else
 				{
 					// fail (this statement has a dot(.) something else besides procName
-					invalidWith =true;
+					invalidWith = true;
 				}
 
 			}
@@ -649,12 +647,7 @@ void ProcessEachToken(char *currentToken)
 	}
 	else if (strcmp(currentToken,"such") == 0 && currToken == TOKEN::AND_END)
 	{
-		if (previousToken == TOKEN::SUCHTHAT_CL)
-		{
-			nonQueryToken = true;
-		}
-		else expectingThat = true;
-
+		expectingThat = true;
 	}
 	else if (expectingThat == true && strcmp(currentToken,"that") != 0)
 	{
@@ -703,10 +696,6 @@ void ProcessEachToken(char *currentToken)
 				{
 					currToken = TOKEN::WITH_CL;
 				}
-				else if (strcmp(currentToken,"pattern")==0)
-				{
-					currToken = TOKEN::PATTERN_CL;
-				}
 				else
 				{
 					nonQueryToken = true;
@@ -739,7 +728,7 @@ void ProcessEachToken(char *currentToken)
 						if (startBracket != 0){ startBracket = startBracket -1; }
 						else 
 						{ 
-							//FAIL 
+							 //FAIL 
 						} 
 					}
 				}
@@ -794,25 +783,25 @@ void ProcessEachToken(char *currentToken)
 						{
 							inQuotes = true;
 							if(!passedFirstParam)
-							{
-								firstParameter += concatStmt[i];
-							}
-							else if (!passedSecondParam)
-							{
-								secondParameter += concatStmt[i];
-							}
+								{
+									firstParameter += concatStmt[i];
+								}
+								else if (!passedSecondParam)
+								{
+									secondParameter += concatStmt[i];
+								}
 						}
 						else if (concatStmt[i] == '"' && inQuotes)
 						{
 							inQuotes = false;
 							if(!passedFirstParam)
-							{
-								firstParameter += concatStmt[i];
-							}
-							else if (!passedSecondParam)
-							{
-								secondParameter += concatStmt[i];
-							}
+								{
+									firstParameter += concatStmt[i];
+								}
+								else if (!passedSecondParam)
+								{
+									secondParameter += concatStmt[i];
+								}
 						}
 						else if (concatStmt[i] == ')' && !inQuotes)
 						{
@@ -861,31 +850,29 @@ void ProcessEachToken(char *currentToken)
 							supposedSynonym += concatStmt[i]; 
 						}
 					}
-					if (nonExistantSyn == false)
+
+					if (verifyCorrectParameters(patternSyn,firstParameter,secondParameter,thirdParameter))
 					{
-						if (verifyCorrectParameters(patternSyn,firstParameter,secondParameter,thirdParameter))
-						{
-							//ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
-							AttrType leftString = getAttrType(patternSyn);
-							ParamNode* leftParamNode = new ParamNode(patternSyn, leftString, supposedSynonym);
-							SyntType rightParamSynType = getSynType(firstParameter);
-							SyntType lastParamSynType = getSynType(secondParameter);
-							removeCharsFromString( secondParameter, "\"" );
-							removeCharsFromString(firstParameter, "\""); 
-							AttrType rightAttr = getAttrType(rightParamSynType);
-							AttrType lastAttr = getAttrType(lastParamSynType);
-							//ParamNode* middleParamNode = new ParamNode (rightParamSynType, firstParameter);
-							//ParamNode* rightParamNode = new ParamNode (lastParamSynType,secondParameter);
-							ParamNode* rightParamNode = new ParamNode (rightParamSynType,rightAttr,firstParameter);
-							ParamNode* lastParamNode = new ParamNode (lastParamSynType,lastAttr, secondParameter);
-							//PatternNode* newPattern = new PatternNode(leftParamNode,rightParamNode, lastParamNode);
-							//rootTree->addPattern(newPattern);
-							QueryPart* newQueryPart = new QueryPart(QueryType::pattern,leftParamNode,rightParamNode,lastParamNode);
-							qo.queryVec.push_back(newQueryPart);
-							patternPass = true;
-							currToken = TOKEN::AND_END;
-							previousToken = TOKEN::PATTERN_CL;
-						}
+						//ParamNode* leftParamNode = new ParamNode(patternSyn,supposedSynonym);
+						AttrType leftString = getAttrType(patternSyn);
+						ParamNode* leftParamNode = new ParamNode(patternSyn, leftString, supposedSynonym);
+						SyntType rightParamSynType = getSynType(firstParameter);
+						SyntType lastParamSynType = getSynType(secondParameter);
+						removeCharsFromString( secondParameter, "\"" );
+						removeCharsFromString(firstParameter, "\""); 
+						AttrType rightAttr = getAttrType(rightParamSynType);
+						AttrType lastAttr = getAttrType(lastParamSynType);
+						//ParamNode* middleParamNode = new ParamNode (rightParamSynType, firstParameter);
+						//ParamNode* rightParamNode = new ParamNode (lastParamSynType,secondParameter);
+						ParamNode* rightParamNode = new ParamNode (rightParamSynType,rightAttr,firstParameter);
+						ParamNode* lastParamNode = new ParamNode (lastParamSynType,lastAttr, secondParameter);
+						//PatternNode* newPattern = new PatternNode(leftParamNode,rightParamNode, lastParamNode);
+						//rootTree->addPattern(newPattern);
+						QueryPart* newQueryPart = new QueryPart(QueryType::pattern,leftParamNode,rightParamNode,lastParamNode);
+						qo.queryVec.push_back(newQueryPart);
+						patternPass = true;
+						currToken = TOKEN::AND_END;
+						previousToken = TOKEN::PATTERN_CL;
 					}
 				}
 				else
@@ -905,14 +892,14 @@ void ProcessEachToken(char *currentToken)
 				bool tupleExist = false;
 				regex boolean("BOOLEAN");
 				// 
-
+				
 				concatStmt += currentToken;
 				if (regex_match(concatStmt, beginTuple) && !regex_match(concatStmt, tuple))
 				{
 					strToken = concatStmt;
 					tupleExist = true;
 				}
-
+				
 				if (regex_match(concatStmt,tuple))
 				{
 					strToken = concatStmt;
@@ -1000,7 +987,7 @@ void ProcessEachToken(char *currentToken)
 							{
 								nonExistantSyn = true;
 							}
-
+							
 						}
 						else if (strcmp(leftHandChar, "procName") == 0)
 						{
@@ -1055,15 +1042,15 @@ void ProcessEachToken(char *currentToken)
 					{	
 						if (!tupleExist)
 						{
-							SyntType newSyntSymbol = newSymbol->getSyntType(currentToken);
-							if (newSyntSymbol != SyntType::synError)
-							{
-								ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),currentToken);
-								qo.resultVec.push_back(newResultSynonym);
-								currToken = TOKEN::AND_END;
-								completeSelectStmt = true;
-								concatStmt = "";
-							}
+						SyntType newSyntSymbol = newSymbol->getSyntType(currentToken);
+						if (newSyntSymbol != SyntType::synError)
+						{
+							ParamNode* newResultSynonym = new ParamNode(newSyntSymbol,getAttrType(newSyntSymbol),currentToken);
+							qo.resultVec.push_back(newResultSynonym);
+							currToken = TOKEN::AND_END;
+							completeSelectStmt = true;
+							concatStmt = "";
+						}
 						}
 					}
 				}
@@ -1288,8 +1275,6 @@ Query_Object QueryParser::getQueryObject(std::string i){
 	synonymError = false;
 	completeSelectStmt = false;
 	invalidWith = false;
-	previousToken = TOKEN::SELECT;
-	currToken = TOKEN::SELECT;
 
 	char *a=new char[i.size()+1];
 	a[i.size()]=0;
@@ -1334,7 +1319,5 @@ int main ()
 	}
 }
 */
-
-
 
 
