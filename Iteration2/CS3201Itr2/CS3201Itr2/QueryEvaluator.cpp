@@ -57,12 +57,12 @@ void QueryEvaluator::optimise() {
 		for(unsigned int i = 0; i < resultSynonyms.size(); i++) {
 			synonymVec.push_back(new SynonymValues(resultSynonyms[i]->getParam()));
 		}
+	}
 
-		sortQueryParts();
+	sortQueryParts();
 
-		if(!hasResult) {
-			return;
-		}
+	if(!hasResult) {
+		return;
 	}
 	
 	//QueryParts not sorted into groups will be put into queryWithNoResult vector
@@ -70,44 +70,9 @@ void QueryEvaluator::optimise() {
 		QueryType queryType = queryParts[i]->getType();
 		ParamNode* left = queryParts[i]->getLeftParam();
 		ParamNode* right = queryParts[i]->getRightParam();
-
-		//filter QueryParts that guarantees empty result, e.g. "Next(s,s)"
-		if((queryType == nxt || queryType == follows || queryType == followsStar || queryType == parent || queryType == parentStar) && left->getParam() == right->getParam() && left->getParam() != "_") {
-			hasResult = false;
-			return;
-		}
-			
-		//filter QueryParts with query type "Parent" or "Parent*" that guarantees empty result, e.g. "Parent(assignment,_)"
-		if((queryType == parent || queryType == parentStar) && (left->getType() == call || left->getType() == assignment)) {
-			hasResult = false;
-			return;
-		}
-
-		//filter QueryParts with query type "Affects" or "Affects*" that guarantees empty result, e.g. "Affects(while,a)"
-		if((queryType == affects || queryType == affectsStar) && (left->getType() == whileLoop || left->getType() == ifelse || left->getType() == call || right->getType() == whileLoop || right->getType() == ifelse || right->getType() == call)) {
-			hasResult = false;
-			return;
-		}
-
-		//filter QueryParts that guarantees true, e.g. "with a.stmt#=a.stmt#" and QueryParts that guarantees false, e.g. "with 1=2"
-		if(queryType == with && left->getType() == right->getType()) {
-			if(left->getParam() != right->getParam() && (left->getType() == integer || left->getType() == expression)) {
-				hasResult = false;
-				return;
-			}
-			else if(left->getParam() == right->getParam()) {
-				queryParts.erase(queryParts.begin() + i);
-				i--;
-			}
-		}
-
-		//ensure QueryParts with 2 synonyms in queryWithNoResult vector to be at the back
-		if(left->getType() != integer && left->getType() != expression && right->getType() != integer && right->getType() != expression) {
-			queryWithNoResult.push_back(queryParts[i]);
-		}
-		else {
-			queryWithNoResult.insert(queryWithNoResult.begin(), queryParts[i]);
-		}
+		
+		//ensure QueryParts with 1 synonym in queryWithNoResult vector to be at the front
+		queryWithNoResult.insert(queryWithNoResult.begin(), queryParts[i]);
 	}
 
 	//clean up and end query evaluation if time out
@@ -207,36 +172,28 @@ void QueryEvaluator::sortQueryParts() {
 					i--;
 				}
 			}
-			else if((right->getType() == integer || right->getType() == expression) && existsInSynVec(left->getParam())) {
-				//QueryParts that takes less time to evaluate is inserted into the front of the group
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
-					queryWithOneResult.insert(queryWithOneResult.begin(), queryParts[i]);
+			else if((right->getType() == integer || right->getType() == expression)) {
+				if (existsInSynVec(left->getParam())) {
+					//QueryParts that takes less time to evaluate is inserted into the front of the group
+					if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
+						queryWithOneResult.insert(queryWithOneResult.begin(), queryParts[i]);
+					}
+					else {
+						queryWithOneResult.push_back(queryParts[i]);
+					}
+
+					queryParts.erase(queryParts.begin() + i);
+					i--;
 				}
-				else {
-					queryWithOneResult.push_back(queryParts[i]);
+			}
+			else {
+				if(!existsInSynVec(left->getParam())) {
+					synonymVec.push_back(new SynonymValues(left->getParam()));
 				}
 
-				queryParts.erase(queryParts.begin() + i);
-				i--;
-			}
-			else if(existsInSynVec(left->getParam())) {
 				if(!existsInSynVec(right->getParam())) {
 					synonymVec.push_back(new SynonymValues(right->getParam()));
 				}
-
-				//QueryParts that takes less time to evaluate is inserted into the front of the group
-				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
-					queryWithTwoResults.insert(queryWithTwoResults.begin(), queryParts[i]);
-				}
-				else {
-					queryWithTwoResults.push_back(queryParts[i]);
-				}
-
-				queryParts.erase(queryParts.begin() + i);
-				i--;
-			}
-			else if(existsInSynVec(right->getParam())) {
-				synonymVec.push_back(new SynonymValues(left->getParam()));
 
 				//QueryParts that takes less time to evaluate is inserted into the front of the group
 				if(queryType == follows || queryType == parent || queryType == calls || queryType == with) {
