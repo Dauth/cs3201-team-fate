@@ -1598,7 +1598,7 @@ Node* PKBFacade::getFollowedBy(Node* statement) {
 //     if the statement is an assignment statement and uses the target variable
 //         if no target assignment is provided, or if the target assignment matches
 //             append to result vector
-//         if no target assignment is provided, or if the result vector is empty
+//         if no target assignment is provided, or if the result vector is empty, and statement doesnt modify this variable
 //             recursively call this method with the current node
 //         if the transitive flag is enabled, and no target assignment is provided or result vector is empty
 //             recursively call this method with the current node and set target vector to the variable this node modifies
@@ -1616,7 +1616,7 @@ void PKBFacade::forwardAffectsSearch(set<pair<string, string>>* results, set<pai
 				if (stop == NO_STOP || stop == stmt->getLine()) {
 					results->insert(make_pair(origin, stmt->getLine()));
 				}
-				if (stop == NO_STOP || results->size() == 0) {
+				if ((stop == NO_STOP || results->size() == 0) && !modifiesTable.isModified(stmt->getLine(), varName)) {
 					forwardAffectsSearch(results, searched, stmt, origin, varName, stop, transitive);
 				}
 				if (transitive && (stop == NO_STOP || results->size() == 0)) { 
