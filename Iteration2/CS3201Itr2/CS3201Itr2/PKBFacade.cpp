@@ -815,11 +815,11 @@ vector<pair<string, string>> PKBFacade::getNext(SyntType s1, string sNum2) {
 	if ( s1 == progline){
 		s1 = statement;
 	}
+	vector<pair<string, string>> results;
 	int lineNo2 = atoi(sNum2.c_str());
 	if(lineNo2 > statementTable.getStatementCount(statement)){
 		return results;
 	}
-	vector<pair<string, string>> results;
 	vector<CFGNode*> prevList = statementTable.getStatement(sNum2)->getCfgNode()->getPrevNode();
 	for (unsigned int i=0; i<prevList.size(); i++) {
 		Node* temp = prevList.at(i)->getStatement();
@@ -952,7 +952,7 @@ vector<pair<string, string>> PKBFacade::getNextStar(SyntType s1, string num2) {
 		s1 = statement;
 	}
 	vector<pair<string, string>> results;
-	int lineNo2 = atoi(sNum2.c_str());
+	int lineNo2 = atoi(num2.c_str());
 	if(lineNo2 > statementTable.getStatementCount(statement)){
 		return results;
 	}
@@ -1001,7 +1001,7 @@ vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
 		s2 = statement;
 	}
 	vector<pair<string, string>> results;
-	int lineNo1 = atoi(sNum1.c_str());
+	int lineNo1 = atoi(num1.c_str());
 	if(lineNo1 > statementTable.getStatementCount(statement)){
 		return results;
 	}
@@ -1063,8 +1063,8 @@ vector<pair<string, string>> PKBFacade::getNextStar(string num1, SyntType s2) {
 //Post: results - the vector contains pairs of statements
 vector<pair<string, string>> PKBFacade::getNextStar(string num1, string num2) {
 	vector<pair<string, string>> results;
-	int lineNo1 = atoi(sNum1.c_str());
-	int lineNo2 = atoi(sNum2.c_str());
+	int lineNo1 = atoi(num1.c_str());
+	int lineNo2 = atoi(num2.c_str());
 	if(lineNo2 > statementTable.getStatementCount(statement) || lineNo1 > statementTable.getStatementCount(statement)){
 		return results;
 	}
